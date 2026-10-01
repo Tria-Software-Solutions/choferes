@@ -13,7 +13,8 @@ import {
   useTheme,
 } from "@mui/material";
 import { IconArrowLeft, IconBeach, IconBriefcase, IconCalendarMonth, IconCalendarX, IconId, IconMail, IconReceipt, IconShieldExclamation, IconUser, IconWallet } from "@tabler/icons-react";
-import { Employee, getEmployeePositionLabel } from "../../models/Employee";
+import { Employee } from "../../models/Employee";
+import { getEmployeePositionsLabel } from "@choferes/shared";
 import * as EmployeeService from "../../services/employeeService";
 import { useAuthContext } from "../../context/AuthContext";
 import { PERMISSION_CODES } from "../../constants/permissions.constants";
@@ -234,10 +235,7 @@ const EmployeeDetailPage: React.FC = () => {
   const visibleTabs = tabs.filter((item) => item.visible);
   const activeTab = visibleTabs.some((item) => item.key === tab) ? tab : visibleTabs[0].key;
 
-  const employeePosition = getEmployeePositionLabel(
-    employee.position,
-    employee.gender,
-  );
+  const employeePosition = getEmployeePositionsLabel(employee, employee.gender);
 
   return (
     <PageContainer>

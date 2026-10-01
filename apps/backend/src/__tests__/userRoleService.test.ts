@@ -20,6 +20,7 @@ jest.mock("../models/UserRole", () => {
 jest.mock("../models/Role", () => {
   const mockFunctions = {
     findByPk: jest.fn(),
+    findAll: jest.fn(),
   };
   return { __esModule: true, Role: mockFunctions, default: mockFunctions };
 });
@@ -97,17 +98,45 @@ describe("createUserRole", () => {
 });
 
 describe("updateUserRole", () => {
-  it("debería actualizar el rol de un usuario", async () => {
-    UserRole.update.mockResolvedValue([1]);
-    UserRole.findOne.mockResolvedValue({ ...mockUserRole, roleId: 2 });
+  it("reemplaza el rol de un usuario por otro", async () => {
+    UserRole.findAll.mockResolvedValue([{ userId: 1, roleId: 1 }]);
+    UserRole.findOne
+      .mockResolvedValueOnce(null) // assignRole: aún no tiene el rol 2
+      .mockResolvedValue({ ...mockUserRole, roleId: 2 });
+    UserRole.create.mockResolvedValue({});
+    Role.findAll.mockResolvedValue([{ id: 2, name: "Chofer" }]);
 
     const result = await userRoleService.updateUserRole(1, 2);
 
-    expect(UserRole.update).toHaveBeenCalledWith(
-      { userId: 1, roleId: 2 },
-      { where: { userId: 1 } },
-    );
+    expect(UserRole.destroy).toHaveBeenCalledWith({ where: { userId: 1, roleId: [1] } });
+    expect(UserRole.create).toHaveBeenCalledWith({ userId: 1, roleId: 2 });
     expect(result).toHaveProperty("roleId", 2);
+  });
+
+  it("deja al usuario con varios roles a la vez", async () => {
+    UserRole.findAll.mockResolvedValue([{ userId: 1, roleId: 1 }]);
+    UserRole.findOne.mockResolvedValue(null);
+    UserRole.create.mockResolvedValue({});
+    Role.findAll.mockResolvedValue([
+      { id: 1, name: "Chofer" },
+      { id: 4, name: "Supervisor" },
+    ]);
+
+    await userRoleService.updateUserRole(1, [1, 4]);
+
+    expect(UserRole.destroy).not.toHaveBeenCalled();
+    expect(UserRole.create).toHaveBeenCalledTimes(1);
+    expect(UserRole.create).toHaveBeenCalledWith({ userId: 1, roleId: 4 });
+  });
+
+  it("no toca nada cuando los roles no cambian", async () => {
+    UserRole.findAll.mockResolvedValue([{ userId: 1, roleId: 1 }]);
+    UserRole.findOne.mockResolvedValue({ ...mockUserRole });
+
+    await userRoleService.updateUserRole(1, [1]);
+
+    expect(UserRole.destroy).not.toHaveBeenCalled();
+    expect(UserRole.create).not.toHaveBeenCalled();
   });
 });
 

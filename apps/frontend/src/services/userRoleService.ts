@@ -26,11 +26,15 @@ export const createUserRole = async (userRole: Omit<UserRole, "id">) => {
   return response.data;
 };
 
+// Reemplaza los roles del usuario: un solo id o la lista completa.
 export const updateUserRole = async (
   userId: number,
-  roleId: number
+  roles: number | number[]
 ) => {
-  const response = await api.put(`/user-role/${userId}`, { roleId });
+  const response = await api.put(
+    `/user-role/${userId}`,
+    Array.isArray(roles) ? { roleIds: roles } : { roleId: roles },
+  );
   invalidateCache("/user-role");
   return response.data;
 };

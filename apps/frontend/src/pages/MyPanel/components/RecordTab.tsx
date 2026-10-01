@@ -15,14 +15,21 @@ import {
 import { StatusBadge } from "../../../components/Layout";
 import type { StatTone } from "../../../components/Layout";
 import { BentoGridItem } from "../../../components/BentoGrid/BentoGrid.component";
-import { getEmployeePositionLabel } from "../../../models/Employee";
+import { getEmployeePositionsLabel } from "@choferes/shared";
 import {
   DISCIPLINARY_ACTION_TYPE_LABELS,
   DISCIPLINARY_SEVERITY_LABELS,
 } from "../../../models/DisciplinaryAction";
 import type { DisciplinaryAction } from "../../../models/DisciplinaryAction";
 import type { EmployeeLicense, LicenseStatus } from "../../../models/EmployeeLicense";
-import { maskNationalId, maskPhone } from "../../../utils/mask";
+import { maskPhone } from "../../../utils/mask";
+import {
+  DEFAULT_NATIONALITY,
+  NATIONAL_ID_TYPE_LABELS,
+  NationalIdType,
+  formatNationalId,
+  getFlagEmoji,
+} from "@choferes/shared";
 import { formatMoney } from "../../../utils/paymentSlipPdf";
 import { formatTenure } from "../../../utils/tenure";
 import { formatDaysCount, formatShortDate, type LinkedOverview } from "../panelModel";
@@ -204,7 +211,7 @@ export const RecordTab: React.FC<RecordTabProps> = ({ overview }) => {
   const { employee, licenses, disciplinaryActions } = overview;
   const { colors } = useTheme().tokens;
 
-  const position = getEmployeePositionLabel(employee.position, employee.gender);
+  const position = getEmployeePositionsLabel(employee, employee.gender);
   const phones = [employee.primaryPhone, employee.secondaryPhone]
     .filter(Boolean)
     .map((phone) => maskPhone(phone as string))
@@ -233,8 +240,15 @@ export const RecordTab: React.FC<RecordTabProps> = ({ overview }) => {
                 <Field icon={<IconMail />} label="Correo" value={employee.email || "—"} />
                 <Field
                   icon={<IconId />}
-                  label="Cédula"
-                  value={employee.nationalId ? maskNationalId(employee.nationalId) : "—"}
+                  label={NATIONAL_ID_TYPE_LABELS[(employee.nationalIdType ?? "cedula") as NationalIdType].split(" (")[0]}
+                  value={
+                    employee.nationalId
+                      ? `${getFlagEmoji(employee.nationality ?? DEFAULT_NATIONALITY)} ${formatNationalId(
+                          (employee.nationalIdType ?? "cedula") as NationalIdType,
+                          employee.nationalId,
+                        )}`.trim()
+                      : "—"
+                  }
                 />
                 <Field icon={<IconPhone />} label="Teléfonos" value={phones || "—"} />
                 <Field
