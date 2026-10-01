@@ -27,16 +27,25 @@ jest.mock("react-router-dom", () => ({
   },
 }));
 
+const mockUseAuthContext = jest.fn();
 jest.mock("../../context/AuthContext", () => ({
-  useAuthContext: () => ({
-    currentUser: { id: 1, firstName: "Carlos", lastName: "Mora", roles: [{ id: 6, name: "Chofer" }] },
-    userPermissions: [],
-  }),
+  useAuthContext: () => mockUseAuthContext(),
 }));
 
 jest.mock("../../services/meService", () => ({
   getMyOverview: () => mockGetMyOverview(),
   createMyVacation: jest.fn(),
+  updateMyProfile: jest.fn(),
+}));
+
+// La pestaña "Datos" reutiliza PersonalInfoTab (Redux + notificaciones); aquí
+// solo importa su estructura, así que se aportan versiones mínimas.
+jest.mock("react-redux", () => ({
+  useDispatch: () => jest.fn(),
+}));
+
+jest.mock("../../components/Snackbar/Snackbar.component", () => ({
+  useAppNotifications: () => ({ showNotification: jest.fn() }),
 }));
 
 // Las gráficas (recharts), el comprobante de pago y el diálogo de solicitud
@@ -129,6 +138,7 @@ const linkedOverview = (partial: Partial<MyPanelOverview> = {}): MyPanelOverview
   vacations: [],
   disciplinaryActions: [],
   licenses: [],
+  licenseRequests: [],
   payments: [],
   tasks: [],
   summaries: { weekly: null, biweekly: null, monthly: null },
@@ -167,9 +177,19 @@ describe("MyPanel", () => {
     mockGetMyOverview.mockReset();
     mockNavigate.mockReset();
     mockSetSearchParams.mockReset();
+    mockUseAuthContext.mockReturnValue({
+      currentUser: {
+        id: 1,
+        firstName: "Carlos",
+        lastName: "Mora",
+        employeeId: 7,
+        roles: [{ id: 6, name: "Chofer" }],
+      },
+      userPermissions: [],
+    });
   });
 
-  it("abre en Resumen con el saludo, el turno de hoy y las cinco pestañas", async () => {
+  it("abre en Resumen con el saludo, el turno de hoy y las pestañas del expediente", async () => {
     mockGetMyOverview.mockResolvedValue(linkedOverview());
     renderPanel();
 
@@ -179,10 +199,13 @@ describe("MyPanel", () => {
     expect(screen.getByText("Hoy: Avenida 123")).toBeInTheDocument();
     expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
       "Resumen",
+      "Datos",
       "Horas",
       "Vacaciones",
       "Pagos",
-      "Expediente",
+      "Licencias",
+      "Amonestaciones",
+      "Documentos",
     ]);
     expect(selectedTab()).toBe("Resumen");
     expect(screen.getByText("Todo al día: no tienes avisos pendientes.")).toBeInTheDocument();
@@ -209,7 +232,7 @@ describe("MyPanel", () => {
 
   it("abre la pestaña que indica la URL", async () => {
     mockGetMyOverview.mockResolvedValue(linkedOverview());
-    renderPanel("tab=vacaciones");
+    renderPanel("tab=vacations");
 
     expect(await screen.findByText("Mi saldo")).toBeInTheDocument();
     expect(selectedTab()).toBe("Vacaciones");
@@ -228,13 +251,114 @@ describe("MyPanel", () => {
     renderPanel();
     await screen.findByRole("tablist");
 
-    fireEvent.click(screen.getByRole("tab", { name: "Expediente" }));
-    expect(await screen.findByText("Datos personales")).toBeInTheDocument();
-    expect(mockSetSearchParams).toHaveBeenLastCalledWith({ tab: "expediente" }, { replace: true });
+    fireEvent.click(screen.getByRole("tab", { name: "Datos" }));
+    expect(await screen.findByText("Información personal")).toBeInTheDocument();
+    expect(mockSetSearchParams).toHaveBeenLastCalledWith({ tab: "data" }, { replace: true });
 
     fireEvent.click(screen.getByRole("tab", { name: "Resumen" }));
     expect(await screen.findByRole("heading", { level: 2, name: "Avenida 123" })).toBeInTheDocument();
     expect(mockSetSearchParams).toHaveBeenLastCalledWith({}, { replace: true });
+  });
+
+  it("el expediente muestra todos los datos personales y ofrece editarlos y solicitar licencias", async () => {
+    mockUseAuthContext.mockReturnValue({
+      currentUser: {
+        id: 1,
+        firstName: "Carlos",
+        lastName: "Mora",
+        employeeId: 7,
+        roles: [{ id: 6, name: "Chofer" }],
+      },
+      // El autoservicio va atado al permiso del propio panel.
+      userPermissions: ["my-panel:view"],
+    });
+    mockGetMyOverview.mockResolvedValue(
+      linkedOverview({
+        employee: {
+          id: 7,
+          firstName: "Carlos",
+          lastName: "Mora",
+          email: "carlos@example.com",
+          gender: "Masculino",
+          preferredName: "Carlitos",
+          address: "Desamparados, San José",
+          birthDate: "1994-05-12",
+          vehicles: [{ plate: "BCD123", type: "car" }],
+          hourlyRate: 2500,
+        },
+      }),
+    );
+    renderPanel("tab=data");
+
+    expect(await screen.findByText("Información personal")).toBeInTheDocument();
+    // Todos los datos personales, no solo el contacto mínimo.
+    expect(screen.getByText("Nombre preferido")).toBeInTheDocument();
+    expect(screen.getByText("Fecha de nacimiento")).toBeInTheDocument();
+    expect(screen.getByText("Dirección")).toBeInTheDocument();
+    expect(screen.getByText("Desamparados, San José")).toBeInTheDocument();
+    // Los datos de planilla (ingreso y tarifa) no son asunto del empleado aquí.
+    expect(screen.queryByText("Fecha de ingreso")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tarifa por hora")).not.toBeInTheDocument();
+    // Sus vehículos, en su propia tarjeta.
+    expect(screen.getByText("Vehículos propios")).toBeInTheDocument();
+    expect(screen.getByText("BCD-123")).toBeInTheDocument();
+    // Mismo formato que gerencia: cada tarjeta tiene su propio "Editar".
+    expect(screen.getAllByRole("button", { name: "Editar" }).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("el empleado puede pedir una licencia desde su pestaña de licencias", async () => {
+    mockUseAuthContext.mockReturnValue({
+      currentUser: {
+        id: 1,
+        firstName: "Carlos",
+        lastName: "Mora",
+        employeeId: 7,
+        roles: [{ id: 6, name: "Chofer" }],
+      },
+      userPermissions: ["my-panel:view"],
+    });
+    mockGetMyOverview.mockResolvedValue(linkedOverview());
+    renderPanel("tab=licenses");
+
+    expect(await screen.findByText("Licencias de conducir")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Solicitar licencia" })).toBeInTheDocument();
+  });
+
+  it("un puesto que no conduce no ve la pestaña de licencias", async () => {
+    mockGetMyOverview.mockResolvedValue(
+      linkedOverview({
+        employee: {
+          id: 7,
+          firstName: "Carlos",
+          lastName: "Mora",
+          position: "recepcionista",
+        },
+      }),
+    );
+    renderPanel();
+
+    // Se espera a que el panel cargue: las pestañas se ajustan al empleado
+    // cuando llega su ficha.
+    await screen.findByText("Todo al día: no tienes avisos pendientes.");
+    expect(screen.queryByRole("tab", { name: "Licencias" })).not.toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Datos" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Amonestaciones" })).toBeInTheDocument();
+  });
+
+  it("cada tarjeta del expediente trae su propio botón Editar", async () => {
+    mockGetMyOverview.mockResolvedValue(linkedOverview());
+    renderPanel("tab=data");
+
+    expect(await screen.findByText("Información personal")).toBeInTheDocument();
+    // Personales, identificación y vehículos: tres acciones independientes.
+    const editButtons = screen.getAllByRole("button", { name: "Editar" });
+    expect(editButtons).toHaveLength(3);
+
+    // Al abrir la tarjeta personal, nombre y apellido aparecen deshabilitados:
+    // se editan en otro lugar, no desde aquí.
+    fireEvent.click(editButtons[0]);
+    expect(screen.getByDisplayValue("Carlos")).toBeDisabled();
+    expect(screen.getByDisplayValue("Mora")).toBeDisabled();
   });
 
   it("los avisos llevan a la pestaña o a la página correspondiente", async () => {
@@ -272,7 +396,7 @@ describe("MyPanel", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: /Licencia B1 vence en 18 días/ }));
     expect(await screen.findByText("Licencias de conducir")).toBeInTheDocument();
-    expect(selectedTab()).toBe("Expediente");
+    expect(selectedTab()).toBe("Licencias");
 
     fireEvent.click(screen.getByRole("tab", { name: /Resumen/ }));
     fireEvent.click(await screen.findByRole("button", { name: /1 tarea vencida/ }));
@@ -291,7 +415,7 @@ describe("MyPanel", () => {
     renderPanel();
 
     expect(await screen.findByRole("tab", { name: "Vacaciones, solicitud en revisión" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Expediente, licencia vencida" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Licencias, licencia vencida" })).toBeInTheDocument();
   });
 
   it("sin empleado vinculado explica qué hacer y no muestra pestañas", async () => {
@@ -300,6 +424,7 @@ describe("MyPanel", () => {
       vacations: [],
       disciplinaryActions: [],
       licenses: [],
+      licenseRequests: [],
       payments: [],
       tasks: [],
       summaries: { weekly: null, biweekly: null, monthly: null },
@@ -324,9 +449,44 @@ describe("MyPanel", () => {
 
   it("solicitar vacaciones abre el diálogo de solicitud", async () => {
     mockGetMyOverview.mockResolvedValue(linkedOverview());
-    renderPanel("tab=vacaciones");
+    renderPanel("tab=vacations");
 
     fireEvent.click(await screen.findByRole("button", { name: "Solicitar vacaciones" }));
     expect(await screen.findByRole("dialog")).toHaveTextContent("Solicitar vacaciones");
+  });
+
+  it("los KPIs aparecen tras la franja de atención y antes de la semana", async () => {
+    mockGetMyOverview.mockResolvedValue(linkedOverview());
+    renderPanel();
+
+    await screen.findByText("Todo al día: no tienes avisos pendientes.");
+    // Los KPIs son botones con aria-label
+    await screen.findByLabelText("Vacaciones. Ir a mis vacaciones");
+    await screen.findByLabelText("Horas de la quincena. Ir a mis horas");
+    await screen.findByLabelText("Horas del mes. Ir a mis horas");
+    await screen.findByLabelText("Último pago. Ir a mis pagos");
+    // La semana está después de los KPIs en el DOM
+    const weekCard = await screen.findByText("Mi semana");
+    expect(weekCard).toBeInTheDocument();
+  });
+
+  it("clicar un KPI navega a la pestaña correspondiente", async () => {
+    mockGetMyOverview.mockResolvedValue(linkedOverview());
+    renderPanel();
+
+    await screen.findByText("Todo al día: no tienes avisos pendientes.");
+    fireEvent.click(screen.getByLabelText("Vacaciones. Ir a mis vacaciones"));
+    expect(await screen.findByText("Mi saldo")).toBeInTheDocument();
+  });
+
+  it("en escritorio 'Mi semana' y 'Próximas tareas' están en la misma fila", async () => {
+    mockGetMyOverview.mockResolvedValue(linkedOverview());
+    renderPanel();
+
+    await screen.findByText("Mi semana");
+    await screen.findByText("Próximas tareas");
+    // Ambas se renderizan (la comprobación de que comparten rejilla es visual)
+    expect(screen.getByText("Mi semana")).toBeInTheDocument();
+    expect(screen.getByText("Próximas tareas")).toBeInTheDocument();
   });
 });

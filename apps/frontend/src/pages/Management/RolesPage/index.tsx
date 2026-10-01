@@ -63,6 +63,13 @@ import {
 } from "../../../components/Layout";
 import { useLocation } from "react-router-dom";
 import SegmentedToggle from "../../../components/SegmentedToggle/SegmentedToggle.component";
+import {
+  NameFormatProvider,
+  formatEmployeeName,
+  getStoredNameFormat,
+  setStoredNameFormat,
+  type EmployeeNameFormat,
+} from "../../../context/NameFormatContext";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
 import {
   getPreferencesObject,
@@ -102,6 +109,12 @@ const RolesPage: React.FC = () => {
     (state: RootState) => state.hoursWorked
   );
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
+  // Cómo mostrar los nombres en el tablero: nombre completo o preferido.
+  const [nameFormat, setNameFormat] = useState<EmployeeNameFormat>(() => getStoredNameFormat());
+  const handleNameFormat = (format: EmployeeNameFormat) => {
+    setNameFormat(format);
+    setStoredNameFormat(format);
+  };
 
   // El buscador se recuerda entre navegaciones.
   const { search, setSearch } = useTablePreferences("roles-selector", () => 25);
@@ -642,7 +655,7 @@ const RolesPage: React.FC = () => {
   ): Record<string, string | number>[] => {
     return employees.map((employee: Employee) => {
       const row: Record<string, string | number> = {
-        Empleado: `${employee.firstName} ${employee.lastName}`,
+        Empleado: formatEmployeeName(employee, nameFormat),
       };
       currentWeek.forEach(({ day, date }, idx) => {
         const dateObj = typeof date === "string" ? new Date(date) : date;
@@ -809,9 +822,21 @@ const RolesPage: React.FC = () => {
               : `${filteredSchedules.length} horarios`
           }
           actions={
-            canExport ? (
-              <ExportMenu actions={exportOptions} disabled={!hasExportableRows} />
-            ) : undefined
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+              <SegmentedToggle
+                size="small"
+                ariaLabel="Nombre a mostrar en el tablero"
+                options={[
+                  { value: "full", label: "Nombre completo" },
+                  { value: "preferred", label: "Nombre preferido" },
+                ]}
+                value={nameFormat}
+                onChange={(value) => handleNameFormat(value as EmployeeNameFormat)}
+              />
+              {canExport ? (
+                <ExportMenu actions={exportOptions} disabled={!hasExportableRows} />
+              ) : undefined}
+            </Box>
           }
           toolbar={
             <>
@@ -877,6 +902,7 @@ const RolesPage: React.FC = () => {
           ) : !userPermissions.includes(PERMISSION_CODES.VIEW_ROLES) ? (
             <EmptyState icon={<IconLockAccess />} title="No tienes permisos para ver roles" />
           ) : (
+            <NameFormatProvider value={nameFormat}>
             <WeeklyBoard
               filteredEmployees={filteredEmployees}
               schedules={viewMode === "schedule" ? filteredSchedules : schedules}
@@ -894,6 +920,7 @@ const RolesPage: React.FC = () => {
               permissions={userPermissions}
               viewMode={viewMode}
             />
+            </NameFormatProvider>
           )}
         </PageBody>
       </PageCard>

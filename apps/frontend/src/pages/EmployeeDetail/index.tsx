@@ -43,14 +43,15 @@ import {
   nameStyles,
   tabsBoxStyles,
 } from "./styles";
+import ROUTES from "../../constants/routes.constants";
 
 type TabKey =
-  | "datos"
-  | "horas"
-  | "pagos"
-  | "vacaciones"
-  | "licencias"
-  | "amonestaciones";
+  | "data"
+  | "hours"
+  | "payments"
+  | "vacations"
+  | "licenses"
+  | "disciplinary";
 
 type TabDescriptor = {
   key: TabKey;
@@ -60,12 +61,12 @@ type TabDescriptor = {
 };
 
 const TAB_KEYS: readonly TabKey[] = [
-  "datos",
-  "horas",
-  "pagos",
-  "vacaciones",
-  "licencias",
-  "amonestaciones",
+  "data",
+  "hours",
+  "payments",
+  "vacations",
+  "licenses",
+  "disciplinary",
 ];
 
 const isTabKey = (value: string | null): value is TabKey =>
@@ -90,10 +91,10 @@ const EmployeeDetailPage: React.FC = () => {
   // directo la sección, incluso si ya estás viendo otro empleado o la misma
   // ficha en otra pestaña.
   const requestedTab = searchParams.get("tab");
-  const tab: TabKey = isTabKey(requestedTab) ? requestedTab : "datos";
+  const tab: TabKey = isTabKey(requestedTab) ? requestedTab : "data";
   const setTab = useCallback(
     (value: TabKey) =>
-      setSearchParams(value === "datos" ? {} : { tab: value }, { replace: true }),
+      setSearchParams(value === "data" ? {} : { tab: value }, { replace: true }),
     [setSearchParams],
   );
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -103,6 +104,10 @@ const EmployeeDetailPage: React.FC = () => {
   const canDelete = userPermissions.includes(PERMISSION_CODES.EDIT_EMPLOYEES);
   const canViewPayments = userPermissions.includes(PERMISSION_CODES.VIEW_PAYMENTS);
   const canViewVacations = userPermissions.includes(PERMISSION_CODES.VIEW_VACATIONS);
+  // El backend omite estos campos si el rol no administra la compensación, así
+  // que "no viene" y "no está registrado" se distinguen por permiso, no por null.
+  const canSeePayroll = canViewPayments;
+  const canSeeVacationBalance = canViewVacations;
   const canViewLicenses = userPermissions.includes(PERMISSION_CODES.VIEW_LICENSES);
   const canViewDisciplinary = userPermissions.includes(PERMISSION_CODES.VIEW_DISCIPLINARY);
 
@@ -145,7 +150,7 @@ const EmployeeDetailPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-      navigate("/employees");
+      navigate(ROUTES.EMPLOYEES);
     } catch (error) {
       showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_ERROR, {
         severity: "error",
@@ -205,7 +210,7 @@ const EmployeeDetailPage: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<IconArrowLeft size={16} />}
-                onClick={() => navigate("/employees")}
+                onClick={() => navigate(ROUTES.EMPLOYEES)}
               >
                 Volver a empleados
               </Button>
@@ -220,13 +225,13 @@ const EmployeeDetailPage: React.FC = () => {
   // sección se lea como una unidad (Horas, Pagos, Licencias, Amonestaciones).
   // Con varios cards (Datos, Vacaciones) el tab usa su propio icono.
   const tabs: TabDescriptor[] = [
-    { key: "datos", label: "Datos", icon: IconUser, visible: true },
-    { key: "horas", label: "Horas", icon: IconCalendarMonth, visible: true },
-    { key: "pagos", label: "Pagos", icon: IconReceipt, visible: canViewPayments },
-    { key: "vacaciones", label: "Vacaciones", icon: IconBeach, visible: canViewVacations },
-    { key: "licencias", label: "Licencias", icon: IconId, visible: canViewLicenses },
+    { key: "data", label: "Datos", icon: IconUser, visible: true },
+    { key: "hours", label: "Horas", icon: IconCalendarMonth, visible: true },
+    { key: "payments", label: "Pagos", icon: IconReceipt, visible: canViewPayments },
+    { key: "vacations", label: "Vacaciones", icon: IconBeach, visible: canViewVacations },
+    { key: "licenses", label: "Licencias", icon: IconId, visible: canViewLicenses },
     {
-      key: "amonestaciones",
+      key: "disciplinary",
       label: "Amonestaciones",
       icon: IconShieldExclamation,
       visible: canViewDisciplinary,
@@ -252,7 +257,7 @@ const EmployeeDetailPage: React.FC = () => {
           >
             <Button
               startIcon={<IconArrowLeft size={18} />}
-              onClick={() => navigate("/employees")}
+              onClick={() => navigate(ROUTES.EMPLOYEES)}
               sx={backButtonStyles(theme)}
             >
               {isSmallScreen ? "Volver" : "Empleados"}
@@ -296,18 +301,22 @@ const EmployeeDetailPage: React.FC = () => {
               </Box>
 
               <Box sx={metaChipsRowStyles}>
-                <Box component="span" sx={metaChipStyles(theme)}>
-                  <IconWallet size={13} stroke={1.75} style={{ opacity: 0.7 }} />
-                  {employee.hourlyRate != null
-                    ? `${formatMoney(Number(employee.hourlyRate), "CRC")}/h`
-                    : "Sin tarifa"}
-                </Box>
-                <Box component="span" sx={metaChipStyles(theme)}>
-                  <IconBeach size={13} stroke={1.75} style={{ opacity: 0.7 }} />
-                  {employee.vacationDays != null
-                    ? `${employee.vacationDays} días disponibles`
-                    : "Sin saldo de vacaciones"}
-                </Box>
+                {canSeePayroll && (
+                  <Box component="span" sx={metaChipStyles(theme)}>
+                    <IconWallet size={13} stroke={1.75} style={{ opacity: 0.7 }} />
+                    {employee.hourlyRate != null
+                      ? `${formatMoney(Number(employee.hourlyRate), "CRC")}/h`
+                      : "Sin tarifa"}
+                  </Box>
+                )}
+                {canSeeVacationBalance && (
+                  <Box component="span" sx={metaChipStyles(theme)}>
+                    <IconBeach size={13} stroke={1.75} style={{ opacity: 0.7 }} />
+                    {employee.vacationDays != null
+                      ? `${employee.vacationDays} días disponibles`
+                      : "Sin saldo de vacaciones"}
+                  </Box>
+                )}
                 {employeePosition && (
                   <Box component="span" sx={metaChipStyles(theme)}>
                     <IconBriefcase size={13} stroke={1.75} style={{ opacity: 0.7 }} />
@@ -345,22 +354,22 @@ const EmployeeDetailPage: React.FC = () => {
         </Box>
 
         <Box sx={contentBoxStyles(theme)}>
-          {activeTab === "datos" && (
+          {activeTab === "data" && (
             <PersonalInfoTab
               employee={employee}
               onEmployeeUpdated={handleEmployeeUpdated}
               onEmployeeRefresh={loadEmployee}
             />
           )}
-          {activeTab === "horas" && <HoursTab employee={employee} />}
-          {activeTab === "pagos" && (
+          {activeTab === "hours" && <HoursTab employee={employee} />}
+          {activeTab === "payments" && (
             <PaymentsTab employee={employee} onEmployeeRefresh={loadEmployee} />
           )}
-          {activeTab === "vacaciones" && (
+          {activeTab === "vacations" && (
             <VacationsTab employee={employee} onEmployeeRefresh={loadEmployee} />
           )}
-          {activeTab === "licencias" && <LicensesTab employee={employee} />}
-          {activeTab === "amonestaciones" && <DisciplinaryTab employee={employee} />}
+          {activeTab === "licenses" && <LicensesTab employee={employee} />}
+          {activeTab === "disciplinary" && <DisciplinaryTab employee={employee} />}
         </Box>
       </PageCard>
 

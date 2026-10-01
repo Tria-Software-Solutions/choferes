@@ -12,9 +12,12 @@ import { Notification } from "../models/Notification";
 import { Payment } from "../models/Payment";
 import { Vacation } from "../models/Vacation";
 import { EmployeeLicense } from "../models/EmployeeLicense";
+import { LicenseRequest } from "../models/LicenseRequest";
 import { DisciplinaryAction } from "../models/DisciplinaryAction";
 import { TaskList } from "../models/TaskList";
 import { Task } from "../models/Task";
+import { DocumentFolder } from "../models/DocumentFolder";
+import { Document } from "../models/Document";
 
 // User <-> Notification (One-to-Many)
 Notification.belongsTo(User, {
@@ -154,6 +157,29 @@ Employee.hasMany(EmployeeLicense, {
   as: "licenses",
 });
 
+// Employee <-> LicenseRequest (One-to-Many): cambios de licencia propuestos
+// por el propio empleado y pendientes de revisión.
+LicenseRequest.belongsTo(Employee, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+  as: "employee",
+});
+Employee.hasMany(LicenseRequest, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+  as: "licenseRequests",
+});
+LicenseRequest.belongsTo(EmployeeLicense, {
+  foreignKey: "licenseId",
+  onDelete: "SET NULL",
+  as: "license",
+});
+EmployeeLicense.hasMany(LicenseRequest, {
+  foreignKey: "licenseId",
+  onDelete: "SET NULL",
+  as: "requests",
+});
+
 // Employee <-> DisciplinaryAction (One-to-Many)
 DisciplinaryAction.belongsTo(Employee, {
   foreignKey: "employeeId",
@@ -185,6 +211,54 @@ TaskList.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
 User.hasMany(TaskList, { foreignKey: "userId", as: "taskLists", onDelete: "CASCADE" });
 Task.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
 User.hasMany(Task, { foreignKey: "userId", as: "tasks", onDelete: "CASCADE" });
+
+// DocumentFolder <-> DocumentFolder (árbol de carpetas, hasta 5 niveles)
+DocumentFolder.belongsTo(DocumentFolder, {
+  foreignKey: "parentId",
+  as: "parent",
+  onDelete: "CASCADE",
+});
+DocumentFolder.hasMany(DocumentFolder, {
+  foreignKey: "parentId",
+  as: "children",
+  onDelete: "CASCADE",
+});
+
+// DocumentFolder <-> Employee (dueño de una carpeta personal)
+DocumentFolder.belongsTo(Employee, {
+  foreignKey: "ownerEmployeeId",
+  as: "owner",
+  onDelete: "CASCADE",
+});
+Employee.hasMany(DocumentFolder, {
+  foreignKey: "ownerEmployeeId",
+  as: "documentFolders",
+  onDelete: "CASCADE",
+});
+
+// DocumentFolder <-> Document (One-to-Many)
+Document.belongsTo(DocumentFolder, {
+  foreignKey: "folderId",
+  as: "folder",
+  onDelete: "CASCADE",
+});
+DocumentFolder.hasMany(Document, {
+  foreignKey: "folderId",
+  as: "documents",
+  onDelete: "CASCADE",
+});
+
+// Document <-> Employee (dueño de un archivo personal)
+Document.belongsTo(Employee, {
+  foreignKey: "ownerEmployeeId",
+  as: "owner",
+  onDelete: "CASCADE",
+});
+Employee.hasMany(Document, {
+  foreignKey: "ownerEmployeeId",
+  as: "documents",
+  onDelete: "CASCADE",
+});
 
 // Function to ensure associations are set up (for import side effects)
 export default function setupAssociations() {}
