@@ -124,5 +124,8 @@ export {
   getRestrictedWeekday,
   getPlateRestriction,
   formatPlate,
+  VEHICLE_TYPES,
+  VEHICLE_TYPE_LABELS,
+  DEFAULT_VEHICLE_TYPE,
 } from "./types/VehicleRestriction";
-export type { PlateRestriction } from "./types/VehicleRestriction";
+export type { PlateRestriction, VehicleType, VehicleEntry } from "./types/VehicleRestriction";

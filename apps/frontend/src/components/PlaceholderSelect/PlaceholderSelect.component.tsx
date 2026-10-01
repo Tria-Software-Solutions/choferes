@@ -123,6 +123,11 @@ const PlaceholderSelect = <T,>({
           </Box>
         )}
         inputProps={{ "aria-label": label ?? placeholder }}
+        MenuProps={{
+          anchorOrigin: { vertical: "bottom", horizontal: "left" },
+          transformOrigin: { vertical: "top", horizontal: "left" },
+          PaperProps: { sx: { maxHeight: 300 } },
+        }}
         {...selectProps}
       >
         {children}

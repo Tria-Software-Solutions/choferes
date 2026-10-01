@@ -37,6 +37,8 @@ export interface Employee {
   positions?: string[] | null;
   /** Género del empleado ("Masculino" | "Femenino"). */
   gender?: EmployeeGender | null;
+  /** Apodo o nombre preferido del empleado. */
+  preferredName?: string | null;
   /** Cédula de identidad. Solo dígitos: la máscara se aplica en la UI. */
   nationalId?: string | null;
   /** Tipo de documento: cédula (por defecto), DIMEX, pasaporte u otro. */
@@ -47,7 +49,9 @@ export interface Employee {
   birthDate?: string | null;
   /** Dirección de residencia. */
   address?: string | null;
-  /** Placas de sus vehículos propios (restricción vehicular). */
+  /** Vehículos propios con tipo (restricción vehicular). */
+  vehicles?: Array<{ plate: string; type: string }> | null;
+  /** Legado: solo las placas. Usar `vehicles` en código nuevo. */
   vehiclePlates?: string[] | null;
   /** Teléfono principal. Solo dígitos: la máscara se aplica en la UI. */
   primaryPhone?: string | null;
