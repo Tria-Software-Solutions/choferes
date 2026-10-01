@@ -128,17 +128,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
   const location = useLocation();
 
-  // Formato de nombre: "full" = nombre apellido, "short" = nombre + inicial
-  const [nameFormat, setNameFormat] = useState<"full" | "short">(() => {
-    try { return (localStorage.getItem("usersNameFormat") as "full" | "short") ?? "full"; }
-    catch { return "full"; }
-  });
-  const formatUserName = (user: { firstName?: string; lastName?: string }) => {
-    const first = user.firstName ?? "";
-    const last = user.lastName ?? "";
-    if (nameFormat === "short" && last) return `${first} ${last[0]}.`;
-    return `${first} ${last}`.trim();
-  };
+  const formatUserName = (user: { firstName?: string; lastName?: string }) =>
+    `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
 
   const getInitialRowsPerPage = () => {
     if (typeof window !== 'undefined') {
@@ -613,25 +604,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                     isSearching={isLoadingUsers && search !== ""}
                   />
                 )}
-              </Box>
-
-              {/* Toggle formato de nombre */}
-              <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
-                {(["full", "short"] as const).map((fmt) => (
-                  <Button
-                    key={fmt}
-                    size="small"
-                    variant={nameFormat === fmt ? "contained" : "outlined"}
-                    disableElevation
-                    onClick={() => {
-                      setNameFormat(fmt);
-                      try { localStorage.setItem("usersNameFormat", fmt); } catch { /* noop */ }
-                    }}
-                    sx={{ textTransform: "none", fontWeight: 600, fontSize: "0.75rem", px: 1.25, minWidth: 0 }}
-                  >
-                    {fmt === "full" ? "Nombre completo" : "Inicial"}
-                  </Button>
-                ))}
               </Box>
 
               {/* Show Inactive Toggle & Add Button */}
