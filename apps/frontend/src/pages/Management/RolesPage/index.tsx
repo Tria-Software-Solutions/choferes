@@ -66,9 +66,7 @@ import SegmentedToggle from "../../../components/SegmentedToggle/SegmentedToggle
 import {
   NameFormatProvider,
   formatEmployeeName,
-  getStoredNameFormat,
-  setStoredNameFormat,
-  type EmployeeNameFormat,
+  useEmployeeNameFormatSetting,
 } from "../../../context/NameFormatContext";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
 import {
@@ -109,12 +107,9 @@ const RolesPage: React.FC = () => {
     (state: RootState) => state.hoursWorked
   );
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
-  // Cómo mostrar los nombres en el tablero: nombre completo o preferido.
-  const [nameFormat, setNameFormat] = useState<EmployeeNameFormat>(() => getStoredNameFormat());
-  const handleNameFormat = (format: EmployeeNameFormat) => {
-    setNameFormat(format);
-    setStoredNameFormat(format);
-  };
+  // Cómo mostrar los nombres del tablero: es un setting global (Configuración →
+  // Apariencia), no un control de esta página; acá solo se lee el valor.
+  const { nameFormat } = useEmployeeNameFormatSetting();
 
   // El buscador se recuerda entre navegaciones.
   const { search, setSearch } = useTablePreferences("roles-selector", () => 25);
@@ -822,21 +817,9 @@ const RolesPage: React.FC = () => {
               : `${filteredSchedules.length} horarios`
           }
           actions={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-              <SegmentedToggle
-                size="small"
-                ariaLabel="Nombre a mostrar en el tablero"
-                options={[
-                  { value: "full", label: "Nombre completo" },
-                  { value: "preferred", label: "Nombre preferido" },
-                ]}
-                value={nameFormat}
-                onChange={(value) => handleNameFormat(value as EmployeeNameFormat)}
-              />
-              {canExport ? (
-                <ExportMenu actions={exportOptions} disabled={!hasExportableRows} />
-              ) : undefined}
-            </Box>
+            canExport ? (
+              <ExportMenu actions={exportOptions} disabled={!hasExportableRows} />
+            ) : undefined
           }
           toolbar={
             <>
