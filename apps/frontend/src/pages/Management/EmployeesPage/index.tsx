@@ -19,7 +19,6 @@ import {
 import SearchBarComponent from '../../../components/SearchBar/SearchBar.component';
 import StickyDataGridComponent from '../../../components/Table/StickyDataGrid/StickyDataGrid.component';
 import { GridColDef } from '@mui/x-data-grid';
-import { useEmployeeBiweeklyHours } from '../../../hooks/useEmployeeBiweeklyHours';
 import { formatTenure } from '../../../utils/tenure';
 import { maskPhone } from '../../../utils/mask';
 import PremiumTooltip from '../../../components/PremiumTooltip/PremiumTooltip.component';
@@ -44,7 +43,7 @@ import PAGE_TITLE from '../../../constants/pageTitle.constants';
 import { PERMISSION_CODES } from '../../../constants/permissions.constants';
 import NOTIFICATIONS from '../../../constants/notifications.constants';
 import MANAGEMENT from '../../../constants/management.constants';
-import { IconAlertTriangle, IconBriefcase, IconCalendarWeek, IconCamera, IconCash, IconChevronRight, IconCirclePlus, IconClockHour4, IconHourglassHigh, IconLoader2, IconMail, IconPhone, IconPlus, IconShieldExclamation, IconUsers, IconX } from "@tabler/icons-react";
+import { IconAlertTriangle, IconBriefcase, IconCalendarWeek, IconCamera, IconCash, IconChevronRight, IconCirclePlus, IconLoader2, IconMail, IconPhone, IconPlus, IconShieldExclamation, IconUsers, IconX } from "@tabler/icons-react";
 import SegmentedToggle from '../../../components/SegmentedToggle/SegmentedToggle.component';
 import {
   EmptyState,
@@ -55,6 +54,7 @@ import {
   PageHeader,
   StatCard,
   StatGrid,
+  StatusBadge,
 } from '../../../components/Layout';
 import ExportMenu from '../../../components/ExportMenu/ExportMenu.component';
 import {
@@ -72,13 +72,9 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { getAvatarSrc, resizeAvatarFile } from '../../../utils/avatar';
 import { formatMoney } from '../../../utils/paymentSlipPdf';
 import EmployeeAvatar from '../../../components/EmployeeAvatar/EmployeeAvatar.component';
+import ROUTES from "../../../constants/routes.constants";
 
 // Pay-related fields the employee still has no value for.
-// Las horas vienen con decimales (horas × turnos): se muestran sin ceros inútiles
-// ("72 h", "84.5 h") para que la columna no se ensanche.
-const formatHours = (value: number): string =>
-  `${Number.isInteger(value) ? value : value.toFixed(1)} h`;
-
 const getMissingProfileFields = (employee: Employee): string[] => {
   const missing: string[] = [];
   if (employee.hourlyRate === null || employee.hourlyRate === undefined) {
@@ -159,13 +155,6 @@ const EmployeesPage: React.FC = () => {
       setLoaded((prev) => ({ ...prev, licenses: true })),
     );
   }, [dispatch, location.pathname]);
-
-  // Horas y horas extra de la quincena actual (mismas reglas que el pago).
-  const {
-    byEmployeeId: hoursByEmployeeId,
-    biweekNumber: currentBiweekNumber,
-    year: currentBiweekYear,
-  } = useEmployeeBiweeklyHours();
 
   // Peor estado de licencia por empleado, para alertar sin abrir el detalle.
   const licenseAlertByEmployee = useMemo(() => {
@@ -552,12 +541,12 @@ const EmployeesPage: React.FC = () => {
                 aria-label={`Ver detalle de ${fullName}`}
                 onClick={(event) => {
                   event.stopPropagation();
-                  navigate(`/employees/${rowId}`);
+                  navigate(`${ROUTES.EMPLOYEES}/${rowId}`);
                 }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
-                    navigate(`/employees/${rowId}`);
+                    navigate(`${ROUTES.EMPLOYEES}/${rowId}`);
                   }
                 }}
                 sx={{
@@ -775,86 +764,61 @@ const EmployeesPage: React.FC = () => {
         },
       },
       {
-        field: 'horasQuincena',
-        // Sin el período, un número suelto en la tabla no dice a qué quincena
-        // pertenece.
-        headerName:
-          currentBiweekNumber && currentBiweekYear
-            ? `Horas quincena (Q${currentBiweekNumber}·${currentBiweekYear})`
-            : 'Horas quincena',
-        width: isSmallScreen ? 120 : 140,
-        minWidth: 120,
-        sortable: false,
+        field: 'estado',
+        headerName: 'Estado',
+        width: isSmallScreen ? 130 : 150,
+        minWidth: 130,
+        sortable: true,
+        // Activos primero; los egresos programados y los inactivos al final.
+        valueGetter: (_value, row) => {
+          const employee = row as Employee;
+          if (employee.isActive === false) return 0;
+          if (employee.scheduledTerminationDate) return 1;
+          return 2;
+        },
         renderCell: (params) => {
-          const entry = hoursByEmployeeId.get((params.row as Employee).id);
-          if (!entry) {
-            return (
-              <Typography
-                component="span"
-                sx={{ fontSize: '0.85rem', color: 'text.disabled', fontStyle: 'italic' }}
-              >
-                Sin registro
-              </Typography>
-            );
+          const employee = params.row as Employee;
+          if (employee.isActive === false) {
+            return <StatusBadge size="small" tone="default" label="Inactivo" />;
           }
-          return (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                width: '100%',
-                minWidth: 0,
-              }}
-            >
-              <IconClockHour4 size={14} stroke={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
-              <Typography
-                component="span"
-                sx={{ fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap' }}
-              >
-                {formatHours(entry.totalHours)}
-              </Typography>
-            </Box>
-          );
+          if (employee.scheduledTerminationDate) {
+            return <StatusBadge size="small" tone="warning" label="Egreso programado" />;
+          }
+          return <StatusBadge size="small" tone="success" label="Activo" />;
         },
       },
       {
-        field: 'horasExtra',
-        headerName: 'Horas extra',
-        width: isSmallScreen ? 115 : 130,
-        minWidth: 115,
-        sortable: false,
+        field: 'licencias',
+        headerName: 'Licencias',
+        width: isSmallScreen ? 125 : 145,
+        minWidth: 125,
+        sortable: true,
+        // Peor estado primero (vencida → por vencer → vigente → sin licencia).
+        valueGetter: (_value, row) => {
+          const alert = licenseAlertByEmployee.get((row as Employee).id);
+          if (alert === 'vencida') return 0;
+          if (alert === 'por_vencer') return 1;
+          if (alert === 'vigente') return 2;
+          return 3;
+        },
         renderCell: (params) => {
-          const entry = hoursByEmployeeId.get((params.row as Employee).id);
-          const overtime = entry?.overtimeHours ?? 0;
+          const alert = licenseAlertByEmployee.get((params.row as Employee).id);
+          if (alert === 'vencida') {
+            return <StatusBadge size="small" tone="danger" label="Vencida" />;
+          }
+          if (alert === 'por_vencer') {
+            return <StatusBadge size="small" tone="warning" label="Por vencer" />;
+          }
+          if (alert === 'vigente') {
+            return <StatusBadge size="small" tone="success" label="Vigente" />;
+          }
           return (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                width: '100%',
-                minWidth: 0,
-              }}
+            <Typography
+              component="span"
+              sx={{ fontSize: '0.85rem', color: 'text.disabled', fontStyle: 'italic' }}
             >
-              <IconHourglassHigh
-                size={14}
-                stroke={1.5}
-                style={{ opacity: overtime > 0 ? 0.6 : 0.25, flexShrink: 0 }}
-              />
-              <Typography
-                component="span"
-                sx={{
-                  fontSize: '0.85rem',
-                  fontWeight: overtime > 0 ? 600 : 400,
-                  fontStyle: overtime > 0 ? 'normal' : 'italic',
-                  color: overtime > 0 ? 'warning.main' : 'text.disabled',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {entry ? formatHours(overtime) : '—'}
-              </Typography>
-            </Box>
+              Sin licencia
+            </Typography>
           );
         },
       },
@@ -947,7 +911,6 @@ const EmployeesPage: React.FC = () => {
       hasEditPermissions,
       handleOpenAvatarDialog,
       licenseAlertByEmployee,
-      hoursByEmployeeId,
     ]
   );
 

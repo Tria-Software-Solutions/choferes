@@ -3,6 +3,7 @@ import type { MyPanelOverview, MyPanelWeekDay } from "../../models/MyPanel";
 import type { Payment } from "../../models/Payment";
 import type { Task } from "../../models/Task";
 import { ROUTES } from "../../constants/constants";
+import { getEmployeePositions } from "@choferes/shared";
 
 // Lógica pura de "Mi Panel": fechas en calendario local, formatos en español y
 // los datos derivados que consumen las pestañas. Vive fuera de los componentes
@@ -14,22 +15,52 @@ export type LinkedOverview = MyPanelOverview & { employee: Employee };
 export const isLinkedOverview = (overview: MyPanelOverview | null): overview is LinkedOverview =>
   Boolean(overview?.linked && overview.employee);
 
-export type PanelTabKey = "resumen" | "horas" | "vacaciones" | "pagos" | "expediente";
+export type PanelTabKey =
+  | "summary"
+  | "hours"
+  | "vacations"
+  | "payments"
+  | "data"
+  | "licenses"
+  | "disciplinary"
+  | "documents";
 
 export const PANEL_TAB_KEYS: readonly PanelTabKey[] = [
-  "resumen",
-  "horas",
-  "vacaciones",
-  "pagos",
-  "expediente",
+  "summary",
+  "data",
+  "hours",
+  "vacations",
+  "payments",
+  "licenses",
+  "disciplinary",
+  "documents",
 ];
 
 export const isPanelTabKey = (value: string | null): value is PanelTabKey =>
   value !== null && (PANEL_TAB_KEYS as readonly string[]).includes(value);
 
+// Enlaces guardados de cuando todo el expediente vivía en una sola pestaña
+// (`?tab=record`): ahora abren la de datos.
+const LEGACY_PANEL_TAB_ALIASES: Readonly<Record<string, PanelTabKey>> = {
+  record: "data",
+};
+
+/** Resuelve `?tab=`, incluidos los alias antiguos; null si el valor no existe. */
+export const resolvePanelTab = (value: string | null): PanelTabKey | null =>
+  isPanelTabKey(value) ? value : (value && LEGACY_PANEL_TAB_ALIASES[value]) || null;
+
 // Horas ordinarias de referencia por período: las mismas que usa Reportes para
 // detectar horas extra (semanal 48, quincenal 96, mensual 192).
 export const REGULAR_HOURS = { week: 48, biweek: 96, month: 192 } as const;
+
+// Puestos que conducen: solo ellos ven la pestaña de licencias de conducir.
+const DRIVING_POSITIONS: readonly string[] = ["chofer", "chofer_coordinador"];
+
+export const hasDrivingPosition = (employee: {
+  positions?: readonly string[] | null;
+  position?: string | null;
+}): boolean =>
+  getEmployeePositions(employee).some((position) => DRIVING_POSITIONS.includes(position));
 
 const pad = (value: number): string => String(value).padStart(2, "0");
 
@@ -232,14 +263,14 @@ export const getAttentionItems = (overview: MyPanelOverview, todayIso: string): 
         id: `license-${license.id}`,
         tone: "danger",
         label: `Licencia ${license.licenseType} vencida`,
-        target: { tab: "expediente" },
+        target: { tab: "licenses" },
       });
     } else if (license.status === "por_vencer") {
       items.push({
         id: `license-${license.id}`,
         tone: "warning",
         label: `Licencia ${license.licenseType} ${describeExpiry(license.daysUntilExpiry)}`,
-        target: { tab: "expediente" },
+        target: { tab: "licenses" },
       });
     }
   }
@@ -273,7 +304,7 @@ export const getAttentionItems = (overview: MyPanelOverview, todayIso: string): 
         pendingVacations.length === 1
           ? "Solicitud de vacaciones en revisión"
           : `${pendingVacations.length} solicitudes de vacaciones en revisión`,
-      target: { tab: "vacaciones" },
+      target: { tab: "vacations" },
     });
   }
 
@@ -288,13 +319,13 @@ export const getTabAlerts = (
   const alerts: Partial<Record<PanelTabKey, { tone: AttentionTone; hint: string }>> = {};
 
   if (overview.vacations.some((vacation) => vacation.status === "pending")) {
-    alerts.vacaciones = { tone: "info", hint: "solicitud en revisión" };
+    alerts.vacations = { tone: "info", hint: "solicitud en revisión" };
   }
 
   if (overview.licenses.some((license) => license.status === "vencida")) {
-    alerts.expediente = { tone: "danger", hint: "licencia vencida" };
+    alerts.licenses = { tone: "danger", hint: "licencia vencida" };
   } else if (overview.licenses.some((license) => license.status === "por_vencer")) {
-    alerts.expediente = { tone: "warning", hint: "licencia por vencer" };
+    alerts.licenses = { tone: "warning", hint: "licencia por vencer" };
   }
 
   return alerts;

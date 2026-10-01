@@ -123,7 +123,7 @@ export const createLicense = async (input: CreateLicenseInput) => {
     type: "success",
     category: "employee",
     priority: "low",
-    actionUrl: "/mi-panel?tab=expediente",
+    actionUrl: "/my-panel?tab=licenses",
     actionText: "Ver mi expediente",
   });
 
@@ -164,7 +164,7 @@ export const updateLicense = async (id: number, input: UpdateLicenseInput) => {
       type: "info",
       category: "employee",
       priority: "medium",
-      actionUrl: "/mi-panel?tab=expediente",
+      actionUrl: "/my-panel?tab=licenses",
       actionText: "Ver mi expediente",
     });
   }
@@ -183,7 +183,7 @@ export const deleteLicense = async (id: number) => {
     type: "info",
     category: "employee",
     priority: "low",
-    actionUrl: "/mi-panel?tab=expediente",
+    actionUrl: "/my-panel?tab=licenses",
     actionText: "Ver mi expediente",
   });
   return true;
@@ -233,7 +233,7 @@ export const dispatchLicenseReminders = async () => {
         type,
         category: "employee",
         priority,
-        actionUrl: "/mi-panel?tab=expediente",
+        actionUrl: "/my-panel?tab=licenses",
         actionText: "Ver mi expediente",
       });
       await notifyManagementRoles({
@@ -243,7 +243,7 @@ export const dispatchLicenseReminders = async () => {
         type,
         category: "employee",
         priority,
-        actionUrl: `/employees/${license.employeeId}?tab=licencias`,
+        actionUrl: `/employees/${license.employeeId}?tab=licenses`,
         actionText: "Ver licencia",
       });
       return 1;

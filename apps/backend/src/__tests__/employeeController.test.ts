@@ -114,8 +114,11 @@ describe("GET /api/employees", () => {
 
     await request(app).get("/api/employees?page=2&limit=10&search=juan");
 
+    // El segundo argumento es el actor: sin él el service no puede saber qué
+    // omitir, y el listado se abre también con roles:view.
     expect(service.getEmployees).toHaveBeenCalledWith(
       expect.objectContaining({ page: "2", limit: "10", search: "juan" }),
+      expect.objectContaining({ id: 1, permissions: ["*"] }),
     );
   });
 
@@ -137,7 +140,10 @@ describe("GET /api/employees/:id", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(mockEmployee);
-    expect(service.getEmployeeById).toHaveBeenCalledWith(1);
+    expect(service.getEmployeeById).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ id: 1, permissions: ["*"] }),
+    );
   });
 
   it("debería devolver 404 si no existe", async () => {

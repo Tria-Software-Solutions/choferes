@@ -10,8 +10,10 @@ import {
   getAttentionItems,
   getShiftFacts,
   getTabAlerts,
+  hasDrivingPosition,
   isAssigned,
   isPanelTabKey,
+  resolvePanelTab,
   latestPayment,
   relativeDayLabel,
   shortTenure,
@@ -23,6 +25,7 @@ const overviewOf = (partial: Partial<MyPanelOverview> = {}): MyPanelOverview => 
   vacations: [],
   disciplinaryActions: [],
   licenses: [],
+  licenseRequests: [],
   payments: [],
   tasks: [],
   summaries: { weekly: null, biweekly: null, monthly: null },
@@ -97,10 +100,27 @@ describe("fechas", () => {
 
 describe("pestañas", () => {
   it("solo acepta pestañas conocidas", () => {
-    expect(isPanelTabKey("horas")).toBe(true);
-    expect(isPanelTabKey("expediente")).toBe(true);
+    expect(isPanelTabKey("hours")).toBe(true);
+    expect(isPanelTabKey("data")).toBe(true);
+    expect(isPanelTabKey("licenses")).toBe(true);
+    expect(isPanelTabKey("disciplinary")).toBe(true);
     expect(isPanelTabKey("admin")).toBe(false);
     expect(isPanelTabKey(null)).toBe(false);
+  });
+
+  it("resuelve los enlaces antiguos del expediente único", () => {
+    // `?tab=record` era todo el expediente: ahora abre la pestaña de datos.
+    expect(resolvePanelTab("record")).toBe("data");
+    expect(resolvePanelTab("licenses")).toBe("licenses");
+    expect(resolvePanelTab("admin")).toBeNull();
+    expect(resolvePanelTab(null)).toBeNull();
+  });
+
+  it("reconoce a los puestos que conducen", () => {
+    expect(hasDrivingPosition({ position: "chofer" })).toBe(true);
+    expect(hasDrivingPosition({ positions: ["recepcionista", "chofer_coordinador"] })).toBe(true);
+    expect(hasDrivingPosition({ position: "recepcionista" })).toBe(false);
+    expect(hasDrivingPosition({})).toBe(false);
   });
 
   it("marca la pestaña con algo que atender", () => {
@@ -109,8 +129,8 @@ describe("pestañas", () => {
       licenses: [{ id: 1, employeeId: 1, licenseType: "B1", status: "vencida" }],
     });
     expect(getTabAlerts(overview)).toEqual({
-      vacaciones: { tone: "info", hint: "solicitud en revisión" },
-      expediente: { tone: "danger", hint: "licencia vencida" },
+      vacations: { tone: "info", hint: "solicitud en revisión" },
+      licenses: { tone: "danger", hint: "licencia vencida" },
     });
     expect(getTabAlerts(null)).toEqual({});
     expect(getTabAlerts(overviewOf({ linked: false }))).toEqual({});
@@ -227,12 +247,12 @@ describe("avisos", () => {
       ["info", "Solicitud de vacaciones en revisión"],
     ]);
     expect(items.find((item) => item.id === "tasks-overdue")?.target).toEqual({ to: "/tasks" });
-    expect(items.find((item) => item.id === "vacations-pending")?.target).toEqual({ tab: "vacaciones" });
-    expect(items.find((item) => item.id === "license-2")?.target).toEqual({ tab: "expediente" });
+    expect(items.find((item) => item.id === "vacations-pending")?.target).toEqual({ tab: "vacations" });
+    expect(items.find((item) => item.id === "license-2")?.target).toEqual({ tab: "licenses" });
   });
 });
 
-describe("pagos", () => {
+describe("payments", () => {
   it("elige la boleta más reciente que no esté cancelada", () => {
     const payment = (id: number, year: number, biweekNumber: number, status: "pending" | "sent" | "cancelled") =>
       ({ id, year, biweekNumber, status }) as never;

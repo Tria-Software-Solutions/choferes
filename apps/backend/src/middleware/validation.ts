@@ -875,6 +875,58 @@ export const licenseQueryRules = [
   query("employeeId").optional().isInt({ min: 1 }).withMessage("employeeId inválido"),
 ];
 
+// ─── Self-service: datos propios y solicitudes de licencia ──────────────────
+
+// PUT /me/profile — el empleado actualiza sus propios datos. Se reutilizan las
+// reglas de los campos personales de planilla; el servicio filtra por lista
+// blanca, así que cualquier campo laboral que llegue se descarta.
+export const myProfileRules = [...contractBodyRules];
+
+// POST /me/licenses/requests — el cambio queda pendiente de revisión.
+export const myLicenseRequestRules = [
+  body("action")
+    .isIn(["create", "update", "delete"])
+    .withMessage("action debe ser create, update o delete"),
+  body("licenseId")
+    .optional({ values: "null" })
+    .isInt({ min: 1 })
+    .withMessage("licenseId inválido"),
+  body("licenseType")
+    .optional({ values: "null" })
+    .trim()
+    .isIn([...LICENSE_TYPES])
+    .withMessage("Categoría de licencia inválida"),
+  body("licenseNumber")
+    .optional({ values: "null" })
+    .trim()
+    .isLength({ max: 50 })
+    .withMessage("licenseNumber no puede exceder 50 caracteres"),
+  dateOnly("issuedAt"),
+  dateOnly("expiresAt"),
+  body("notes")
+    .optional({ values: "null" })
+    .trim()
+    .isLength({ max: 1000 })
+    .withMessage("notes no puede exceder 1000 caracteres"),
+];
+
+export const licenseRequestQueryRules = [
+  query("employeeId").optional().isInt({ min: 1 }).withMessage("employeeId inválido"),
+  query("status")
+    .optional()
+    .isIn(["pending", "approved", "rejected"])
+    .withMessage("status inválido"),
+];
+
+export const licenseRequestRejectRules = [
+  ...idParam,
+  body("reviewNotes")
+    .optional({ values: "null" })
+    .trim()
+    .isLength({ max: 1000 })
+    .withMessage("reviewNotes no puede exceder 1000 caracteres"),
+];
+
 // ─── Disciplinary actions (amonestaciones) ──────────────────────────────────
 
 // Attachments travel as base64 data URLs in the JSON body. Each file is capped

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Alert,
@@ -17,9 +17,10 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { IconAlertTriangle, IconId, IconInbox, IconPencil, IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconAlertTriangle, IconCheck, IconClock, IconId, IconInbox, IconPencil, IconPlus, IconTrash, IconX } from "@tabler/icons-react";
 import { Employee } from "../../../models/Employee";
 import { EmployeeLicense } from "../../../models/EmployeeLicense";
+import { LicenseRequest } from "../../../models/LicenseRequest";
 import { AppDispatch } from "../../../store/store";
 import {
   deleteLicense,
@@ -32,13 +33,20 @@ import { useAuthContext } from "../../../context/AuthContext";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
+import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import {
   deleteButtonStyles,
   editButtonStyles,
 } from "../../../components/Table/EditableTable/helpers";
 import LicenseFormDialog from "./LicenseFormDialog";
-import { submitButton } from "../../Forms/sharedStyles";
 import SectionHeader from "./SectionHeader";
+import { submitButton } from "../../Forms/sharedStyles";
+import {
+  getLicenseRequests,
+  approveLicenseRequest,
+  rejectLicenseRequest,
+} from "../../../services/licenseRequestService";
+import { getMyLicenseRequests } from "../../../services/meService";
 import {
   cardStackStyles,
   fillSectionPaperStyles,
@@ -69,7 +77,16 @@ const formatDate = (value?: string | null): string => {
   return match ? `${match[3]}/${match[2]}/${match[1]}` : value;
 };
 
+const describeRequest = (request: LicenseRequest): string => {
+  const type = request.payload?.licenseType ?? request.license?.licenseType ?? "";
+  if (request.action === "create") return `Nueva licencia ${type}`.trim();
+  if (request.action === "update") return `Cambio de la licencia ${type}`.trim();
+  return `Eliminar la licencia ${type}`.trim();
+};
+
 // Driver's licenses of a single employee, with expiry alerts (Costa Rica).
+// Aquí también se revisan las solicitudes que el empleado envía desde su panel:
+// aprobar aplica el cambio, rechazar solo la cierra.
 const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
@@ -93,9 +110,32 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
   const [deleteTarget, setDeleteTarget] = useState<EmployeeLicense | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
 
+  const [requests, setRequests] = useState<LicenseRequest[]>([]);
+  const [reviewBusyId, setReviewBusyId] = useState<number | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<LicenseRequest | null>(null);
+  const [rejectNotes, setRejectNotes] = useState("");
+
   const canCreate = userPermissions.includes(PERMISSION_CODES.CREATE_LICENSE);
   const canEdit = userPermissions.includes(PERMISSION_CODES.EDIT_LICENSE);
   const canDelete = userPermissions.includes(PERMISSION_CODES.DELETE_LICENSE);
+  // Autoservicio: el empleado pide el cambio desde su panel (su permiso es
+  // `my-panel:view`) y lo resuelve quien administra licencias.
+  const canRequest = userPermissions.includes(PERMISSION_CODES.VIEW_MY_PANEL);
+  const canReview = canEdit;
+  // Quien administra licencias escribe directo; los demás piden el cambio.
+  const isDirect = canCreate || canEdit || canDelete;
+
+  const pendingRequests = useMemo(
+    () => requests.filter((request) => request.status === "pending"),
+    [requests],
+  );
+  const pendingByLicense = useMemo(() => {
+    const map = new Map<number, LicenseRequest>();
+    pendingRequests
+      .filter((request) => request.licenseId != null)
+      .forEach((request) => map.set(request.licenseId as number, request));
+    return map;
+  }, [pendingRequests]);
 
   useEffect(() => {
     setLoaded(false);
@@ -104,8 +144,29 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
     );
   }, [dispatch, employee.id]);
 
+  const loadRequests = useCallback(async () => {
+    if (!canReview && !canRequest) {
+      setRequests([]);
+      return;
+    }
+    try {
+      setRequests(
+        canReview ? await getLicenseRequests({ employeeId: employee.id }) : await getMyLicenseRequests(),
+      );
+    } catch {
+      setRequests([]);
+    }
+  }, [canReview, canRequest, employee.id]);
+
+  useEffect(() => {
+    void loadRequests();
+  }, [loadRequests]);
+
   const reload = async () => {
-    await dispatch(fetchLicenses({ employeeId: employee.id, limit: 10000 }));
+    await Promise.all([
+      dispatch(fetchLicenses({ employeeId: employee.id, limit: 10000 })),
+      loadRequests(),
+    ]);
   };
 
   const alerts = useMemo(
@@ -134,6 +195,40 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
     }
   };
 
+  const handleApprove = async (id: number) => {
+    setReviewBusyId(id);
+    try {
+      await approveLicenseRequest(id);
+      showNotification("Solicitud aprobada y licencia actualizada", { severity: "success" });
+      await reload();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "No se pudo aprobar la solicitud";
+      showNotification(message, { severity: "error" });
+    } finally {
+      setReviewBusyId(null);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!rejectTarget) return;
+    const id = rejectTarget.id;
+    setReviewBusyId(id);
+    try {
+      await rejectLicenseRequest(id, rejectNotes.trim() || null);
+      showNotification("Solicitud rechazada", { severity: "success" });
+      setRejectTarget(null);
+      setRejectNotes("");
+      await loadRequests();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "No se pudo rechazar la solicitud";
+      showNotification(message, { severity: "error" });
+    } finally {
+      setReviewBusyId(null);
+    }
+  };
+
   return (
     <Box sx={cardStackStyles}>
       <Paper elevation={0} sx={fillSectionPaperStyles(theme)}>
@@ -150,19 +245,82 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
                 <IconId size={16} color={theme.palette.primary.main} />
                 {licenses.length} licencia{licenses.length === 1 ? "" : "s"}
               </Typography>
-              {canCreate && (
+              {(canCreate || (!isDirect && canRequest)) && (
                 <Button
                   variant="text"
                   startIcon={<IconPlus size={18} />}
                   onClick={() => handleOpenForm(null)}
                   sx={submitButton}
                 >
-                  Nueva licencia
+                  {isDirect ? "Nueva licencia" : "Solicitar licencia"}
                 </Button>
               )}
             </Box>
           }
         />
+
+        {/* Solicitudes del propio empleado: se revisan desde aquí. */}
+        {pendingRequests.length > 0 && (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 1.5 }}>
+            {pendingRequests.map((request) => {
+              const isBusy = reviewBusyId === request.id;
+              return (
+                <Box
+                  key={request.id}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    p: 1.25,
+                    borderRadius: "12px",
+                    border: `1px solid ${theme.tokens.colors.warning}55`,
+                    backgroundColor: theme.tokens.colors.warningSoft,
+                  }}
+                >
+                  <IconClock size={18} style={{ flexShrink: 0 }} />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700 }}>
+                      {describeRequest(request)}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                      En revisión desde el {formatDate(request.createdAt?.slice(0, 10))}
+                    </Typography>
+                  </Box>
+                  {canReview ? (
+                    <>
+                      <Button
+                        size="small"
+                        variant="text"
+                        startIcon={<IconCheck size={16} />}
+                        onClick={() => void handleApprove(request.id)}
+                        disabled={isBusy}
+                        sx={{ textTransform: "none", fontWeight: 600, flexShrink: 0 }}
+                      >
+                        Aprobar
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="text"
+                        color="error"
+                        startIcon={<IconX size={16} />}
+                        onClick={() => {
+                          setRejectNotes("");
+                          setRejectTarget(request);
+                        }}
+                        disabled={isBusy}
+                        sx={{ textTransform: "none", fontWeight: 600, flexShrink: 0 }}
+                      >
+                        Rechazar
+                      </Button>
+                    </>
+                  ) : (
+                    <Chip size="small" color="warning" label="En revisión" />
+                  )}
+                </Box>
+              );
+            })}
+          </Box>
+        )}
 
         {alerts.length > 0 && (
           <Alert
@@ -211,6 +369,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
                 {licenses.map((license) => {
                   const status = STATUS[license.status ?? "sin_vencimiento"];
                   const isBusy = busyId === license.id;
+                  const pending = pendingByLicense.get(license.id);
                   return (
                     <TableRow
                       key={license.id}
@@ -236,12 +395,22 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
                         )}
                       </TableCell>
                       <TableCell sx={tableCellStyles}>
-                        <Chip
-                          size="small"
-                          label={status.label}
-                          color={status.color}
-                          variant={status.color === "default" ? "outlined" : "filled"}
-                        />
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
+                          <Chip
+                            size="small"
+                            label={status.label}
+                            color={status.color}
+                            variant={status.color === "default" ? "outlined" : "filled"}
+                          />
+                          {pending && (
+                            <Chip
+                              size="small"
+                              color="warning"
+                              variant="outlined"
+                              label={pending.action === "delete" ? "Baja en revisión" : "Cambio en revisión"}
+                            />
+                          )}
+                        </Box>
                       </TableCell>
                       <TableCell sx={tableCellStyles} align="right">
                         <Box
@@ -252,7 +421,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
                             gap: 0.5,
                           }}
                         >
-                          {canEdit && (
+                          {canEdit ? (
                             <IconButton
                               size="small"
                               title="Editar"
@@ -262,7 +431,17 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
                             >
                               <IconPencil size={15} />
                             </IconButton>
-                          )}
+                          ) : canRequest ? (
+                            <IconButton
+                              size="small"
+                              title="Solicitar cambio"
+                              disabled={isBusy}
+                              onClick={() => handleOpenForm(license)}
+                              sx={editButtonStyles(theme)}
+                            >
+                              <IconPencil size={15} />
+                            </IconButton>
+                          ) : null}
                           {canDelete && (
                             <IconButton
                               size="small"
@@ -290,6 +469,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
         onClose={() => setIsFormOpen(false)}
         employee={employee}
         license={editingLicense}
+        mode={isDirect ? "direct" : "request"}
         onSaved={() => void reload()}
       />
 
@@ -308,6 +488,29 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
         type="delete"
         loading={busyId === deleteTarget?.id}
       />
+
+      <DialogComponent
+        open={Boolean(rejectTarget)}
+        onClose={() => setRejectTarget(null)}
+        onConfirm={() => void handleReject()}
+        title="Rechazar solicitud"
+        message={rejectTarget ? describeRequest(rejectTarget) : ""}
+        type="warning"
+        confirmText="Rechazar"
+        loading={rejectTarget ? reviewBusyId === rejectTarget.id : false}
+      >
+        <TextfieldComponent
+          name="reviewNotes"
+          label="Motivo (opcional)"
+          placeholder="¿Por qué no se aplica el cambio?"
+          value={rejectNotes}
+          onChange={(event) => setRejectNotes(event.target.value)}
+          multiline
+          minRows={2}
+          inputProps={{ maxLength: 1000 }}
+          fullWidth
+        />
+      </DialogComponent>
     </Box>
   );
 };

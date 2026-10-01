@@ -66,6 +66,8 @@ export interface EmployeeAccess {
   hasUser: boolean;
   userId: number | null;
   username: string | null;
+  /** false = cuenta deshabilitada: el login es rechazado aunque tenga rol. */
+  isActive: boolean;
   roles: { id: number; name: string }[];
   /** true cuando la cuenta existe pero quedó sin ningún rol. */
   needsRole: boolean;

@@ -41,3 +41,62 @@ export const createMyVacation = async (req: Request, res: Response) => {
     return handleError(res, error, "Error al solicitar vacaciones");
   }
 };
+
+// PUT /me/profile — el empleado actualiza sus propios datos personales.
+// El servicio filtra por lista blanca: lo laboral (puesto, contrato, tarifa)
+// solo lo cambia administración.
+export const updateMyProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized: authentication required" });
+    }
+    const employee = await meService.updateMyProfile(userId, req.body);
+    return res.status(200).json(employee);
+  } catch (error) {
+    return handleError(res, error, "Error al guardar tus datos");
+  }
+};
+
+// GET /me/licenses/requests — estado de las solicitudes propias de licencia.
+export const getMyLicenseRequests = async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized: authentication required" });
+    }
+    const data = await meService.getMyLicenseRequests(userId);
+    return res.status(200).json({ data });
+  } catch (error) {
+    return handleError(res, error, "Error al cargar tus solicitudes de licencia");
+  }
+};
+
+// GET /me/documents — documentos compartidos y del propio empleado.
+export const getMyDocuments = async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized: authentication required" });
+    }
+    const data = await meService.getMyDocuments(userId);
+    return res.status(200).json(data);
+  } catch (error) {
+    return handleError(res, error, "Error al cargar tus documentos");
+  }
+};
+
+// POST /me/licenses/requests — el empleado pide crear o editar una licencia.
+// Queda pendiente hasta que Gerencia/Administrativo la revise.
+export const createMyLicenseRequest = async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized: authentication required" });
+    }
+    const request = await meService.createMyLicenseRequest(userId, req.body);
+    return res.status(201).json(request);
+  } catch (error) {
+    return handleError(res, error, "Error al enviar la solicitud de licencia");
+  }
+};

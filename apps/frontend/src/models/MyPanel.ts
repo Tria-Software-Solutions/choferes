@@ -4,6 +4,7 @@ import type { Vacation } from "./Vacation";
 import type { VacationAccrual } from "./VacationAccrual";
 import type { DisciplinaryAction } from "./DisciplinaryAction";
 import type { EmployeeLicense } from "./EmployeeLicense";
+import type { LicenseRequest } from "./LicenseRequest";
 import type { Payment } from "./Payment";
 import type { Task } from "./Task";
 
@@ -68,6 +69,8 @@ export interface MyPanelOverview {
   vacations: Vacation[];
   disciplinaryActions: DisciplinaryAction[];
   licenses: EmployeeLicense[];
+  /** Cambios de licencia pedidos por el empleado (en revisión o ya resueltos). */
+  licenseRequests: LicenseRequest[];
   payments: Payment[];
   tasks: Task[];
   summaries: MyPanelSummaries;

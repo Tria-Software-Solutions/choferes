@@ -1,5 +1,6 @@
 const APPBAR_MENU = {
   DASHBOARD: "Reportes",
+  DOCUMENTS: "Documentos",
   EMPLOYEES: "Gestión de Empleados",
   LOGOUT: "Cerrar Sesión",
   MANAGE: "Gestión",
@@ -27,6 +28,7 @@ export const NAV_SHORT_LABELS: Record<string, string> = {
   [APPBAR_MENU.EMPLOYEES]: "Planilla",
   [APPBAR_MENU.SCHEDULES]: "Horarios",
   [APPBAR_MENU.TASKS]: "Tareas",
+  [APPBAR_MENU.DOCUMENTS]: "Documentos",
   [APPBAR_MENU.PROFILE]: "Configuración",
 };
 

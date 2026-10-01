@@ -13,8 +13,12 @@ import { ServiceError, isServiceError, sendServerError } from "../utils/errors";
 // Get all employees (paginated)
 export const getEmployees = async (req: Request, res: Response) => {
   try {
+    // El listado también se abre con roles:view (tablero de Roles), así que el
+    // servicio necesita saber quién pregunta para no mandar el salario de todos.
+    const actor = (req as AuthenticatedRequest).user;
     const result = await employeeService.getEmployees(
       req.query as { page?: string; limit?: string },
+      actor,
     );
     return res.status(200).json(result);
   } catch (error) {
@@ -26,7 +30,8 @@ export const getEmployees = async (req: Request, res: Response) => {
 export const getEmployeeById = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const employee = await employeeService.getEmployeeById(id);
+    const actor = (req as AuthenticatedRequest).user;
+    const employee = await employeeService.getEmployeeById(id, actor);
     if (employee) {
       return res.status(200).json(employee);
     }
