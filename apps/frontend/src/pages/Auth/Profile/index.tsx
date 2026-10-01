@@ -39,6 +39,7 @@ import {
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { useThemeMode } from "../../../context/ThemeContext";
 import { useTimeFormat } from "../../../hooks/useTimeFormat";
+import { useEmployeeNameFormatSetting, type EmployeeNameFormat } from "../../../context/NameFormatContext";
 import { getAvatarSrc, resizeAvatarFile } from "../../../utils/avatar";
 import UserAvatar from "../../../components/UserAvatar/UserAvatar.component";
 import { updateUserAvatar, removeUserAvatar } from "../../../store/slices/userSlice";
@@ -149,6 +150,9 @@ const ThemeMockup: React.FC<{ tone: "light" | "dark" }> = ({ tone }) => {
 const Profile: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { currentUser, setUser, userPermissions } = useAuthContext();
+  // Mismo doble candado que filtra la pestaña "Usuarios" del sidebar.
+  const canSeeUsers =
+    hasAdminSettingsRole(currentUser) && userPermissions.includes(PERMISSION_CODES.VIEW_USERS);
   const { users } = useSelector((state: RootState) => state.users);
   const { showNotification } = useAppNotifications();
   const theme = useTheme();
@@ -159,6 +163,11 @@ const Profile: React.FC = () => {
     setMode: (mode: ThemeMode) => void;
   };
   const { clockFormat, setClockFormat } = useTimeFormat();
+  const { nameFormat, setNameFormat } = useEmployeeNameFormatSetting();
+  // El formato de nombre solo cambia cómo se ven los nombres en el tablero de
+  // Roles (y su exportación), así que se ofrece únicamente a quien puede verlo.
+  // Chofer / Chofer Coordinador / Recepcionista no tienen `roles:view`.
+  const canSeeNameFormat = userPermissions.includes(PERMISSION_CODES.VIEW_ROLES);
 
   // La pestaña vive en la URL (?tab=) para que un enlace de notificación abra
   // directo la sección pedida (Usuarios, Roles, Notificaciones...) en lugar de
@@ -197,9 +206,12 @@ const Profile: React.FC = () => {
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
 
+  // El listado de usuarios solo lo consume la pestaña "Usuarios" de
+  // Administración. Pedirlo sin ese filtro hacía que cualquier empleado que
+  // abriera Configuración se llevara un 403 en GET /api/users.
   useEffect(() => {
-    dispatch(fetchUsers({}));
-  }, [dispatch]);
+    if (canSeeUsers) dispatch(fetchUsers({}));
+  }, [dispatch, canSeeUsers]);
 
   // Validates individual profile fields
   const validateField = useCallback((name: string, value: string) => {
@@ -1177,7 +1189,11 @@ const Profile: React.FC = () => {
               <PanelHeader
                 icon={<IconPalette />}
                 title="Apariencia"
-                description="Elige el tema y el formato de hora de la aplicación."
+                description={
+                  canSeeNameFormat
+                    ? "Elige el tema, el formato de hora y cómo se muestran los nombres de empleado."
+                    : "Elige el tema y el formato de hora de la aplicación."
+                }
               />
 
               {/* Theme Segmented Toggle */}
@@ -1258,6 +1274,30 @@ const Profile: React.FC = () => {
                   size="small"
                 />
               </Box>
+
+              {/* Employee name format setting — solo para quien ve Roles */}
+              {canSeeNameFormat && (
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 2.5, pt: 2.5, borderTop: `1px solid ${theme.tokens.colors.borderDivider}` }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <IconUser size={18} style={{ color: theme.tokens.colors.textMuted }} />
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>Nombre de empleado</Typography>
+                      <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                        {nameFormat === "preferred" ? "Nombre preferido (ej. Carlitos)" : "Nombre completo (ej. Carlos Mora)"}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <SegmentedToggle
+                    value={nameFormat}
+                    onChange={(v) => setNameFormat(v as EmployeeNameFormat)}
+                    options={[
+                      { value: "full", label: "Completo" },
+                      { value: "preferred", label: "Preferido" },
+                    ]}
+                    size="small"
+                  />
+                </Box>
+              )}
 </Paper>
           )}
 
