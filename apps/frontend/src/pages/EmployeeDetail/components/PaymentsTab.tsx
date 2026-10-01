@@ -73,8 +73,16 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
 
-  const payments = useSelector(selectPayments);
+  const allPayments = useSelector(selectPayments);
   const isLoading = useSelector(selectIsLoadingPayments);
+  // El store puede traer filas de otros empleados (p. ej. el listado completo de
+  // Planilla): se muestran solo las de este empleado desde el primer cuadro y se
+  // espera la primera carga antes de decidir entre lista o estado vacío.
+  const [loaded, setLoaded] = useState(false);
+  const payments = useMemo(
+    () => allPayments.filter((item) => item.employeeId === employee.id),
+    [allPayments, employee.id],
+  );
   const loadError = useSelector(selectPaymentsError);
 
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
@@ -87,7 +95,10 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
   const canDelete = userPermissions.includes(PERMISSION_CODES.DELETE_PAYMENT);
 
   useEffect(() => {
-    void dispatch(fetchPayments({ employeeId: employee.id, limit: 10000 }));
+    setLoaded(false);
+    void dispatch(fetchPayments({ employeeId: employee.id, limit: 10000 })).finally(() =>
+      setLoaded(true),
+    );
   }, [dispatch, employee.id]);
 
   const reload = async () => {
@@ -158,7 +169,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
           }
         />
 
-        {isLoading && payments.length === 0 ? (
+        {(isLoading || !loaded) && payments.length === 0 ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
             <CircularProgress size={26} />
           </Box>

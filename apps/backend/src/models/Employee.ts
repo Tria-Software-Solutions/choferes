@@ -32,11 +32,23 @@ export class Employee extends Model {
 
   public scheduledTerminationReason?: string | null; // Reason to carry over when the scheduled date is processed
 
-  public position?: string | null; // Job position / cargo
+  public position?: string | null; // Main job position (first of `positions`)
+
+  public positions!: string[]; // All job positions of the employee
 
   public gender?: string | null; // "Masculino" | "Femenino"
 
-  public nationalId?: string | null; // Cédula de identidad (solo dígitos)
+  public nationalId?: string | null; // Documento de identidad (cédula/DIMEX: dígitos; pasaporte: alfanumérico)
+
+  public nationalIdType!: "cedula" | "dimex" | "pasaporte" | "otro"; // Tipo del documento
+
+  public nationality!: string; // Nacionalidad (ISO 3166-1 alfa-2)
+
+  public birthDate?: string | null; // Fecha de nacimiento (YYYY-MM-DD)
+
+  public address?: string | null; // Dirección de residencia
+
+  public vehiclePlates!: string[]; // Placas de sus vehículos propios
 
   public primaryPhone?: string | null; // Teléfono principal (solo dígitos)
 
@@ -105,9 +117,37 @@ Employee.init(
       type: DataTypes.STRING(100),
       allowNull: false,
     },
+    positions: {
+      // Todos los puestos del empleado (el primero es `position`).
+      type: DataTypes.ARRAY(DataTypes.STRING(100)),
+      allowNull: false,
+    },
     gender: {
       type: DataTypes.STRING(20),
       allowNull: true,
+    },
+    nationalIdType: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      defaultValue: "cedula",
+    },
+    nationality: {
+      type: DataTypes.STRING(2),
+      allowNull: false,
+      defaultValue: "CR",
+    },
+    birthDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    vehiclePlates: {
+      type: DataTypes.ARRAY(DataTypes.STRING(10)),
+      allowNull: false,
+      defaultValue: [],
     },
     nationalId: {
       type: DataTypes.STRING(30),

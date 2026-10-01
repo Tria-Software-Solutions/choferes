@@ -82,8 +82,8 @@ export const checkRoleAssignment = async (
   if (targetUserId === actor.id) {
     // Re-saving your own profile resends the role you already have; allow that
     // no-op but never a change of your own role.
-    const current = await UserRole.findOne({ where: { userId: targetUserId } });
-    if (current && current.roleId === roleId) return null;
+    const current = await UserRole.findAll({ where: { userId: targetUserId } });
+    if (current.some((row) => row.roleId === roleId)) return null;
     return { status: 403, message: "No puedes cambiar tu propio rol" };
   }
 

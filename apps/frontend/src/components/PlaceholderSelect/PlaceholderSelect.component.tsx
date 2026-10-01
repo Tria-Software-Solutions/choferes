@@ -78,7 +78,24 @@ const PlaceholderSelect = <T,>({
           />
         }
         renderValue={(selected) =>
-          selected === "" || selected === null || selected === undefined ? (
+          Array.isArray(selected) ? (
+            // Selección múltiple: los nombres van separados por coma.
+            selected.length === 0 ? (
+              <Box
+                component="span"
+                sx={{ color: "text.secondary", opacity: 0.6, fontSize: "0.875rem" }}
+              >
+                {placeholder}
+              </Box>
+            ) : (
+              selected
+                .map((item) => (formatValue ? formatValue(item as T) : humanizeSelectValue(item)))
+                .reduce<ReactNode[]>(
+                  (acc, node, index) => (index === 0 ? [node] : [...acc, ", ", node]),
+                  [],
+                )
+            )
+          ) : selected === "" || selected === null || selected === undefined ? (
             <Box
               component="span"
               sx={{ color: "text.secondary", opacity: 0.6, fontSize: "0.875rem" }}

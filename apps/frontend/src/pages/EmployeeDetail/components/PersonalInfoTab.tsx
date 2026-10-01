@@ -14,8 +14,8 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { IconAlertTriangle, IconBeach, IconBriefcase, IconCalendarCheck, IconCalendarClock, IconCalendarX, IconCash, IconCheck, IconClockHour3, IconFileText, IconId, IconInfoCircle, IconKey, IconLoader2, IconMail, IconPencil, IconPhone, IconRotate, IconUser, IconUserCircle, IconX } from "@tabler/icons-react";
-import { format } from "date-fns";
+import { IconAlertTriangle, IconBeach, IconBriefcase, IconCake, IconCalendarCheck, IconCalendarClock, IconCalendarX, IconCar, IconCash, IconCheck, IconClockHour3, IconFileText, IconId, IconInfoCircle, IconKey, IconLoader2, IconMail, IconMapPin, IconPencil, IconPhone, IconRotate, IconUser, IconUserCircle, IconWorld, IconX } from "@tabler/icons-react";
+import { differenceInCalendarDays, format } from "date-fns";
 import { es } from "date-fns/locale";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -23,15 +23,24 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import {
   Employee,
   EmployeeGender,
-  getEmployeePositionLabel,
   TERMINATION_REASON_LABELS,
 } from "../../../models/Employee";
 import {
+  DEFAULT_NATIONALITY,
   EMPLOYEE_GENDERS,
-  EMPLOYEE_POSITIONS,
   EMPLOYEE_TERMINATION_REASONS,
-  getRoleNameForPosition,
+  NATIONAL_ID_TYPE_LABELS,
+  NationalIdType,
+  formatNationalId,
+  getFlagEmoji,
+  normalizeNationalId,
+  getEmployeePositions,
+  getEmployeePositionsLabel,
+  getRoleNamesForPositions,
 } from "@choferes/shared";
+import IdentityFields, { countryLabel, identityError } from "../../../components/IdentityFields/IdentityFields.component";
+import VehiclePlates from "../../../components/IdentityFields/VehiclePlates.component";
+import PositionSelect from "../../../components/PositionSelect/PositionSelect.component";
 import { AppDispatch } from "../../../store/store";
 import { updateEmployee } from "../../../store/slices/employeeSlice";
 import {
@@ -40,7 +49,7 @@ import {
   getEmployeeAccess,
   linkEmployeeToUser,
 } from "../../../services/employeeService";
-import { digitsOnly, maskNationalId, maskPhone } from "../../../utils/mask";
+import { digitsOnly, maskPhone } from "../../../utils/mask";
 import { formatMoney } from "../../../utils/paymentSlipPdf";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
@@ -65,7 +74,7 @@ interface PersonalInfoTabProps {
 
 // Cada sección conserva el mismo layout; sus campos se activan con el botón
 // "Editar" de su encabezado.
-type EditSection = "personal" | "contract" | "payment";
+type EditSection = "personal" | "identity" | "vehicles" | "contract" | "payment";
 
 // Celda de dato etiquetado para la vista de solo lectura.
 const InfoCell: React.FC<{
@@ -130,9 +139,17 @@ const buildFormFromEmployee = (employee: Employee) => ({
   email: employee.email ?? "",
   primaryPhone: maskPhone(employee.primaryPhone ?? ""),
   secondaryPhone: maskPhone(employee.secondaryPhone ?? ""),
-  position: employee.position ?? "",
+  positions: getEmployeePositions(employee),
   gender: employee.gender ?? "",
-  nationalId: maskNationalId(employee.nationalId ?? ""),
+  nationalIdType: (employee.nationalIdType ?? "cedula") as NationalIdType,
+  nationalId: formatNationalId(
+    (employee.nationalIdType ?? "cedula") as NationalIdType,
+    employee.nationalId ?? "",
+  ),
+  nationality: employee.nationality ?? DEFAULT_NATIONALITY,
+  birthDate: employee.birthDate ?? "",
+  address: employee.address ?? "",
+  vehiclePlates: employee.vehiclePlates ?? [],
   contractStartDate: employee.contractStartDate ?? "",
   terminationDate: employee.terminationDate ?? "",
   terminationReason: employee.terminationReason ?? "",
@@ -246,16 +263,22 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     setEditingSection(null);
   };
 
-  const update = (field: keyof typeof form, value: string) =>
+  const update = (field: Exclude<keyof typeof form, "positions" | "vehiclePlates" | "nationalIdType">, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  // Puestos predefinidos + cualquier valor heredado de cuando el puesto era
-  // texto libre, para que nunca se pierda el valor guardado.
-  const positionOptions = useMemo(() => {
-    const base = [...EMPLOYEE_POSITIONS] as string[];
-    if (form.position && !base.includes(form.position)) base.push(form.position);
-    return base;
-  }, [form.position]);
+  const birthAge = (() => {
+    const birth = parseStoredDate(employee.birthDate);
+    if (!birth) return null;
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    if (
+      today.getMonth() < birth.getMonth() ||
+      (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())
+    ) {
+      age -= 1;
+    }
+    return age >= 0 ? age : null;
+  })();
 
   const rateValue = form.hourlyRate.trim() === "" ? null : Number(form.hourlyRate);
   const daysValue = form.vacationDays.trim() === "" ? null : Number(form.vacationDays);
@@ -290,10 +313,16 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     (form.firstName.trim() || null) !== (employee.firstName ?? null) ||
     (form.lastName.trim() || null) !== (employee.lastName ?? null) ||
     (form.email.trim() || null) !== (employee.email ?? null) ||
-    (digitsOnly(form.nationalId) || null) !== (employee.nationalId ?? null) ||
+    (normalizeNationalId(form.nationalIdType, form.nationalId) || null) !==
+      (employee.nationalId ?? null) ||
+    form.nationalIdType !== (employee.nationalIdType ?? "cedula") ||
+    form.nationality !== (employee.nationality ?? DEFAULT_NATIONALITY) ||
+    (form.birthDate || null) !== (employee.birthDate ?? null) ||
+    (form.address.trim() || null) !== (employee.address ?? null) ||
+    form.vehiclePlates.join(",") !== (employee.vehiclePlates ?? []).join(",") ||
     (digitsOnly(form.primaryPhone) || null) !== (employee.primaryPhone ?? null) ||
     (digitsOnly(form.secondaryPhone) || null) !== (employee.secondaryPhone ?? null) ||
-    (form.position.trim() || null) !== (employee.position ?? null) ||
+    form.positions.join(",") !== getEmployeePositions(employee).join(",") ||
     (form.gender.trim() || null) !== (employee.gender ?? null) ||
     (form.contractStartDate || null) !== (employee.contractStartDate ?? null) ||
     (hasTermination ? form.terminationDate || null : null) !==
@@ -308,11 +337,11 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     (daysValue ?? null) !== (employee.vacationDays ?? null);
 
   const handleSave = async () => {
-    if (form.position.trim() === "") {
-      showNotification("El puesto es obligatorio", { severity: "warning" });
+    if (form.positions.length === 0) {
+      showNotification("Elige al menos un puesto", { severity: "warning" });
       return;
     }
-    if (rateInvalid || daysInvalid || terminationInvalid || contactInvalid) {
+    if (rateInvalid || daysInvalid || terminationInvalid || contactInvalid || identityError(form) !== "") {
       showNotification("Revisa los valores ingresados", { severity: "warning" });
       return;
     }
@@ -327,9 +356,15 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             email: form.email.trim() || null,
             primaryPhone: digitsOnly(form.primaryPhone) || null,
             secondaryPhone: digitsOnly(form.secondaryPhone) || null,
-            position: form.position.trim(),
+            position: form.positions[0],
+            positions: form.positions,
             gender: (form.gender.trim() || null) as Employee["gender"],
-            nationalId: digitsOnly(form.nationalId) || null,
+            nationalIdType: form.nationalIdType,
+            nationalId: normalizeNationalId(form.nationalIdType, form.nationalId) || null,
+            nationality: form.nationality,
+            birthDate: form.birthDate || null,
+            address: form.address.trim() || null,
+            vehiclePlates: form.vehiclePlates,
             contractStartDate: form.contractStartDate || null,
             terminationDate: hasTermination ? form.terminationDate || null : null,
             terminationReason: hasTermination ? form.terminationReason || null : null,
@@ -381,8 +416,9 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     }
   };
 
-  // Rol de acceso que le corresponde a su puesto.
-  const expectedRoleName = getRoleNameForPosition(employee.position);
+  // Roles de acceso que le corresponden a sus puestos (uno por puesto).
+  const expectedRoleName = getRoleNamesForPositions(getEmployeePositions(employee)).join(", ");
+  const hasSeveralPositions = getEmployeePositions(employee).length > 1;
 
   // Asigna el rol de su puesto cuando la cuenta quedó sin rol.
   const handleAssignDefaultRole = async () => {
@@ -392,7 +428,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
       const updated = await assignDefaultEmployeeRole(employee.id);
       setAccess(updated);
       showNotification(
-        `Se asignó el rol "${updated.roles[0]?.name ?? expectedRoleName ?? ""}" a la cuenta`,
+        `Se ${updated.roles.length > 1 ? "asignaron los roles" : "asignó el rol"} "${updated.roles.map((role) => role.name).join(", ") || expectedRoleName}" a la cuenta`,
         { severity: "success" },
       );
     } catch (error) {
@@ -443,9 +479,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
               <InfoCell label="Nombre completo" icon={<IconUser size={13} />} span={2}>
                 {employee.firstName} {employee.lastName}
               </InfoCell>
-              <InfoCell label="Cédula" icon={<IconId size={13} />}>
-                {employee.nationalId ? maskNationalId(employee.nationalId) : "Sin cédula"}
-              </InfoCell>
               <InfoCell label="Estado">
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
                   <Chip
@@ -463,8 +496,8 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 </Box>
               </InfoCell>
               <InfoCell label="Puesto" icon={<IconBriefcase size={13} />}>
-                {getEmployeePositionLabel(
-                  employee.position,
+                {getEmployeePositionsLabel(
+                  employee,
                   (employee.gender || null) as EmployeeGender | null,
                 ) || "Sin puesto"}
               </InfoCell>
@@ -516,18 +549,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextfieldComponent
-                name="nationalId"
-                label="Cédula"
-                placeholder="Ej: 1-2345-6789"
-                icon={<IconId size={20} color={theme.palette.text.secondary} />}
-                value={form.nationalId}
-                onChange={(event) => update("nationalId", maskNationalId(event.target.value))}
-                disabled={!isEditing("personal") || isSaving}
-                inputProps={{ inputMode: "numeric" }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
               <PlaceholderSelect
                 label="Género"
                 placeholder="Selecciona"
@@ -545,24 +566,15 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
               </PlaceholderSelect>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <PlaceholderSelect
-                label="Puesto"
+              <PositionSelect
+                label="Puestos"
                 placeholder="Selecciona"
                 icon={<IconBriefcase size={20} color={theme.palette.text.secondary} />}
-                formatValue={(value) =>
-                  getEmployeePositionLabel(String(value), (form.gender || null) as EmployeeGender | null) ??
-                  String(value)
-                }
-                value={form.position}
+                value={form.positions}
+                gender={form.gender}
                 disabled={!isEditing("personal") || isSaving}
-                onChange={(event) => update("position", String(event.target.value))}
-              >
-                {positionOptions.map((pos) => (
-                  <MenuItem key={pos} value={pos}>
-                    {getEmployeePositionLabel(pos, (form.gender || null) as EmployeeGender | null) ?? pos}
-                  </MenuItem>
-                ))}
-              </PlaceholderSelect>
+                onChange={(positions) => setForm((prev) => ({ ...prev, positions }))}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextfieldComponent
@@ -610,6 +622,124 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           )}
         </Paper>
 
+        {/* ── Identificación y residencia ── */}
+        <Paper elevation={0} sx={sectionPaperStyles(theme)}>
+          <SectionHeader
+            icon={<IconId size={20} stroke={1.5} />}
+            title="Identificación y residencia"
+            description="Documento (cédula, DIMEX o pasaporte), nacionalidad, nacimiento y dirección."
+            actions={editAction("identity")}
+          />
+
+          {!isEditing("identity") ? (
+            <InfoGrid>
+              <InfoCell
+                label={NATIONAL_ID_TYPE_LABELS[(employee.nationalIdType ?? "cedula") as NationalIdType].split(" (")[0]}
+                icon={<IconId size={13} />}
+              >
+                {employee.nationalId ? (
+                  <>
+                    <Box component="span" aria-hidden sx={{ mr: 0.75 }}>
+                      {getFlagEmoji(employee.nationality ?? DEFAULT_NATIONALITY)}
+                    </Box>
+                    {formatNationalId(
+                      (employee.nationalIdType ?? "cedula") as NationalIdType,
+                      employee.nationalId,
+                    )}
+                  </>
+                ) : (
+                  "Sin documento"
+                )}
+              </InfoCell>
+              <InfoCell label="Nacionalidad" icon={<IconWorld size={13} />}>
+                {countryLabel(employee.nationality ?? DEFAULT_NATIONALITY)}
+              </InfoCell>
+              <InfoCell label="Fecha de nacimiento" icon={<IconCake size={13} />}>
+                {employee.birthDate ? (
+                  <>
+                    {formatDate(employee.birthDate)}
+                    {birthAge !== null && (
+                      <Typography component="span" sx={{ color: "text.secondary", fontWeight: 500 }}>
+                        {" · "}{birthAge} años
+                      </Typography>
+                    )}
+                  </>
+                ) : (
+                  "Sin registrar"
+                )}
+              </InfoCell>
+              <InfoCell label="Dirección" icon={<IconMapPin size={13} />} span={2}>
+                {employee.address || "Sin dirección registrada"}
+              </InfoCell>
+            </InfoGrid>
+          ) : (
+            <Grid container spacing={{ xs: 2, sm: 2.5 }}>
+              <IdentityFields
+                value={{
+                  nationalIdType: form.nationalIdType,
+                  nationalId: form.nationalId,
+                  nationality: form.nationality,
+                }}
+                onChange={(identity) => setForm((prev) => ({ ...prev, ...identity }))}
+                disabled={isSaving}
+                iconColor={theme.palette.text.secondary}
+              />
+              <Grid item xs={12} sm={6}>
+                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+                  <DatePicker
+                    label="Fecha de nacimiento"
+                    value={parseStoredDate(form.birthDate)}
+                    onChange={(date) =>
+                      update("birthDate", date && !Number.isNaN(date.getTime()) ? format(date, "yyyy-MM-dd") : "")
+                    }
+                    format="d MMM yyyy"
+                    maxDate={new Date()}
+                    minDate={new Date(1900, 0, 1)}
+                    openTo="year"
+                    views={["year", "month", "day"]}
+                    slots={{ toolbar: () => null }}
+                    disabled={isSaving}
+                    slotProps={{ textField: { size: "small", fullWidth: true } }}
+                  />
+                </LocalizationProvider>
+              </Grid>
+              <Grid item xs={12}>
+                <TextfieldComponent
+                  name="address"
+                  label="Dirección"
+                  placeholder="Provincia, cantón, distrito y otras señas"
+                  icon={<IconMapPin size={20} color={theme.palette.text.secondary} />}
+                  value={form.address}
+                  onChange={(event) => update("address", event.target.value)}
+                  disabled={isSaving}
+                  multiline
+                  minRows={2}
+                  inputProps={{ maxLength: 500 }}
+                />
+              </Grid>
+            </Grid>
+          )}
+        </Paper>
+
+        {/* ── Vehículos propios y restricción vehicular ── */}
+        <Paper elevation={0} sx={sectionPaperStyles(theme)}>
+          <SectionHeader
+            icon={<IconCar size={20} stroke={1.5} />}
+            title="Vehículos propios"
+            description="Placas de sus carros, para saber si les aplica la restricción vehicular de San José."
+            actions={editAction("vehicles")}
+          />
+          <VehiclePlates
+            plates={form.vehiclePlates}
+            onChange={
+              isEditing("vehicles")
+                ? (plates) => setForm((prev) => ({ ...prev, vehiclePlates: plates }))
+                : undefined
+            }
+            disabled={isSaving}
+          />
+        </Paper>
+
         {/* ── Contrato y egreso ── */}
         <Paper elevation={0} sx={sectionPaperStyles(theme)}>
           <SectionHeader
@@ -622,37 +752,93 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           {!isEditing("contract") ? (
             <>
               {/* Scheduled termination banner */}
-              {employee.scheduledTerminationDate && !employee.terminationDate && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                    mb: 2,
-                    px: 1.5,
-                    py: 1.25,
-                    borderRadius: 2,
-                    bgcolor: "warning.main",
-                    color: "warning.contrastText",
-                    opacity: 0.9,
-                  }}
-                >
-                  <IconAlertTriangle size={18} style={{ flexShrink: 0 }} />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      Finalización programada: {formatDate(employee.scheduledTerminationDate)}
-                    </Typography>
-                    {employee.scheduledTerminationReason && (
-                      <Typography variant="caption">
-                        Motivo:{" "}
-                        {TERMINATION_REASON_LABELS[
-                          employee.scheduledTerminationReason as keyof typeof TERMINATION_REASON_LABELS
-                        ] ?? employee.scheduledTerminationReason}
+              {employee.scheduledTerminationDate && !employee.terminationDate && (() => {
+                const { colors } = theme.tokens;
+                const target = parseStoredDate(employee.scheduledTerminationDate);
+                const daysLeft = target ? differenceInCalendarDays(target, new Date()) : null;
+                const countdown =
+                  daysLeft === null
+                    ? null
+                    : daysLeft <= 0
+                      ? "Hoy"
+                      : daysLeft === 1
+                        ? "Mañana"
+                        : `En ${daysLeft} días`;
+                const reason = employee.scheduledTerminationReason
+                  ? TERMINATION_REASON_LABELS[
+                      employee.scheduledTerminationReason as keyof typeof TERMINATION_REASON_LABELS
+                    ] ?? employee.scheduledTerminationReason
+                  : null;
+                return (
+                  <Box
+                    role="status"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      mb: 2,
+                      p: 1.5,
+                      borderRadius: "12px",
+                      border: `1px solid ${colors.warning}33`,
+                      borderLeft: `4px solid ${colors.warning}`,
+                      backgroundColor: colors.warningSoft,
+                    }}
+                  >
+                    <Box
+                      aria-hidden
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        flexShrink: 0,
+                        display: "grid",
+                        placeItems: "center",
+                        borderRadius: "10px",
+                        color: colors.warningDark,
+                        backgroundColor: `${colors.warning}26`,
+                      }}
+                    >
+                      <IconCalendarClock size={20} stroke={1.75} />
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography
+                        sx={{
+                          fontSize: "0.6875rem",
+                          fontWeight: 700,
+                          letterSpacing: "0.06em",
+                          textTransform: "uppercase",
+                          color: colors.warningDark,
+                        }}
+                      >
+                        Finalización programada
                       </Typography>
+                      <Typography sx={{ fontSize: "0.9375rem", fontWeight: 700, color: "text.primary" }}>
+                        {formatDate(employee.scheduledTerminationDate)}
+                      </Typography>
+                      {reason && (
+                        <Typography sx={{ fontSize: "0.8125rem", color: "text.secondary" }}>
+                          Motivo: {reason}
+                        </Typography>
+                      )}
+                    </Box>
+                    {countdown && (
+                      <Box
+                        sx={{
+                          flexShrink: 0,
+                          px: 1.25,
+                          py: 0.5,
+                          borderRadius: 999,
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          color: colors.warningDark,
+                          backgroundColor: `${colors.warning}26`,
+                        }}
+                      >
+                        {countdown}
+                      </Box>
                     )}
                   </Box>
-                </Box>
-              )}
+                );
+              })()}
               <InfoGrid>
                 <InfoCell label="Fecha de ingreso" icon={<IconCalendarCheck size={13} />}>
                   {employee.contractStartDate
@@ -1018,9 +1204,11 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <IconInfoCircle size={16} />
             <Typography variant="caption">
               El usuario es su correo electrónico. Si ya tiene cuenta, no se crea otra. La cuenta
-              recibe el rol &quot;{expectedRoleName}&quot;
-              {employee.position === "supervisor" ? " (un supervisor siempre lo tiene)" : ""} y
-              cambia si cambia su puesto.
+              recibe {hasSeveralPositions ? "los roles" : "el rol"} &quot;{expectedRoleName}&quot;
+              {getEmployeePositions(employee).includes("supervisor")
+                ? " (un supervisor siempre tiene el de Supervisor)"
+                : ""}{" "}
+              y {hasSeveralPositions ? "cambian" : "cambia"} si {hasSeveralPositions ? "cambian sus puestos" : "cambia su puesto"}.
             </Typography>
           </Box>
 
@@ -1073,8 +1261,10 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                         lineHeight: 1.45,
                       }}
                     >
-                      Sin un rol el usuario no ve ninguna sección de la app. Asígnale el rol
-                      &quot;{expectedRoleName}&quot; (el de su puesto) para que pueda entrar.
+                      Sin un rol el usuario no ve ninguna sección de la app. Asígnale{" "}
+                      {hasSeveralPositions ? "los roles" : "el rol"} &quot;{expectedRoleName}&quot;
+                      ({hasSeveralPositions ? "los de sus puestos" : "el de su puesto"}) para que pueda
+                      entrar.
                     </Typography>
                   </Box>
                   {canManageUser && (
@@ -1098,7 +1288,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                         "&:hover": { backgroundColor: theme.tokens.colors.hover },
                       }}
                     >
-                      Asignar rol {expectedRoleName}
+                      Asignar {hasSeveralPositions ? "roles" : "rol"} {expectedRoleName}
                     </Button>
                   )}
                 </Box>
