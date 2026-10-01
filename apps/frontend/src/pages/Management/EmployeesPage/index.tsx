@@ -1,7 +1,6 @@
 import {
   NationalIdType,
   formatNationalId,
-  getCountryName,
   getEmployeePositionsLabel,
 } from '@choferes/shared';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
@@ -363,8 +362,10 @@ const EmployeesPage: React.FC = () => {
   const exportData = useMemo(
     () =>
       filteredEmployees.map((e) => ({
-        Documento: formatNationalId((e.nationalIdType ?? 'cedula') as NationalIdType, e.nationalId ?? ''),
-        Nacionalidad: getCountryName(e.nationality ?? 'CR') ?? '',
+        'Identificación': formatNationalId(
+          (e.nationalIdType ?? 'cedula') as NationalIdType,
+          e.nationalId ?? '',
+        ),
         'Nombre completo': `${e.firstName} ${e.lastName}`.trim(),
         Puesto: getEmployeePositionsLabel(e, e.gender) || '',
         Email: e.email || '',
@@ -377,8 +378,7 @@ const EmployeesPage: React.FC = () => {
   // Excel y PDF comparten las mismas columnas.
   const exportOptions = useMemo(() => {
     const exportHeaders = [
-      'Documento',
-      'Nacionalidad',
+      'Identificación',
       'Nombre completo',
       'Puesto',
       'Email',
