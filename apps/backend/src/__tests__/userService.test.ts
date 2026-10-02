@@ -386,6 +386,68 @@ describe("createUser", () => {
     expect(mockRoleFindByPk).toHaveBeenCalledWith(3);
     expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 5, roleId: 3 });
   });
+
+  it("asigna todos los roles de roleIds (una cuenta puede tener varios)", async () => {
+    (bcrypt.hash as jest.Mock).mockResolvedValue("hashed");
+    (User.create as jest.Mock).mockResolvedValue({ id: 7 });
+    mockRoleFindByPk.mockImplementation(async (id: number) => ({
+      id,
+      name: id === 1 ? "Chofer" : "Recepcionista",
+    }));
+    mockUserRoleFindOne.mockResolvedValue(null);
+    mockUserRoleCreate.mockImplementation(async ({ userId, roleId }: Record<string, number>) => ({
+      id: roleId,
+      userId,
+      roleId,
+    }));
+
+    await userService.createUser({
+      firstName: "Varios",
+      lastName: "Roles",
+      username: "varios",
+      email: "varios@example.com",
+      password: "plain_password",
+      roleIds: [1, 2],
+    } as any);
+
+    expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 7, roleId: 1 });
+    expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 7, roleId: 2 });
+  });
+
+  it("rechaza roleIds vacío (una cuenta nunca queda sin rol)", async () => {
+    (bcrypt.hash as jest.Mock).mockResolvedValue("hashed");
+
+    await expect(
+      userService.createUser({
+        firstName: "Sin",
+        lastName: "Rol",
+        username: "sinrol",
+        email: "sinrol@example.com",
+        password: "plain_password",
+        roleIds: [],
+      } as any),
+    ).rejects.toMatchObject({ statusCode: 400 });
+
+    expect(User.create).not.toHaveBeenCalled();
+    expect(mockUserRoleCreate).not.toHaveBeenCalled();
+  });
+
+  it("rechaza un roleId que no es un entero positivo", async () => {
+    (bcrypt.hash as jest.Mock).mockResolvedValue("hashed");
+
+    await expect(
+      userService.createUser({
+        firstName: "Rol",
+        lastName: "Invalido",
+        username: "rolinvalido",
+        email: "rolinvalido@example.com",
+        password: "plain_password",
+        roleIds: [0],
+      } as any),
+    ).rejects.toMatchObject({ statusCode: 400 });
+
+    expect(User.create).not.toHaveBeenCalled();
+  });
 });
 
 describe("updateUser", () => {

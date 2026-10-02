@@ -10,6 +10,7 @@ import {
   submitButton,
   textFieldSx,
   menuPaperProps,
+  sectionTitle,
 } from "../sharedStyles";
 
 export {
@@ -22,6 +23,7 @@ export {
   cancelButton,
   submitButton,
   menuPaperProps,
+  sectionTitle,
 };
 
 export const formControl = (theme: Theme) => textFieldSx(theme);

@@ -80,7 +80,11 @@ export const getUserPermissions = async (id: number) => {
   return response.data;
 };
 
-export const createUser = async (newUser: Omit<User, "id">) => {
+// `roleIds` (lista) viaja en el cuerpo y el backend los asigna en la misma
+// operación; el servidor exige al menos un rol.
+export const createUser = async (
+  newUser: Omit<User, "id"> & { roleIds: number[] },
+) => {
   const response = await api.post("/users/register", newUser);
   // Clear cache to ensure fresh data
   invalidateCache("/users");

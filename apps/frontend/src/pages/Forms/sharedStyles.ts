@@ -43,6 +43,16 @@ export const menuPaperProps = {
   },
 };
 
+// ─── Section title (splits a long form into labelled groups) ───
+export const sectionTitle = (theme: Theme) => ({
+  display: "block",
+  fontSize: "0.72rem",
+  fontWeight: 600,
+  color: theme.palette.text.secondary,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+});
+
 // ─── Info callout (accent-tinted note inside forms) ───
 export const infoBox = (theme: Theme) => ({
   display: "flex",

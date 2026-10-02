@@ -230,21 +230,34 @@ export const getUserPermissions = async (userId: number) => {
   return Array.from(new Set(permissions));
 };
 
+// Roles a asignar en el alta. Acepta `roleIds` (lista) y `roleId` (uno) para no
+// romper a los clientes que solo mandan un rol. Se resuelve ANTES de crear la
+// cuenta y se exige al menos uno, así la invariante "toda cuenta tiene al menos
+// un rol" se cumple para todos los clientes de la API (y una lista vacía no
+// deja una cuenta que se cuelgue de un permiso comodín).
+const resolveRolesToGrant = async (data: Record<string, any>): Promise<Role[]> => {
+  const raw = Array.isArray(data.roleIds) ? data.roleIds : [data.roleId];
+  const provided = raw.filter((value: unknown) => value !== undefined && value !== null);
+  const ids = provided.map((value: unknown) => Number(value));
+  if (ids.length === 0 || ids.some((id: number) => !Number.isInteger(id) || id <= 0)) {
+    throw new ServiceError(400, "El rol es requerido");
+  }
+  return Promise.all(Array.from(new Set(ids)).map((id) => resolveRoleById(id)));
+};
+
 // Creates a new user with hashed password (whitelisted fields only). Returns
 // the safe projection: the created instance still holds the password hash.
 //
-// `roleId` (not whitelisted for mass assignment) chooses the role and is
-// REQUIRED: every account must have a role, so there is no generic fallback.
-// Resolving it BEFORE creating the account keeps the invariant "toda cuenta
-// tiene al menos un rol" true for every client of the API.
+// The roles (`roleIds`, or the single `roleId`) are NOT whitelisted for mass
+// assignment: they are assigned in the same operation, so the account never
+// lands without permissions if a second request fails. Resolving them BEFORE
+// creating the account keeps the invariant "toda cuenta tiene al menos un rol"
+// true for every client of the API.
 export const createUser = async (data: Record<string, any>) => {
   const clean = pickFields(data, CREATABLE_FIELDS);
   const hashedPassword = await bcrypt.hash(clean.password, 10);
 
-  if (data.roleId == null) {
-    throw new ServiceError(400, "El rol es requerido");
-  }
-  const role = await resolveRoleById(Number(data.roleId));
+  const roles = await resolveRolesToGrant(data);
 
   const created = await User.create(
     {
@@ -254,12 +267,13 @@ export const createUser = async (data: Record<string, any>) => {
     { returning: true },
   );
 
-  await assignRole(created.id, role.id);
+  await Promise.all(roles.map((role) => assignRole(created.id, role.id)));
+  const roleNames = roles.map((role) => role.name).join(", ");
 
   await createNotification(created.id, {
     source: `account-created:${created.id}`,
     title: "Bienvenido a Choferes",
-    message: `Tu cuenta fue creada con el rol ${role.name}.`,
+    message: `Tu cuenta fue creada con ${roles.length === 1 ? "el rol" : "los roles"} ${roleNames}.`,
     type: "success",
     category: "system",
     priority: "high",
@@ -269,7 +283,7 @@ export const createUser = async (data: Record<string, any>) => {
   await notifyManagementRoles({
     source: `account-created:${created.id}`,
     title: "Cuenta creada",
-    message: `Se creó la cuenta de ${created.firstName} ${created.lastName} (${created.username}) con el rol ${role.name}.`,
+    message: `Se creó la cuenta de ${created.firstName} ${created.lastName} (${created.username}) con ${roles.length === 1 ? "el rol" : "los roles"} ${roleNames}.`,
     type: "info",
     category: "system",
     priority: "medium",

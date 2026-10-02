@@ -102,6 +102,37 @@ describe("checkRoleAssignment", () => {
   });
 });
 
+describe("checkRoleAssignment con SysAdmin", () => {
+  const sysAdminRole = roleNamed("SysAdmin", "users:create", "roles:edit", "payments:delete");
+  const sysAdminActor = { id: 1, roles: ["SysAdmin"], permissions: ["*"] };
+  const gerenciaActor = {
+    id: 2,
+    roles: ["Gerencia"],
+    permissions: ["users:create", "roles:edit", "payments:delete"],
+  };
+  const administrativoActor = { id: 3, roles: ["Administrativo"], permissions: ["users:create"] };
+
+  it("SysAdmin aparece en la UI y SysAdmin puede concederlo", async () => {
+    Role.findByPk.mockResolvedValue(sysAdminRole);
+
+    await expect(accessGrant.checkRoleAssignment(sysAdminActor, 20, 7)).resolves.toBeNull();
+  });
+
+  it("Gerencia puede conceder SysAdmin si conserva todos sus permisos", async () => {
+    Role.findByPk.mockResolvedValue(sysAdminRole);
+
+    await expect(accessGrant.checkRoleAssignment(gerenciaActor, 20, 7)).resolves.toBeNull();
+  });
+
+  it("Administrativo ve SysAdmin pero no puede concederlo", async () => {
+    Role.findByPk.mockResolvedValue(sysAdminRole);
+
+    const denial = await accessGrant.checkRoleAssignment(administrativoActor, 20, 7);
+
+    expect(denial).toEqual(expect.objectContaining({ status: 403 }));
+  });
+});
+
 describe("checkPermissionGrant", () => {
   const roleEditor = { id: 5, roles: ["x"], permissions: ["roles:edit", "roles:view"] };
 

@@ -13,6 +13,7 @@ import {
   cancelButton,
   submitButton,
   textFieldSx,
+  sectionTitle,
 } from "../sharedStyles";
 
 export {
@@ -28,6 +29,7 @@ export {
   actionsInnerBox,
   cancelButton,
   submitButton,
+  sectionTitle,
 };
 
 export const formControl = (theme: Theme) => textFieldSx(theme);
