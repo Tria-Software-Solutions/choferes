@@ -35,27 +35,30 @@ const fillRequiredFields = () => {
 };
 
 describe("AddEmployeeForm", () => {
-  it("muestra las secciones del formulario con los campos nuevos", () => {
+  it("muestra las secciones del formulario con el apodo", () => {
     mountForm();
 
     expect(screen.getByRole("heading", { name: "Identificación" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Contacto" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Puesto" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Contrato y pago" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Vehículos propios" })).toBeInTheDocument();
     expect(screen.getByLabelText(/Nombre preferido/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Saldo de vacaciones/i)).toBeInTheDocument();
-    expect(screen.getByLabelText("Placa del vehículo")).toBeInTheDocument();
   });
 
-  it("envía el apodo, el saldo de vacaciones y los vehículos", () => {
+  it("no pide saldo de vacaciones ni vehículos en el alta", () => {
+    mountForm();
+
+    // El saldo lo acumulan las leyes y los vehículos se agregan en la ficha.
+    expect(screen.queryByLabelText(/Saldo de vacaciones/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Placa del vehículo")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Vehículos propios" })).not.toBeInTheDocument();
+  });
+
+  it("envía el apodo y arranca las vacaciones en 0", () => {
     const onSubmit = mountForm();
 
     fillRequiredFields();
     fireEvent.change(screen.getByLabelText(/Nombre preferido/i), { target: { value: "Carlitos" } });
-    fireEvent.change(screen.getByLabelText(/Saldo de vacaciones/i), { target: { value: "15" } });
-    fireEvent.change(screen.getByLabelText("Placa del vehículo"), { target: { value: "ABC123" } });
-    fireEvent.click(screen.getByRole("button", { name: /placa|agregar|añadir/i }));
 
     fireEvent.click(screen.getByRole("button", { name: /^Crear$/i }));
 
@@ -65,11 +68,11 @@ describe("AddEmployeeForm", () => {
         lastName: "Pérez",
         nationalId: "118820456",
         preferredName: "Carlitos",
-        vacationDays: 15,
-        vehicles: [expect.objectContaining({ plate: "ABC123" })],
+        vacationDays: 0,
         positions: [EMPLOYEE_POSITIONS[0]],
       }),
     );
+    expect(onSubmit.mock.calls[0][0]).not.toHaveProperty("vehicles");
   });
 
   it("no habilita el alta sin los campos obligatorios", () => {

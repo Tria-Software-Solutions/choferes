@@ -241,7 +241,6 @@ const EmployeesPage: React.FC = () => {
     contractStartDate?: string | null;
     hourlyRate?: number | null;
     vacationDays?: number | null;
-    vehicles?: Array<{ plate: string; type: string }>;
   }) => {
     try {
       setIsSubmitting(true);
