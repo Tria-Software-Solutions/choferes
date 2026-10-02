@@ -20,6 +20,12 @@ import SearchBarComponent from '../../../components/SearchBar/SearchBar.componen
 import StickyDataGridComponent from '../../../components/Table/StickyDataGrid/StickyDataGrid.component';
 import { GridColDef } from '@mui/x-data-grid';
 import { formatTenure } from '../../../utils/tenure';
+import {
+  licenseAlertsHint,
+  licenseAlertsValue,
+  licenseUrgencyText,
+  summarizeLicenses,
+} from './licenseSummary';
 import { maskPhone } from '../../../utils/mask';
 import PremiumTooltip from '../../../components/PremiumTooltip/PremiumTooltip.component';
 import AddEmployeeForm from '../../Forms/AddEmployeeForm';
@@ -84,6 +90,12 @@ const getMissingProfileFields = (employee: Employee): string[] => {
     missing.push('saldo de vacaciones');
   }
   return missing;
+};
+
+// YYYY-MM-DD → DD/MM/YYYY, sin corrimiento de zona horaria ni formato largo.
+const formatLicenseDate = (value: string): string => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : value;
 };
 
 // Compact summary metric shown in the KPI band above the grid.
@@ -435,14 +447,13 @@ const EmployeesPage: React.FC = () => {
       0,
     );
 
+    // Alertas de licencia sobre la plantilla completa: se resumen las licencias
+    // de los empleados que existen en el store, no solo de las filas visibles.
     const roster = allEmployees.length > 0 ? allEmployees : filteredEmployees;
-    let expiringLicenses = 0;
-    let expiredLicenses = 0;
-    roster.forEach((employee) => {
-      const alert = licenseAlertByEmployee.get(employee.id);
-      if (alert === 'por_vencer') expiringLicenses += 1;
-      else if (alert === 'vencida') expiredLicenses += 1;
-    });
+    const rosterIds = new Set(roster.map((employee) => employee.id));
+    const licensesSummary = summarizeLicenses(
+      licenses.filter((license) => rosterIds.has(license.employeeId)),
+    );
 
     return {
       total: filteredEmployees.length,
@@ -450,11 +461,9 @@ const EmployeesPage: React.FC = () => {
       averageRate,
       ratesCount: rates.length,
       totalVacationDays,
-      expiringLicenses,
-      expiredLicenses,
-      licenseAlerts: expiringLicenses + expiredLicenses,
+      licenses: licensesSummary,
     };
-  }, [filteredEmployees, allEmployees, licenseAlertByEmployee]);
+  }, [filteredEmployees, allEmployees, licenses]);
 
   // Counts por estado (sobre la plantilla completa) para los filter tabs.
   const filterCounts = useMemo(
@@ -1020,8 +1029,16 @@ const EmployeesPage: React.FC = () => {
             <StatCard
               icon={<IconShieldExclamation />}
               label="Licencias"
-              value={kpiStats.licenseAlerts}
-              tone={kpiStats.licenseAlerts > 0 ? 'danger' : 'default'}
+              value={licenseAlertsValue(kpiStats.licenses)}
+              hint={licenseAlertsHint(kpiStats.licenses)}
+              footer={licenseUrgencyText(kpiStats.licenses, formatLicenseDate)}
+              tone={
+                kpiStats.licenses.expired > 0
+                  ? 'danger'
+                  : kpiStats.licenses.expiring > 0
+                    ? 'warning'
+                    : 'success'
+              }
             />
           </StatGrid>
         )}
