@@ -98,22 +98,27 @@ export const fetchUserPermissions = createAsyncThunk(
   },
 );
 
-// Create a new user and assign a role
+// Create a new user and assign its roles
 export const createUser = createAsyncThunk(
   "users/createUser",
   async (
     {
       newUser,
-      newRoleId,
-    }: { newUser: Omit<User, "id" | "temporalPassword">; newRoleId?: number },
+      newRoleIds,
+    }: {
+      newUser: Omit<User, "id" | "temporalPassword">;
+      /** Roles de la cuenta (una cuenta puede tener varios). */
+      newRoleIds: number[];
+    },
     { rejectWithValue },
   ) => {
     try {
-      // El backend asigna el rol en la misma operación (roleId es obligatorio),
-      // así que la cuenta nunca queda sin permisos si falla un segundo request.
+      // El backend asigna los roles en la misma operación (roleIds es
+      // obligatorio y no puede ir vacío), así que la cuenta nunca queda sin
+      // permisos si falla un segundo request.
       const createdUser = await UserService.createUser({
         ...newUser,
-        roleId: newRoleId,
+        roleIds: newRoleIds,
       });
       const updatedUser = await UserService.getUserById(createdUser.id);
       return updatedUser;

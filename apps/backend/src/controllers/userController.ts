@@ -2,7 +2,8 @@
 // Provides endpoints for authentication, user management, and permissions
 import { Request, Response } from "express";
 import * as userService from "../services/userService";
-import { getUserId } from "../middleware/authorize";
+import { getUserId, AuthenticatedRequest } from "../middleware/authorize";
+import { checkRoleGrant } from "../services/accessGrantService";
 import { sendServerError } from "../utils/errors";
 
 // Authenticate a user and return tokens and permissions
@@ -130,6 +131,20 @@ export const getUserPermissions = async (req: Request, res: Response) => {
 // Create a new user
 export const createUser = async (req: Request, res: Response) => {
   try {
+    const actor = (req as AuthenticatedRequest).user;
+    if (!actor) return res.status(401).json({ message: "Unauthorized" });
+
+    // Alta de cuenta con varios roles: cada uno se valida contra los permisos que
+    // ya tiene el actor, igual que al cambiar los roles de una cuenta existente.
+    // Sin esto, `users:create` bastaría para regalar SysAdmin.
+    const rawIds: unknown[] = Array.isArray(req.body?.roleIds)
+      ? req.body.roleIds
+      : [req.body?.roleId];
+    const roleIds = rawIds.map((value) => Number(value)).filter(Number.isInteger);
+    const denials = await Promise.all(roleIds.map((roleId) => checkRoleGrant(actor, roleId)));
+    const denial = denials.find((result) => result !== null);
+    if (denial) return res.status(denial.status).json({ message: denial.message });
+
     const newUser = await userService.createUser(req.body);
     return res.status(201).json(newUser);
   } catch (error) {

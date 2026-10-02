@@ -4,7 +4,7 @@
 // permission each (users:create / users:edit, roles:edit). Without these checks
 // a holder of, say, `users:create` could assign the all-powerful "Gerencia"
 // role to anyone — including themselves.
-import { isManagementRoleName } from "@choferes/shared";
+import { canGrantRole } from "@choferes/shared";
 import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
 import { UserRole } from "../models/UserRole";
@@ -17,11 +17,6 @@ export interface GrantDenial {
 
 const holdsAll = (actor: AuthenticatedUser, codes: string[]): boolean =>
   actor.permissions.includes("*") || codes.every((code) => actor.permissions.includes(code));
-
-// true si el actor tiene un rol de gestión (Gerencia/Administrativo/SysAdmin).
-const isManagementActor = (actor: AuthenticatedUser): boolean =>
-  actor.permissions.includes("*") ||
-  (Array.isArray(actor.roles) && actor.roles.some((name) => isManagementRoleName(name)));
 
 // Permission codes currently granted to a role, or null when the role doesn't exist.
 export const getRolePermissionCodes = async (roleId: number): Promise<string[] | null> => {
@@ -49,25 +44,23 @@ export const getPermissionCodesByIds = async (ids: number[]): Promise<string[] |
 // does not hold), or null when allowed. Used both when assigning a role to an
 // existing user and when a role is derived automatically (new account, change
 // of position), so nobody can gain access through a side door.
+//
+// The rule itself lives in @choferes/shared (`canGrantRole`) so the UI can
+// disable the roles this actor is not allowed to grant, instead of offering an
+// option the API would reject.
 export const checkRoleGrant = async (
   actor: AuthenticatedUser,
   roleId: number,
 ): Promise<GrantDenial | null> => {
-  const codes = await getRolePermissionCodes(roleId);
-  if (!codes) return { status: 404, message: "Rol no encontrado" };
-
   const role = await Role.findByPk(roleId, { attributes: ["id", "name"] });
-  const targetIsManagement = role ? isManagementRoleName(role.name) : false;
+  if (!role) return { status: 404, message: "Rol no encontrado" };
 
-  // Los roles de gestión administran la plataforma. Pueden asignar cualquier rol
-  // de puesto (que lleva permisos de autoservicio que la cuenta de gestión no
-  // replica, p. ej. `my-panel:view`), sin exigir replicar cada permiso. Conceder
-  // un rol de gestión sigue exigiendo conservar todos sus permisos (`holdsAll`),
-  // para que nadie escale regalando "Gerencia" aunque tenga `users:edit`.
-  if (isManagementActor(actor) && !targetIsManagement) {
-    return null;
-  }
-  if (!holdsAll(actor, codes)) {
+  const codes = await getRolePermissionCodes(roleId);
+  const grantable = canGrantRole(
+    { permissions: actor.permissions, roles: actor.roles },
+    { name: role.name, permissionCodes: codes ?? [] },
+  );
+  if (!grantable) {
     return { status: 403, message: "No puedes asignar un rol con permisos que tú no tienes" };
   }
   return null;

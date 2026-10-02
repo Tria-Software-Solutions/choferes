@@ -6,6 +6,7 @@ import {
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuthContext } from '../../../context/AuthContext';
 import { Employee } from '../../../models/Employee';
+import type { EmployeeGender } from '@choferes/shared';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../../store/store';
 import {
@@ -226,6 +227,21 @@ const EmployeesPage: React.FC = () => {
     firstName: string;
     lastName: string;
     email?: string;
+    preferredName?: string | null;
+    nationalId?: string | null;
+    nationalIdType?: NationalIdType;
+    nationality?: string;
+    birthDate?: string | null;
+    address?: string | null;
+    primaryPhone?: string | null;
+    secondaryPhone?: string | null;
+    position?: string | null;
+    positions?: string[];
+    gender?: EmployeeGender | null;
+    contractStartDate?: string | null;
+    hourlyRate?: number | null;
+    vacationDays?: number | null;
+    vehicles?: Array<{ plate: string; type: string }>;
   }) => {
     try {
       setIsSubmitting(true);
