@@ -8,14 +8,31 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import { IconMail, IconRotate, IconUser, IconId, IconPhone, IconBriefcase, IconUserCircle, IconMapPin } from "@tabler/icons-react";
+import {
+  IconBeach,
+  IconCash,
+  IconMail,
+  IconRotate,
+  IconUser,
+  IconId,
+  IconPhone,
+  IconBriefcase,
+  IconUserCircle,
+  IconMapPin,
+} from "@tabler/icons-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import IdentityFields, { IdentityValue, identityError } from "../../../components/IdentityFields/IdentityFields.component";
+import VehiclePlates, { VehicleEntry } from "../../../components/IdentityFields/VehiclePlates.component";
 import PositionSelect from "../../../components/PositionSelect/PositionSelect.component";
 import PlaceholderSelect from "../../../components/PlaceholderSelect/PlaceholderSelect.component";
 import { FORMS } from "../../../constants/constants";
 import { maskPhone, digitsOnly } from "../../../utils/mask";
-import { DEFAULT_NATIONALITY, EMPLOYEE_GENDERS, normalizeNationalId } from "@choferes/shared";
+import {
+  DEFAULT_NATIONALITY,
+  EMPLOYEE_GENDERS,
+  normalizeNationalId,
+} from "@choferes/shared";
+import type { EmployeeGender, NationalIdType } from "@choferes/shared";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -25,6 +42,7 @@ import {
   boxRoot,
   gridContainer,
   iconStyle,
+  sectionTitle,
   actionsBox,
   clearButton,
   actionsInnerBox,
@@ -36,6 +54,7 @@ import {
 interface AddEmployeeFormData {
   firstName: string;
   lastName: string;
+  preferredName: string;
   email: string;
   nationalId: string;
   primaryPhone: string;
@@ -44,6 +63,7 @@ interface AddEmployeeFormData {
   gender: string;
   contractStartDate: string;
   hourlyRate: string;
+  vacationDays: string;
 }
 
 interface AddEmployeeFormProps {
@@ -51,8 +71,9 @@ interface AddEmployeeFormProps {
     firstName: string;
     lastName: string;
     email?: string;
+    preferredName?: string | null;
     nationalId?: string | null;
-    nationalIdType?: string;
+    nationalIdType?: NationalIdType;
     nationality?: string;
     birthDate?: string | null;
     address?: string | null;
@@ -60,14 +81,19 @@ interface AddEmployeeFormProps {
     secondaryPhone?: string | null;
     position?: string | null;
     positions?: string[];
-    gender?: string | null;
+    gender?: EmployeeGender | null;
     contractStartDate?: string | null;
     hourlyRate?: number | null;
+    vacationDays?: number | null;
+    vehicles?: VehicleEntry[];
   }) => void;
   onCancel?: () => void;
   isLoading?: boolean;
 }
 
+// Formulario de alta de empleado. Los campos van agrupados por secciones (como
+// la ficha del empleado) para que un formulario largo se lea de arriba abajo:
+// identificación, contacto, puesto, contrato y pago, vehículos.
 const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   onSubmit,
   onCancel,
@@ -84,9 +110,10 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     return `${d.getFullYear()}-${month}-${day}`;
   }, []);
 
-  const [formData, setFormData] = useState<AddEmployeeFormData>({
+  const emptyFormData = (): AddEmployeeFormData => ({
     firstName: "",
     lastName: "",
+    preferredName: "",
     email: "",
     nationalId: "",
     primaryPhone: "",
@@ -95,7 +122,10 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     gender: "",
     contractStartDate: todayStr,
     hourlyRate: "",
+    vacationDays: "",
   });
+
+  const [formData, setFormData] = useState<AddEmployeeFormData>(emptyFormData);
   // Un empleado puede tener varios puestos; se necesita al menos uno.
   const [positions, setPositions] = useState<string[]>([]);
   // Documento (cédula, DIMEX, pasaporte u otro) con su nacionalidad y bandera.
@@ -106,9 +136,11 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   });
   const [birthDate, setBirthDate] = useState("");
   const [address, setAddress] = useState("");
+  const [vehicles, setVehicles] = useState<VehicleEntry[]>([]);
   const [errors, setErrors] = useState<Record<keyof AddEmployeeFormData, string>>({
     firstName: "",
     lastName: "",
+    preferredName: "",
     email: "",
     nationalId: "",
     primaryPhone: "",
@@ -117,11 +149,9 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     gender: "",
     contractStartDate: "",
     hourlyRate: "",
+    vacationDays: "",
   });
 
-  
-
-  // Main hook for the employee form
   // Validación de campos del formulario
   const validateField = (name: keyof AddEmployeeFormData, value: string): string => {
     if (name === "email") {
@@ -164,6 +194,13 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       return "";
     }
 
+    if (name === "preferredName") {
+      // Opcional: es un apodo, no un nombre legal.
+      if (!value.trim()) return "";
+      if (value.trim().length > 100) return FORMS.MAX_50_CHARS;
+      return "";
+    }
+
     if (name === "contractStartDate") {
       if (!value.trim()) return "";
       if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "Fecha debe tener formato YYYY-MM-DD";
@@ -174,6 +211,13 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       if (!value.trim()) return "";
       const num = Number(value);
       if (isNaN(num) || num < 0) return "Tarifa debe ser un número ≥ 0";
+      return "";
+    }
+
+    if (name === "vacationDays") {
+      if (!value.trim()) return "";
+      const num = Number(value);
+      if (!Number.isInteger(num) || num < 0) return "Debe ser un número entero ≥ 0";
       return "";
     }
 
@@ -212,6 +256,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       formData.lastName.trim() !== "" &&
       errors.firstName === "" &&
       errors.lastName === "" &&
+      errors.preferredName === "" &&
       positions.length > 0 &&
       errors.email === "" &&
       identity.nationalId !== "" &&
@@ -219,7 +264,8 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       errors.primaryPhone === "" &&
       errors.secondaryPhone === "" &&
       errors.contractStartDate === "" &&
-      errors.hourlyRate === ""
+      errors.hourlyRate === "" &&
+      errors.vacationDays === ""
     );
   };
 
@@ -229,6 +275,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       onSubmit({
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
+        preferredName: formData.preferredName.trim() || null,
         email: formData.email.trim() || undefined,
         nationalIdType: identity.nationalIdType,
         nationalId: normalizeNationalId(identity.nationalIdType, identity.nationalId) || null,
@@ -239,12 +286,19 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         secondaryPhone: digitsOnly(formData.secondaryPhone) || null,
         position: positions[0],
         positions,
-        gender: formData.gender.trim() || null,
+        // El selector solo ofrece EMPLOYEE_GENDERS: el valor vacío es "sin
+        // especificar" y viaja como null.
+        gender: (formData.gender.trim() || null) as EmployeeGender | null,
         contractStartDate: formData.contractStartDate || null,
         hourlyRate:
           formData.hourlyRate.trim() === ""
             ? null
             : Number(formData.hourlyRate),
+        vacationDays:
+          formData.vacationDays.trim() === ""
+            ? null
+            : Number(formData.vacationDays),
+        vehicles,
       });
     }
   };
@@ -255,21 +309,12 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     setIdentity({ nationalIdType: "cedula", nationalId: "", nationality: DEFAULT_NATIONALITY });
     setBirthDate("");
     setAddress("");
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      nationalId: "",
-      primaryPhone: "",
-      secondaryPhone: "",
-      position: "",
-      gender: "",
-      contractStartDate: todayStr,
-      hourlyRate: "",
-    });
+    setVehicles([]);
+    setFormData(emptyFormData());
     setErrors({
       firstName: "",
       lastName: "",
+      preferredName: "",
       email: "",
       nationalId: "",
       primaryPhone: "",
@@ -278,12 +323,20 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       gender: "",
       contractStartDate: "",
       hourlyRate: "",
+      vacationDays: "",
     });
   };
 
   return (
     <Box sx={boxRoot}>
       <Grid container spacing={2} sx={gridContainer}>
+        {/* Section: Identificación */}
+        <Grid item xs={12}>
+          <Typography component="h3" sx={sectionTitle(theme)}>
+            Identificación
+          </Typography>
+        </Grid>
+
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_EMPLOYEE.FIRST_NAME_PLACEHOLDER}
@@ -314,6 +367,41 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             sx={formControl(theme)}
             inputProps={{ maxLength: 100 }}
           />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextfieldComponent
+            placeholder="Ej: Carlitos"
+            label="Nombre preferido (apodo)"
+            variant="outlined"
+            fullWidth
+            value={formData.preferredName}
+            onChange={(e) => handleFieldChange("preferredName", e.target.value)}
+            error={errors.preferredName !== ""}
+            helperText={errors.preferredName}
+            icon={<IconUserCircle style={iconStyle} />}
+            sx={formControl(theme)}
+            inputProps={{ maxLength: 100 }}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <PlaceholderSelect
+            label={FORMS.ADD_EMPLOYEE.GENDER_LABEL}
+            placeholder={FORMS.ADD_EMPLOYEE.GENDER_PLACEHOLDER}
+            icon={<IconUserCircle style={iconStyle} />}
+            value={formData.gender}
+            onChange={(event) => handleFieldChange("gender", String(event.target.value))}
+            sx={formControl(theme)}
+          >
+            <MenuItem value="">Sin especificar</MenuItem>
+            {EMPLOYEE_GENDERS.map((gen) => (
+              <MenuItem key={gen} value={gen}>
+                {gen}
+              </MenuItem>
+            ))}
+          </PlaceholderSelect>
+          {errors.gender && <Typography variant="caption" sx={{ color: "error.main", mt: 0.5 }}>{errors.gender}</Typography>}
         </Grid>
 
         <IdentityFields value={identity} onChange={setIdentity} iconColor={theme.palette.text.secondary} />
@@ -351,6 +439,13 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             sx={formControl(theme)}
             inputProps={{ maxLength: 500 }}
           />
+        </Grid>
+
+        {/* Section: Contacto */}
+        <Grid item xs={12}>
+          <Typography component="h3" sx={sectionTitle(theme)}>
+            Contacto
+          </Typography>
         </Grid>
 
         <Grid item xs={12} sm={6}>
@@ -401,6 +496,13 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
           />
         </Grid>
 
+        {/* Section: Puesto */}
+        <Grid item xs={12}>
+          <Typography component="h3" sx={sectionTitle(theme)}>
+            Puesto
+          </Typography>
+        </Grid>
+
         <Grid item xs={12} sm={6}>
           <PositionSelect
             label={FORMS.ADD_EMPLOYEE.POSITION_LABEL}
@@ -413,23 +515,11 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
           />
         </Grid>
 
-        <Grid item xs={12} sm={6}>
-          <PlaceholderSelect
-            label={FORMS.ADD_EMPLOYEE.GENDER_LABEL}
-            placeholder={FORMS.ADD_EMPLOYEE.GENDER_PLACEHOLDER}
-            icon={<IconUserCircle style={iconStyle} />}
-            value={formData.gender}
-            onChange={(event) => handleFieldChange("gender", String(event.target.value))}
-            sx={formControl(theme)}
-          >
-            <MenuItem value="">Sin especificar</MenuItem>
-            {EMPLOYEE_GENDERS.map((gen) => (
-              <MenuItem key={gen} value={gen}>
-                {gen}
-              </MenuItem>
-            ))}
-          </PlaceholderSelect>
-          {errors.gender && <Typography variant="caption" sx={{ color: "error.main", mt: 0.5 }}>{errors.gender}</Typography>}
+        {/* Section: Contrato y pago */}
+        <Grid item xs={12}>
+          <Typography component="h3" sx={sectionTitle(theme)}>
+            Contrato y pago
+          </Typography>
         </Grid>
 
         <Grid item xs={12} sm={6}>
@@ -459,11 +549,39 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             onChange={(e) => handleFieldChange("hourlyRate", e.target.value)}
             error={errors.hourlyRate !== ""}
             helperText={errors.hourlyRate}
-            icon={<IconMail style={iconStyle} />}
+            icon={<IconCash style={iconStyle} />}
             sx={formControl(theme)}
             type="number"
             inputProps={{ step: "0.01", min: 0 }}
           />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextfieldComponent
+            placeholder="Ej: 15"
+            label="Saldo de vacaciones (días)"
+            variant="outlined"
+            fullWidth
+            value={formData.vacationDays}
+            onChange={(e) => handleFieldChange("vacationDays", e.target.value)}
+            error={errors.vacationDays !== ""}
+            helperText={errors.vacationDays}
+            icon={<IconBeach style={iconStyle} />}
+            sx={formControl(theme)}
+            type="number"
+            inputProps={{ step: "1", min: 0 }}
+          />
+        </Grid>
+
+        {/* Section: Vehículos propios */}
+        <Grid item xs={12}>
+          <Typography component="h3" sx={sectionTitle(theme)}>
+            Vehículos propios
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12}>
+          <VehiclePlates vehicles={vehicles} onChange={setVehicles} />
         </Grid>
 
         <Grid item xs={12}>

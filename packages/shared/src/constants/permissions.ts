@@ -382,11 +382,13 @@ export const ROLE_NAMES = [
 export type RoleName = (typeof ROLE_NAMES)[number];
 
 /**
- * Rol especial de la plataforma (acceso total). No se ofrece en los selectores
- * de rol de la UI (crear/editar usuario): se asigna deliberadamente a quien
- * administra, no desde el formulario.
+ * Roles que no se ofrecen en los selectores de rol de la UI (crear/editar
+ * usuario). Vacío a propósito: SysAdmin también se asigna desde el formulario,
+ * dentro de la sección de Administración (Usuarios), que solo alcanzan Gerencia,
+ * Administrativo y SysAdmin. `canGrantRole` es lo que impide que una cuenta sin
+ * permisos suficientes conceda SysAdmin.
  */
-export const HIDDEN_ROLE_NAMES: readonly RoleName[] = ["SysAdmin"];
+export const HIDDEN_ROLE_NAMES: readonly RoleName[] = [];
 
 const HIDDEN_ROLE_NAMES_SET: ReadonlySet<string> = new Set(
   HIDDEN_ROLE_NAMES.map((name) => name.toLowerCase()),
@@ -450,6 +452,55 @@ export const hasManagementRole = (user?: RoleNameHolder | null): boolean => {
 export const hasAdminSettingsRole = (user?: RoleNameHolder | null): boolean => {
   const roles = user?.roles;
   return Array.isArray(roles) && roles.some((role) => isAdminSettingsRoleName(role?.name));
+};
+
+/** Actor que concede un rol: sus permisos agregados y sus nombres de rol. */
+export interface RoleGrantor {
+  /** Permisos agregados de la cuenta ("*" = acceso total). */
+  permissions?: readonly string[] | null;
+  /**
+   * Nombres de rol del actor. Acepta texto plano (`req.user.roles` del backend)
+   * u objetos `{ name }` (el modelo `User` del frontend).
+   */
+  roles?: ReadonlyArray<string | { name?: string | null } | null> | null;
+}
+
+/** Rol que se quiere conceder, con sus nombres de permiso. */
+export interface GrantableRole {
+  name?: string | null;
+  /** Códigos de permiso del rol. Sin el array se asume que no concede nada. */
+  permissionCodes?: readonly string[] | null;
+}
+
+/** true si el actor tiene cada permiso, o acceso total. */
+const holdsEvery = (actorPermissions: readonly string[], codes: readonly string[]): boolean =>
+  actorPermissions.includes("*") || codes.every((code) => actorPermissions.includes(code));
+
+/** Nombres de rol del actor, sin importar si vienen como texto o como objeto. */
+const roleNameOf = (role: string | { name?: string | null } | null): string | null => {
+  if (typeof role === "string") return role;
+  return role?.name ?? null;
+};
+
+/**
+ * true si `actor` puede conceder `role`, es decir si no le daría más acceso del
+ * que ya tiene. Única definición de la regla: la usa el backend al validar un
+ * alta o un cambio de roles y la UI para deshabilitar las opciones que el actor
+ * no puede otorgar (así nadie elige un rol que el servidor va a rechazar).
+ *
+ * Los roles de gestión administran la plataforma: pueden conceder cualquier rol
+ * de puesto (que lleva permisos de autoservicio que la cuenta de gestión no
+ * replica) sin exigir replicar cada permiso. Conceder un rol de gestión —SysAdmin
+ * entre ellos— sí exige conservar todos sus permisos, para que nadie escale
+ * regalando "Gerencia" con un simple `users:edit`.
+ */
+export const canGrantRole = (actor: RoleGrantor | null | undefined, role: GrantableRole): boolean => {
+  const actorPermissions = Array.isArray(actor?.permissions) ? actor?.permissions ?? [] : [];
+  const actorRoles = Array.isArray(actor?.roles) ? actor?.roles.map(roleNameOf) ?? [] : [];
+  const actorIsManagement =
+    actorPermissions.includes("*") || actorRoles.some((name) => isManagementRoleName(name));
+  if (actorIsManagement && !isManagementRoleName(role?.name)) return true;
+  return holdsEvery(actorPermissions, Array.isArray(role?.permissionCodes) ? role.permissionCodes : []);
 };
 
 export default PERMISSIONS;

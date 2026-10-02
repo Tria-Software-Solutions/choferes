@@ -63,8 +63,14 @@ jest.mock("../services/userService", () => ({
   AUTH_ERRORS: { INVALID_CREDENTIALS: "Invalid credentials", INACTIVE: "User is inactive" },
 }));
 
+jest.mock("../services/accessGrantService", () => ({
+  checkRoleGrant: jest.fn(),
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const userService = require("../services/userService");
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { checkRoleGrant } = require("../services/accessGrantService");
 import userRoutes from "../routes/userRoutes";
 import { createTestApp } from "./helpers/testApp";
 
@@ -86,6 +92,56 @@ const mockUser = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Por defecto el actor puede conceder cualquier rol (la suite lo usa para
+  // probar el resto del alta); cada test de escalada cambia este valor.
+  checkRoleGrant.mockResolvedValue(null);
+});
+
+describe("POST /api/users/register", () => {
+  const newAccount = {
+    firstName: "Nuevo",
+    lastName: "Usuario",
+    username: "nuevo",
+    email: "nuevo@example.com",
+    password: "secreto123",
+  };
+
+  it("crea la cuenta con varios roles cuando el actor puede concederlos", async () => {
+    service.createUser.mockResolvedValue(mockUser);
+
+    const res = await request(app)
+      .post("/api/users/register")
+      .send({ ...newAccount, roleIds: [2, 3] });
+
+    expect(res.status).toBe(201);
+    expect(checkRoleGrant).toHaveBeenCalledTimes(2);
+    expect(service.createUser).toHaveBeenCalledWith(
+      expect.objectContaining({ roleIds: [2, 3] }),
+    );
+  });
+
+  it("rechaza con 403 si el actor no puede conceder alguno de los roles", async () => {
+    checkRoleGrant.mockResolvedValueOnce(null).mockResolvedValueOnce({
+      status: 403,
+      message: "No puedes asignar un rol con permisos que tú no tienes",
+    });
+
+    const res = await request(app)
+      .post("/api/users/register")
+      .send({ ...newAccount, roleIds: [2, 7] });
+
+    expect(res.status).toBe(403);
+    expect(service.createUser).not.toHaveBeenCalled();
+  });
+
+  it("valida el roleId único que envían los clientes antiguos", async () => {
+    service.createUser.mockResolvedValue(mockUser);
+
+    const res = await request(app).post("/api/users/register").send({ ...newAccount, roleId: 4 });
+
+    expect(res.status).toBe(201);
+    expect(checkRoleGrant).toHaveBeenCalledWith(expect.anything(), 4);
+  });
 });
 
 describe("POST /api/users/login", () => {

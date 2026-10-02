@@ -60,6 +60,7 @@ export {
   hasAdminSettingsRole,
   HIDDEN_ROLE_NAMES,
   isRoleSelectable,
+  canGrantRole,
   isPermissionCode,
   getPermissionByCode,
 } from "./constants/permissions";
@@ -68,6 +69,8 @@ export type {
   PermissionModule,
   PermissionDefinition,
   RoleName,
+  RoleGrantor,
+  GrantableRole,
 } from "./constants/permissions";
 export {
   POSITION_ROLE_NAMES,

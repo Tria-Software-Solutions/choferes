@@ -412,12 +412,20 @@ export const userRules = [
     .withMessage("La contraseña es requerida")
     .isLength({ min: 6 })
     .withMessage("La contraseña debe tener al menos 6 caracteres"),
-  // Rol a asignar (obligatorio): toda cuenta debe tener un rol.
-  body("roleId")
-    .notEmpty()
-    .withMessage("El rol es requerido")
-    .isInt({ min: 1 })
-    .withMessage("roleId inválido"),
+  // Rol(es) a asignar (obligatorio): toda cuenta debe tener al menos un rol.
+  // `roleIds` (lista) es la forma nueva; `roleId` (uno) sigue aceptándose para
+  // no romper a los clientes que solo mandan un rol.
+  body("roleIds")
+    .optional()
+    .isArray({ min: 1 })
+    .withMessage("roleIds debe ser una lista con al menos un rol"),
+  body("roleIds.*").isInt({ min: 1 }).withMessage("roleIds contiene un rol inválido"),
+  body("roleId").optional({ values: "null" }).isInt({ min: 1 }).withMessage("roleId inválido"),
+  body().custom((value: Record<string, unknown>) => {
+    const hasList = Array.isArray(value?.roleIds) && value.roleIds.length > 0;
+    const hasOne = value?.roleId !== undefined && value?.roleId !== null;
+    return hasList || hasOne ? true : Promise.reject(new Error("El rol es requerido"));
+  }),
 ];
 
 export const userUpdateRules = [
