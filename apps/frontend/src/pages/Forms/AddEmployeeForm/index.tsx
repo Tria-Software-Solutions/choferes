@@ -9,7 +9,6 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  IconBeach,
   IconCash,
   IconMail,
   IconRotate,
@@ -22,7 +21,6 @@ import {
 } from "@tabler/icons-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import IdentityFields, { IdentityValue, identityError } from "../../../components/IdentityFields/IdentityFields.component";
-import VehiclePlates, { VehicleEntry } from "../../../components/IdentityFields/VehiclePlates.component";
 import PositionSelect from "../../../components/PositionSelect/PositionSelect.component";
 import PlaceholderSelect from "../../../components/PlaceholderSelect/PlaceholderSelect.component";
 import { FORMS } from "../../../constants/constants";
@@ -63,7 +61,6 @@ interface AddEmployeeFormData {
   gender: string;
   contractStartDate: string;
   hourlyRate: string;
-  vacationDays: string;
 }
 
 interface AddEmployeeFormProps {
@@ -85,7 +82,6 @@ interface AddEmployeeFormProps {
     contractStartDate?: string | null;
     hourlyRate?: number | null;
     vacationDays?: number | null;
-    vehicles?: VehicleEntry[];
   }) => void;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -93,7 +89,8 @@ interface AddEmployeeFormProps {
 
 // Formulario de alta de empleado. Los campos van agrupados por secciones (como
 // la ficha del empleado) para que un formulario largo se lea de arriba abajo:
-// identificación, contacto, puesto, contrato y pago, vehículos.
+// identificación, contacto, puesto y contrato/pago. El saldo de vacaciones lo
+// calcula la ley y los vehículos se dan de alta después en la ficha.
 const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   onSubmit,
   onCancel,
@@ -122,7 +119,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     gender: "",
     contractStartDate: todayStr,
     hourlyRate: "",
-    vacationDays: "",
   });
 
   const [formData, setFormData] = useState<AddEmployeeFormData>(emptyFormData);
@@ -136,7 +132,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   });
   const [birthDate, setBirthDate] = useState("");
   const [address, setAddress] = useState("");
-  const [vehicles, setVehicles] = useState<VehicleEntry[]>([]);
   const [errors, setErrors] = useState<Record<keyof AddEmployeeFormData, string>>({
     firstName: "",
     lastName: "",
@@ -149,7 +144,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     gender: "",
     contractStartDate: "",
     hourlyRate: "",
-    vacationDays: "",
   });
 
   // Validación de campos del formulario
@@ -214,13 +208,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       return "";
     }
 
-    if (name === "vacationDays") {
-      if (!value.trim()) return "";
-      const num = Number(value);
-      if (!Number.isInteger(num) || num < 0) return "Debe ser un número entero ≥ 0";
-      return "";
-    }
-
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
 
     if (!value.trim()) {
@@ -264,8 +251,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       errors.primaryPhone === "" &&
       errors.secondaryPhone === "" &&
       errors.contractStartDate === "" &&
-      errors.hourlyRate === "" &&
-      errors.vacationDays === ""
+      errors.hourlyRate === ""
     );
   };
 
@@ -294,11 +280,9 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
           formData.hourlyRate.trim() === ""
             ? null
             : Number(formData.hourlyRate),
-        vacationDays:
-          formData.vacationDays.trim() === ""
-            ? null
-            : Number(formData.vacationDays),
-        vehicles,
+        // El saldo de vacaciones lo acumulan las leyes costaficenses con el
+        // tiempo trabajado; en el alta arranca en 0.
+        vacationDays: 0,
       });
     }
   };
@@ -309,7 +293,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     setIdentity({ nationalIdType: "cedula", nationalId: "", nationality: DEFAULT_NATIONALITY });
     setBirthDate("");
     setAddress("");
-    setVehicles([]);
     setFormData(emptyFormData());
     setErrors({
       firstName: "",
@@ -323,7 +306,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       gender: "",
       contractStartDate: "",
       hourlyRate: "",
-      vacationDays: "",
     });
   };
 
@@ -554,34 +536,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             type="number"
             inputProps={{ step: "0.01", min: 0 }}
           />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextfieldComponent
-            placeholder="Ej: 15"
-            label="Saldo de vacaciones (días)"
-            variant="outlined"
-            fullWidth
-            value={formData.vacationDays}
-            onChange={(e) => handleFieldChange("vacationDays", e.target.value)}
-            error={errors.vacationDays !== ""}
-            helperText={errors.vacationDays}
-            icon={<IconBeach style={iconStyle} />}
-            sx={formControl(theme)}
-            type="number"
-            inputProps={{ step: "1", min: 0 }}
-          />
-        </Grid>
-
-        {/* Section: Vehículos propios */}
-        <Grid item xs={12}>
-          <Typography component="h3" sx={sectionTitle(theme)}>
-            Vehículos propios
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12}>
-          <VehiclePlates vehicles={vehicles} onChange={setVehicles} />
         </Grid>
 
         <Grid item xs={12}>
