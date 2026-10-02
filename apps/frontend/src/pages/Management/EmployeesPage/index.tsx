@@ -50,7 +50,7 @@ import PAGE_TITLE from '../../../constants/pageTitle.constants';
 import { PERMISSION_CODES } from '../../../constants/permissions.constants';
 import NOTIFICATIONS from '../../../constants/notifications.constants';
 import MANAGEMENT from '../../../constants/management.constants';
-import { IconAlertTriangle, IconBriefcase, IconCalendarWeek, IconCamera, IconBrandWhatsapp, IconCash, IconChevronRight, IconCirclePlus, IconLoader2, IconMail, IconPhone, IconPlus, IconShieldExclamation, IconUsers, IconX } from "@tabler/icons-react";
+import { IconAlertTriangle, IconBriefcase, IconCalendarWeek, IconCamera, IconCash, IconChevronRight, IconCirclePlus, IconLoader2, IconMail, IconPhone, IconPlus, IconShieldExclamation, IconUsers, IconX } from "@tabler/icons-react";
 import SegmentedToggle from '../../../components/SegmentedToggle/SegmentedToggle.component';
 import {
   EmptyState,
@@ -102,14 +102,18 @@ const WhatsAppPhone: React.FC<{ phone: string; muted?: boolean }> = ({ phone, mu
   const sx = {
     fontSize: muted ? '0.7rem' : '0.85rem',
     color: muted ? 'text.disabled' : 'text.secondary',
+    textDecoration: 'none',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    lineHeight: 1.3,
+    minWidth: 0,
+    lineHeight: 1.4,
     ...(link
       ? {
-          cursor: 'pointer',
-          '&:hover': { color: 'primary.main', textDecoration: 'underline' },
+          '&:hover': {
+            color: 'primary.main',
+            textDecoration: 'underline',
+          },
         }
       : {}),
   };
@@ -800,19 +804,9 @@ const EmployeesPage: React.FC = () => {
               </Typography>
             );
           }
-          const isMobile = numbers.some((value) => whatsappLink(value));
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', minWidth: 0 }}>
-              {isMobile ? (
-                <IconBrandWhatsapp
-                  size={14}
-                  stroke={1.5}
-                  style={{ opacity: 0.75, flexShrink: 0 }}
-                  aria-hidden
-                />
-              ) : (
-                <IconPhone size={14} stroke={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
-              )}
+              <IconPhone size={14} stroke={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
               <Box sx={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                 {numbers.map((value, index) => (
                   <WhatsAppPhone key={value} phone={value} muted={index > 0} />
