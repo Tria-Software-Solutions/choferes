@@ -20,6 +20,7 @@ import SearchBarComponent from '../../../components/SearchBar/SearchBar.componen
 import StickyDataGridComponent from '../../../components/Table/StickyDataGrid/StickyDataGrid.component';
 import { GridColDef } from '@mui/x-data-grid';
 import { formatTenure } from '../../../utils/tenure';
+import { whatsappLink } from '../../../utils/whatsapp';
 import {
   licenseAlertsHint,
   licenseAlertsValue,
@@ -49,7 +50,7 @@ import PAGE_TITLE from '../../../constants/pageTitle.constants';
 import { PERMISSION_CODES } from '../../../constants/permissions.constants';
 import NOTIFICATIONS from '../../../constants/notifications.constants';
 import MANAGEMENT from '../../../constants/management.constants';
-import { IconAlertTriangle, IconBriefcase, IconCalendarWeek, IconCamera, IconCash, IconChevronRight, IconCirclePlus, IconLoader2, IconMail, IconPhone, IconPlus, IconShieldExclamation, IconUsers, IconX } from "@tabler/icons-react";
+import { IconAlertTriangle, IconBriefcase, IconCalendarWeek, IconCamera, IconBrandWhatsapp, IconCash, IconChevronRight, IconCirclePlus, IconLoader2, IconMail, IconPhone, IconPlus, IconShieldExclamation, IconUsers, IconX } from "@tabler/icons-react";
 import SegmentedToggle from '../../../components/SegmentedToggle/SegmentedToggle.component';
 import {
   EmptyState,
@@ -90,6 +91,47 @@ const getMissingProfileFields = (employee: Employee): string[] => {
     missing.push('saldo de vacaciones');
   }
   return missing;
+};
+
+// Telefono del empleado. Si el numero admite WhatsApp (movil 6/7/8) se vuelve un
+// enlace wa.me, que resuelve solo: con la app instalada abre el chat y sin ella
+// cae a la web. Los fijos quedan como texto porque no pueden tener WhatsApp.
+const WhatsAppPhone: React.FC<{ phone: string; muted?: boolean }> = ({ phone, muted }) => {
+  const link = whatsappLink(phone);
+  const label = maskPhone(phone);
+  const sx = {
+    fontSize: muted ? '0.7rem' : '0.85rem',
+    color: muted ? 'text.disabled' : 'text.secondary',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    lineHeight: 1.3,
+    ...(link
+      ? {
+          cursor: 'pointer',
+          '&:hover': { color: 'primary.main', textDecoration: 'underline' },
+        }
+      : {}),
+  };
+  if (!link) {
+    return (
+      <Typography component="span" sx={sx}>
+        {label}
+      </Typography>
+    );
+  }
+  return (
+    <Typography
+      component="a"
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`Abrir WhatsApp al ${label}`}
+      sx={sx}
+    >
+      {label}
+    </Typography>
+  );
 };
 
 // YYYY-MM-DD → DD/MM/YYYY, sin corrimiento de zona horaria ni formato largo.
@@ -745,9 +787,10 @@ const EmployeesPage: React.FC = () => {
         valueGetter: (value) => maskPhone((value as Employee)?.primaryPhone ?? ''),
         renderCell: (params) => {
           const rowData = params.row as Employee;
-          const phone = maskPhone(rowData.primaryPhone ?? '');
-          const secondary = maskPhone(rowData.secondaryPhone ?? '');
-          if (!phone && !secondary) {
+          const numbers = [rowData.primaryPhone, rowData.secondaryPhone].filter(
+            (value): value is string => Boolean(value),
+          );
+          if (numbers.length === 0) {
             return (
               <Typography
                 component="span"
@@ -757,31 +800,23 @@ const EmployeesPage: React.FC = () => {
               </Typography>
             );
           }
+          const isMobile = numbers.some((value) => whatsappLink(value));
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', minWidth: 0 }}>
-              <IconPhone size={14} stroke={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+              {isMobile ? (
+                <IconBrandWhatsapp
+                  size={14}
+                  stroke={1.5}
+                  style={{ opacity: 0.75, flexShrink: 0 }}
+                  aria-hidden
+                />
+              ) : (
+                <IconPhone size={14} stroke={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+              )}
               <Box sx={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                <Typography
-                  component="span"
-                  sx={{
-                    fontSize: '0.85rem',
-                    color: 'text.secondary',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {phone || secondary}
-                </Typography>
-                {phone && secondary && (
-                  <Typography
-                    component="span"
-                    sx={{ fontSize: '0.7rem', color: 'text.disabled', lineHeight: 1.3 }}
-                  >
-                    {secondary}
-                  </Typography>
-                )}
+                {numbers.map((value, index) => (
+                  <WhatsAppPhone key={value} phone={value} muted={index > 0} />
+                ))}
               </Box>
             </Box>
           );
