@@ -49,6 +49,11 @@ import {
   formControl,
 } from "./styles";
 
+// Tarifa por hora de referencia para un empleado nuevo (salario mínimo por hora
+// de Costa Rica). Viene prellena para no obligar a escribirla; se puede ajustar
+// si el puesto o el contrato pagan más.
+const DEFAULT_HOURLY_RATE = "1690.46";
+
 interface AddEmployeeFormData {
   firstName: string;
   lastName: string;
@@ -118,7 +123,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     position: "",
     gender: "",
     contractStartDate: todayStr,
-    hourlyRate: "",
+    hourlyRate: DEFAULT_HOURLY_RATE,
   });
 
   const [formData, setFormData] = useState<AddEmployeeFormData>(emptyFormData);

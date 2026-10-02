@@ -75,6 +75,19 @@ describe("AddEmployeeForm", () => {
     expect(onSubmit.mock.calls[0][0]).not.toHaveProperty("vehicles");
   });
 
+  it("prellena la tarifa por hora y deja ajustarla", () => {
+    const rate = () => screen.getByLabelText(/^Tarifa por hora$/i) as HTMLInputElement;
+    const onSubmit = mountForm();
+
+    expect(rate().value).toBe("1690.46");
+
+    fireEvent.change(rate(), { target: { value: "2500" } });
+    fillRequiredFields();
+    fireEvent.click(screen.getByRole("button", { name: /^Crear$/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ hourlyRate: 2500 }));
+  });
+
   it("no habilita el alta sin los campos obligatorios", () => {
     mountForm();
 
