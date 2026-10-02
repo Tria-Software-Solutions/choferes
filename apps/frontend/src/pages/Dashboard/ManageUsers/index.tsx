@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useAuthContext } from "../../../context/AuthContext";
-import { isRoleSelectable } from "@choferes/shared";
+import { canGrantRole, isRoleSelectable } from "@choferes/shared";
 import { User } from "../../../models/User";
 import { Role } from "../../../models/Role";
 import { useSelector, useDispatch } from "react-redux";
@@ -391,13 +391,13 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
     email: string;
     username: string;
     password: string;
-    roleName: string;
+    roleNames: string[];
   }) => {
     setIsCreatingUser(true);
     try {
-      const role = roles.find((r) => r.name === userData.roleName);
-      if (!role) {
-        throw new Error(`Rol "${userData.roleName}" no encontrado`);
+      const chosen = roles.filter((r) => userData.roleNames.includes(r.name));
+      if (chosen.length === 0) {
+        throw new Error("Selecciona al menos un rol");
       }
 
       const newUser = {
@@ -412,7 +412,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       await dispatch(
         createUser({
           newUser,
-          newRoleId: role.id,
+          newRoleIds: chosen.map((role) => role.id),
         }),
       ).unwrap();
       setOpenAddUserModal(false);
@@ -772,12 +772,40 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                               >
                                 {roles
                                   .filter((role) => isRoleSelectable(role.name))
-                                  .map((role) => (
-                                    <MenuItem key={role.id} value={role.name} sx={{ fontSize: '0.8rem' }}>
-                                      <Checkbox size="small" checked={editRoleNames.includes(role.name)} sx={{ p: 0.5, mr: 1 }} />
-                                      {role.name}
-                                    </MenuItem>
-                                  ))}
+                                  .map((role) => {
+                                    // Mismo filtro que el alta: el servidor
+                                    // rechaza conceder un rol con permisos que
+                                    // la cuenta actual no tiene, así que no se
+                                    // ofrece (ni se pierde el que ya tenía).
+                                    const grantable = canGrantRole(
+                                      {
+                                        permissions: userPermissions,
+                                        roles: currentUser?.roles,
+                                      },
+                                      {
+                                        name: role.name,
+                                        permissionCodes: (role.permissions ?? []).map(
+                                          (permission) => permission.code,
+                                        ),
+                                      },
+                                    );
+                                    return (
+                                      <MenuItem
+                                        key={role.id}
+                                        value={role.name}
+                                        disabled={!grantable}
+                                        sx={{ fontSize: '0.8rem' }}
+                                      >
+                                        <Checkbox
+                                          size="small"
+                                          checked={editRoleNames.includes(role.name)}
+                                          disabled={!grantable}
+                                          sx={{ p: 0.5, mr: 1 }}
+                                        />
+                                        {role.name}
+                                      </MenuItem>
+                                    );
+                                  })}
                               </Select>
                             </FormControl>
                           </Box>
@@ -974,6 +1002,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
           onCancel={handleCloseAddUserModal}
           isLoading={isCreatingUser}
           roles={roles}
+          actorPermissions={userPermissions}
+          actorRoleNames={currentUser?.roles?.map((role) => role.name) ?? []}
         />
       </DialogComponent>
 
