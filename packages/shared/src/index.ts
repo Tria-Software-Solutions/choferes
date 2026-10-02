@@ -132,3 +132,15 @@ export {
   DEFAULT_VEHICLE_TYPE,
 } from "./types/VehicleRestriction";
 export type { PlateRestriction, VehicleType, VehicleEntry } from "./types/VehicleRestriction";
+
+// Acumulación de vacaciones (art. 153, Código de Trabajo CR). Compartida para
+// que el saldo que propone el formulario de alta y el que calcula el backend
+// salgan de la misma regla.
+export {
+  VACATION_WORKING_DAYS_PER_CYCLE,
+  VACATION_CYCLE_DAYS,
+  computeAccruedVacationDays,
+  parseVacationDate,
+  toVacationDateOnly,
+} from "./types/VacationAccrual";
+export type { VacationAccrualDetail } from "./types/VacationAccrual";
