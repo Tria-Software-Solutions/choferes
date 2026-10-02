@@ -26,6 +26,16 @@ const pickMultiSelectOption = (comboboxName: RegExp, optionText: string) => {
   fireEvent.keyDown(option, { key: "Escape" });
 };
 
+// 349 días antes de hoy: con el ingreso y la referencia incluidos son 350 días
+// trabajados, justo un ciclo completo de 50 semanas (10 días hábiles).
+const fullCycleStartStr = () => {
+  const date = new Date();
+  date.setDate(date.getDate() - 349);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+};
+
 const fillRequiredFields = () => {
   fireEvent.change(screen.getByLabelText(/^Nombre$/i), { target: { value: "Juan" } });
   fireEvent.change(screen.getByLabelText(/^Apellido$/i), { target: { value: "Pérez" } });
@@ -45,17 +55,20 @@ describe("AddEmployeeForm", () => {
     expect(screen.getByLabelText(/Nombre preferido/i)).toBeInTheDocument();
   });
 
-  it("no pide saldo de vacaciones ni vehículos en el alta", () => {
+  it("no pide vehículos en el alta pero sí el saldo de vacaciones", () => {
     mountForm();
 
-    // El saldo lo acumulan las leyes y los vehículos se agregan en la ficha.
-    expect(screen.queryByLabelText(/Saldo de vacaciones/i)).not.toBeInTheDocument();
+    // Los vehículos se agregan en la ficha; el saldo sí se captura aquí.
+    expect(screen.getByLabelText(/Saldo de vacaciones/i)).toBeInTheDocument();
     expect(screen.queryByLabelText("Placa del vehículo")).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Vehículos propios" })).not.toBeInTheDocument();
   });
 
-  it("envía el apodo y arranca las vacaciones en 0", () => {
+  it("propone el saldo que otorga la ley y lo manda en el alta", () => {
     const onSubmit = mountForm();
+
+    // Ingreso hoy: un solo día de un ciclo de 350 da 0.03 días hábiles.
+    expect((screen.getByLabelText(/Saldo de vacaciones/i) as HTMLInputElement).value).toBe("0.03");
 
     fillRequiredFields();
     fireEvent.change(screen.getByLabelText(/Nombre preferido/i), { target: { value: "Carlitos" } });
@@ -68,11 +81,38 @@ describe("AddEmployeeForm", () => {
         lastName: "Pérez",
         nationalId: "118820456",
         preferredName: "Carlitos",
-        vacationDays: 0,
+        vacationDays: 0.03,
         positions: [EMPLOYEE_POSITIONS[0]],
       }),
     );
     expect(onSubmit.mock.calls[0][0]).not.toHaveProperty("vehicles");
+  });
+
+  it("recalcula el saldo al cambiar la fecha de ingreso mientras nadie lo edite", () => {
+    mountForm();
+    const days = () => screen.getByLabelText(/Saldo de vacaciones/i) as HTMLInputElement;
+
+    // Ciclo completo = 10 días hábiles (art. 153).
+    fireEvent.change(screen.getByLabelText(/Fecha de contrato/i), {
+      target: { value: fullCycleStartStr() },
+    });
+    expect(days().value).toBe("10");
+  });
+
+  it("deja ajustar el saldo a mano y ya no lo recalcula", () => {
+    const onSubmit = mountForm();
+    const days = () => screen.getByLabelText(/Saldo de vacaciones/i) as HTMLInputElement;
+
+    fireEvent.change(days(), { target: { value: "4.5" } });
+    fireEvent.change(screen.getByLabelText(/Fecha de contrato/i), {
+      target: { value: fullCycleStartStr() },
+    });
+    expect(days().value).toBe("4.5");
+
+    fillRequiredFields();
+    fireEvent.click(screen.getByRole("button", { name: /^Crear$/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ vacationDays: 4.5 }));
   });
 
   it("prellena la tarifa por hora y deja ajustarla", () => {
