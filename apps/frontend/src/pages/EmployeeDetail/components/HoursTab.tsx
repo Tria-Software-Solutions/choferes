@@ -7,7 +7,6 @@ import {
   IconButton,
   MenuItem,
   Paper,
-  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -17,6 +16,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import ResponsiveTable from "../../../components/Table/ResponsiveTable/ResponsiveTable.component";
 import { IconCalendarMonth, IconInbox, IconRefresh } from "@tabler/icons-react";
 import { BiweeklySummary } from "../../../models/BiweeklySummary";
 import { Employee } from "../../../models/Employee";
@@ -277,7 +277,7 @@ const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
           </Box>
         ) : (
           <TableContainer sx={tableContainerStyles(theme)}>
-            <Table size="small" stickyHeader>
+            <ResponsiveTable size="small" stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell sx={tableHeaderCellStyles}>Quincena</TableCell>
@@ -349,7 +349,7 @@ const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
                   );
                 })}
               </TableBody>
-            </Table>
+            </ResponsiveTable>
           </TableContainer>
         )}
       </Paper>
