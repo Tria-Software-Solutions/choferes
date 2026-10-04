@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useMobileShell } from "../../../hooks/useMobileShell";
+import { useMobileScreenTitle } from "../../../components/MobileShell/MobileScreenTitle";
+import SettingsHub from "./SettingsHub";
 
 import { hasAdminSettingsRole } from "@choferes/shared";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -158,6 +161,8 @@ const Profile: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobileShell = useMobileShell();
+  const navigate = useNavigate();
   const { mode, setMode } = useThemeMode() as {
     mode: ThemeMode;
     setMode: (mode: ThemeMode) => void;
@@ -175,10 +180,14 @@ const Profile: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab");
   const urlTab: TabId = isTabId(requestedTab) ? requestedTab : "profile";
+  // En móvil la lista de ajustes es la pantalla sin ?tab=, y abrir una sección
+  // es una navegación hacia adelante (con "atrás" para volver a la lista).
   const setActiveTab = useCallback(
     (value: TabId) =>
-      setSearchParams(value === "profile" ? {} : { tab: value }, { replace: true }),
-    [setSearchParams],
+      isMobileShell
+        ? setSearchParams({ tab: value })
+        : setSearchParams(value === "profile" ? {} : { tab: value }, { replace: true }),
+    [setSearchParams, isMobileShell],
   );
   // El nombre y el apellido se editan en el expediente (Mi Panel o Planilla),
   // así que aquí solo se mantienen las credenciales de la cuenta.
@@ -553,6 +562,20 @@ const Profile: React.FC = () => {
   // ?tab=roles para un Chofer), se cae a "profile" en vez de renderizarla.
   const activeTab: TabId = sidebarItems.some((item) => item.id === urlTab) ? urlTab : "profile";
 
+  // Teléfonos: sin ?tab= se muestra la lista de ajustes; con él, esa sección.
+  const showHub = isMobileShell && !isTabId(requestedTab);
+  useMobileScreenTitle(
+    isMobileShell && !showHub
+      ? (sidebarItems.find((item) => item.id === activeTab)?.label ?? null)
+      : null,
+    isMobileShell && !showHub
+      ? () => {
+          if ((window.history.state?.idx ?? 0) > 0) navigate(-1);
+          else setSearchParams({}, { replace: true });
+        }
+      : null,
+  );
+
   return (
     <Box
       className="scrollable-content"
@@ -728,7 +751,7 @@ const Profile: React.FC = () => {
                 )}
             </Box>
           </Paper>
-        ) : (
+        ) : isMobileShell ? null : (
           /* Scrollable Tab Bar for Mobile / Tablet */
           <Box
             sx={{
@@ -810,7 +833,17 @@ const Profile: React.FC = () => {
           </Box>
         )}
 
+        {showHub && (
+          <SettingsHub
+            items={sidebarItems}
+            groups={["Cuenta", "Preferencias", "Soporte", "Administración"]}
+            user={currentUser}
+            onOpen={(id) => setActiveTab(id as TabId)}
+          />
+        )}
+
         {/* Content Container */}
+        {!showHub && (
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: { md: 0 }, height: { xs: "auto", md: "100%" } }}>
           {activeTab === "profile" && (
             <Paper
@@ -1335,6 +1368,7 @@ const Profile: React.FC = () => {
             </Box>
           )}
         </Box>
+        )}
       </Box>
 
       {/* Avatar Upload Dialog - Modern */}

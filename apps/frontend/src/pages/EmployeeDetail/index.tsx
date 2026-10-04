@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import EmployeeMobileHeader, { type HeaderChip } from "./components/EmployeeMobileHeader";
+import { useMobileShell } from "../../hooks/useMobileShell";
+import { useMobileScreenTitle } from "../../components/MobileShell/MobileScreenTitle";
 import { useDispatch } from "react-redux";
 import {
   Box,
@@ -85,6 +88,9 @@ const EmployeeDetailPage: React.FC = () => {
   const { showNotification } = useAppNotifications();
 
   const [employee, setEmployee] = useState<Employee | null>(null);
+  const isMobileShell = useMobileShell();
+  // El nombre ya va en grande en el encabezado: la barra solo indica la pantalla.
+  useMobileScreenTitle(employee ? "Empleado" : null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   // La pestaña vive en la URL (?tab=) para que un enlace de notificación abra
@@ -242,10 +248,75 @@ const EmployeeDetailPage: React.FC = () => {
 
   const employeePosition = getEmployeePositionsLabel(employee, employee.gender);
 
+  const tabsBar = (
+  <Box sx={tabsBoxStyles(theme)}>
+    <Tabs
+      value={activeTab}
+      onChange={(_event, value: TabKey) => setTab(value)}
+      variant={isSmallScreen ? "scrollable" : "standard"}
+      // Swipe to scroll on phones; arrow buttons only ate horizontal room.
+      scrollButtons={false}
+      aria-label="Secciones del expediente"
+    >
+      {visibleTabs.map((item) => {
+        const Icon = item.icon;
+        return (
+          <Tab
+            key={item.key}
+            value={item.key}
+            label={item.label}
+            icon={<Icon size={17} />}
+            iconPosition="start"
+            disableRipple
+          />
+        );
+      })}
+    </Tabs>
+  </Box>
+  );
+
+  const headerChips: HeaderChip[] = [
+    ...(canSeePayroll
+      ? [{
+          icon: <IconWallet size={14} stroke={1.75} />,
+          label: employee.hourlyRate != null ? `${formatMoney(Number(employee.hourlyRate), "CRC")}/h` : "Sin tarifa",
+        }]
+      : []),
+    ...(canSeeVacationBalance
+      ? [{
+          icon: <IconBeach size={14} stroke={1.75} />,
+          label: employee.vacationDays != null ? `${employee.vacationDays} días disponibles` : "Sin saldo de vacaciones",
+        }]
+      : []),
+  ];
+
   return (
     <PageContainer>
-      <PageCard>
+      <PageCard sx={isMobileShell ? { overflow: "visible" } : undefined}>
+        {isMobileShell && (
+          <>
+            <EmployeeMobileHeader
+              employee={employee}
+              position={employeePosition}
+              chips={headerChips}
+              onTerminate={canDelete && !employee.terminationDate ? () => setOpenTerminationDialog(true) : undefined}
+            />
+            <Box
+              sx={{
+                position: "sticky",
+                top: 0,
+                zIndex: 5,
+                backgroundColor: theme.palette.background.paper,
+                borderTop: theme.tokens.borders.hairline,
+                borderBottom: theme.tokens.borders.hairline,
+              }}
+            >
+              {tabsBar}
+            </Box>
+          </>
+        )}
         {/* Header: back navigation + identity + quick metrics */}
+        {!isMobileShell && (
         <Box sx={detailHeaderStyles(theme)}>
           <Box
             sx={{
@@ -327,31 +398,9 @@ const EmployeeDetailPage: React.FC = () => {
             </Box>
           </Box>
 
-          <Box sx={tabsBoxStyles(theme)}>
-            <Tabs
-              value={activeTab}
-              onChange={(_event, value: TabKey) => setTab(value)}
-              variant={isSmallScreen ? "scrollable" : "standard"}
-              // Swipe to scroll on phones; arrow buttons only ate horizontal room.
-              scrollButtons={false}
-              aria-label="Secciones del expediente"
-            >
-              {visibleTabs.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Tab
-                    key={item.key}
-                    value={item.key}
-                    label={item.label}
-                    icon={<Icon size={17} />}
-                    iconPosition="start"
-                    disableRipple
-                  />
-                );
-              })}
-            </Tabs>
-          </Box>
+          {!isMobileShell && tabsBar}
         </Box>
+        )}
 
         <Box sx={contentBoxStyles(theme)}>
           {activeTab === "data" && (

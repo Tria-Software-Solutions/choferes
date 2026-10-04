@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { Box, ButtonBase, useTheme } from "@mui/material";
+import { useMobileShell } from "../../hooks/useMobileShell";
 
 interface SegmentedOption<T extends string> {
   value: T;
@@ -28,9 +29,12 @@ export default function SegmentedToggle<T extends string>({
   value,
   onChange,
   size = "small",
-  fullWidth = false,
+  fullWidth,
   ariaLabel,
 }: SegmentedToggleProps<T>) {
+  // En teléfonos y tablets los filtros ocupan todo el ancho (como en iOS).
+  const isMobileShell = useMobileShell();
+  const stretch = fullWidth ?? isMobileShell;
   const { colors, borders, shadows } = useTheme().tokens;
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -58,13 +62,13 @@ export default function SegmentedToggle<T extends string>({
         display: "flex",
         gap: "2px",
         alignItems: "stretch",
-        minHeight: 38,
+        minHeight: { xs: 44, md: 38 },
         boxSizing: "border-box",
         backgroundColor: colors.hoverSoft,
         border: borders.paper,
         borderRadius: "10px",
         p: "3px",
-        width: fullWidth ? "100%" : "fit-content",
+        width: stretch ? "100%" : "fit-content",
         maxWidth: "100%",
         overflowX: "auto",
         flexShrink: 0,
@@ -88,8 +92,8 @@ export default function SegmentedToggle<T extends string>({
               alignItems: "center",
               justifyContent: "center",
               gap: 0.75,
-              flex: fullWidth ? 1 : "none",
-              minHeight: 30,
+              flex: stretch ? 1 : "none",
+              minHeight: { xs: 36, md: 30 },
               px: size === "medium" ? { xs: 1.25, sm: 1.75 } : 1.1,
               borderRadius: "7px",
               fontFamily: "inherit",

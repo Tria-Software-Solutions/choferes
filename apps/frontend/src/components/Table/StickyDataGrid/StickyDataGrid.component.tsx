@@ -1,6 +1,8 @@
 import React, { memo, useEffect, useRef } from "react";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { DataGrid, GridColDef, GridValidRowModel, GridRowHeightParams } from "@mui/x-data-grid";
+import { useMobileShell } from "../../../hooks/useMobileShell";
+import GridCardList from "./GridCardList";
 
 interface StickyDataGridProps<T extends GridValidRowModel> {
   rows: T[];
@@ -21,6 +23,8 @@ interface StickyDataGridProps<T extends GridValidRowModel> {
    * y se restaura al volver a la página (p. ej. tras abrir un detalle).
    */
   scrollKey?: string;
+  /** En teléfonos la tabla se muestra como lista de tarjetas (por defecto). */
+  mobileList?: boolean;
 }
 
 // Posición de scroll por tabla; vive en memoria mientras dure la sesión de la app.
@@ -40,7 +44,9 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
   rowHeight = 60,
   getRowHeight,
   scrollKey,
+  mobileList = true,
 }: StickyDataGridProps<T>) {
+  const isMobileShell = useMobileShell();
   const theme = useTheme();
   const { colors, borders } = theme.tokens;
   // Below md the page scrolls as a whole (see components/Layout), so the grid
@@ -85,6 +91,10 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
       scroller?.removeEventListener("scroll", onScroll);
     };
   }, [scrollKey, flowLayout]);
+
+  if (isMobileShell && mobileList) {
+    return <GridCardList rows={rows} columns={columns} getRowId={getRowId} />;
+  }
 
   return (
     <Box

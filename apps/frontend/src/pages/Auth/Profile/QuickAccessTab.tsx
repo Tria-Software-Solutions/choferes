@@ -132,7 +132,7 @@ const QuickAccessTab: React.FC = () => {
       </Box>
 
       {/* Item list */}
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", mb: 1 }}>
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: { xs: "visible", md: "auto" }, mb: 1 }}>
         {orderedKeys.map((key, index) => {
           const isVisible = preferences[key] !== false;
           return (

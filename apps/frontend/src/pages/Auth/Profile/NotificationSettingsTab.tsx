@@ -229,7 +229,7 @@ const NotificationSettingsTab: React.FC = () => {
       </Box>
 
       {/* Groups */}
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", pr: 0.5 }}>
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: { xs: "visible", md: "auto" }, pr: { md: 0.5 } }}>
         {visibleGroups.map((group) => (
           <Box key={group.id} sx={{ mb: 2 }}>
             <Typography

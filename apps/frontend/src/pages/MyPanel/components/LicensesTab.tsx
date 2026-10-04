@@ -5,7 +5,6 @@ import {
   Button,
   Chip,
   Paper,
-  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -14,6 +13,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import ResponsiveTable from "../../../components/Table/ResponsiveTable/ResponsiveTable.component";
 import {
   IconAlertTriangle,
   IconClock,
@@ -181,7 +181,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ overview, onRefresh })
             </Box>
           ) : (
             <TableContainer sx={tableContainerStyles(theme)}>
-              <Table size="small" stickyHeader>
+              <ResponsiveTable size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
                     <TableCell sx={tableHeaderCellStyles(theme)}>Tipo</TableCell>
@@ -255,7 +255,7 @@ export const LicensesTab: React.FC<LicensesTabProps> = ({ overview, onRefresh })
                     );
                   })}
                 </TableBody>
-              </Table>
+              </ResponsiveTable>
             </TableContainer>
           )}
         </Paper>
