@@ -6,7 +6,10 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { useAuth } from "./hooks/useAuth";
+import { useAppNavigation } from "./hooks/useAppNavigation";
+import { useMobileShell } from "./hooks/useMobileShell";
+import MobileShell from "./components/MobileShell/MobileShell.component";
+import { TAB_BAR_TOTAL_HEIGHT } from "./components/MobileShell/mobileShell.constants";
 import AppBarComponent from "./components/AppBar/AppBar.component";
 import SnackbarComponent from "./components/Snackbar/Snackbar.component";
 import { Provider, useDispatch } from "react-redux";
@@ -14,10 +17,8 @@ import { store, AppDispatch } from "./store/store";
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import { Container, useMediaQuery, useTheme, CircularProgress, Box } from "@mui/material";
-import type { SxProps, Theme } from "@mui/material/styles";
-import { APPBAR_MENU, PERMISSION_CODES, ROUTES } from "./constants/constants";
-import NavIcon from "./components/NavIcon/NavIcon.component";
+import { Container, useTheme, CircularProgress, Box } from "@mui/material";
+import { PERMISSION_CODES, ROUTES } from "./constants/constants";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.component";
 import ReminderAnnouncer from "./components/ReminderAnnouncer/ReminderAnnouncer.component";
 import { normalizeThemeMode, useThemeMode } from "./context/ThemeContext";
@@ -48,122 +49,12 @@ const PageLoader = () => (
   </Box>
 );
 
-interface NavLink {
-  label: string;
-  icon: React.ReactElement;
-  path: string;
-  permission?: string;
-}
-
 const AppBarWrapper: React.FC = () => {
-  const { userPermissions } = useAuthContext();
-  const { logoutUser } = useAuth();
-
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const links: NavLink[] = [
-    {
-      label: APPBAR_MENU.MY_PANEL,
-      icon: <NavIcon label={APPBAR_MENU.MY_PANEL} />,
-      path: ROUTES.MY_PANEL,
-      permission: PERMISSION_CODES.VIEW_MY_PANEL,
-    },
-    {
-      label: APPBAR_MENU.EMPLOYEES,
-      icon: <NavIcon label={APPBAR_MENU.EMPLOYEES} />,
-      path: ROUTES.EMPLOYEES,
-      permission: PERMISSION_CODES.VIEW_EMPLOYEES,
-    },
-    {
-      label: APPBAR_MENU.SCHEDULES,
-      icon: <NavIcon label={APPBAR_MENU.SCHEDULES} />,
-      path: ROUTES.SCHEDULES,
-      permission: PERMISSION_CODES.VIEW_SCHEDULES,
-    },
-    {
-      label: APPBAR_MENU.ROLES,
-      icon: <NavIcon label={APPBAR_MENU.ROLES} />,
-      path: ROUTES.ROLES,
-      permission: PERMISSION_CODES.VIEW_ROLES,
-    },
-    {
-      label: APPBAR_MENU.VEHICLES,
-      icon: <NavIcon label={APPBAR_MENU.VEHICLES} />,
-      path: ROUTES.VEHICLES,
-      permission: PERMISSION_CODES.VIEW_VEHICLES,
-    },
-    {
-      label: APPBAR_MENU.DASHBOARD,
-      icon: <NavIcon label={APPBAR_MENU.DASHBOARD} />,
-      path: ROUTES.DASHBOARD,
-      permission: PERMISSION_CODES.VIEW_ADMIN,
-    },
-    {
-      label: APPBAR_MENU.DOCUMENTS,
-      icon: <NavIcon label={APPBAR_MENU.DOCUMENTS} />,
-      path: ROUTES.DOCUMENTS,
-      permission: PERMISSION_CODES.VIEW_DOCUMENTS,
-    },
-    {
-      label: APPBAR_MENU.TASKS,
-      icon: <NavIcon label={APPBAR_MENU.TASKS} />,
-      path: ROUTES.TASKS,
-      permission: PERMISSION_CODES.VIEW_TASKS,
-    },
-    {
-      label: APPBAR_MENU.PROFILE,
-      icon: <NavIcon label={APPBAR_MENU.PROFILE} />,
-      path: ROUTES.PROFILE,
-    },
-  ];
-
-  const permissionsMap = {
-    [APPBAR_MENU.MY_PANEL]: PERMISSION_CODES.VIEW_MY_PANEL,
-    [APPBAR_MENU.EMPLOYEES]: PERMISSION_CODES.VIEW_EMPLOYEES,
-    [APPBAR_MENU.SCHEDULES]: PERMISSION_CODES.VIEW_SCHEDULES,
-    [APPBAR_MENU.ROLES]: PERMISSION_CODES.VIEW_ROLES,
-    [APPBAR_MENU.VEHICLES]: PERMISSION_CODES.VIEW_VEHICLES,
-    [APPBAR_MENU.DASHBOARD]: PERMISSION_CODES.VIEW_ADMIN,
-    [APPBAR_MENU.DOCUMENTS]: PERMISSION_CODES.VIEW_DOCUMENTS,
-    [APPBAR_MENU.TASKS]: PERMISSION_CODES.VIEW_TASKS,
-  };
-
-  const filteredLinks = links.filter((link) => {
-    const requiredPermission = permissionsMap[link.label];
-    // Items without a mapped permission (e.g. Configuración) are always visible
-    if (!requiredPermission) return true;
-    return (
-      Array.isArray(userPermissions) &&
-      userPermissions.includes(requiredPermission)
-    );
-  });
-
-  const finalLinks = filteredLinks;
-
-  const userLinks = [
-    {
-      label: APPBAR_MENU.PROFILE,
-      icon: <NavIcon label={APPBAR_MENU.PROFILE} size={20} />,
-      path: ROUTES.PROFILE,
-    },
-    {
-      label: APPBAR_MENU.LOGOUT,
-      icon: <NavIcon label={APPBAR_MENU.LOGOUT} size={20} />,
-      onClick: logoutUser,
-    },
-  ];
-
-  return (
-    <AppBarComponent
-      title={isSmallScreen ? APPBAR_MENU.TITLE_SIMPLIFIED : APPBAR_MENU.TITLE}
-      userLinks={userLinks}
-      links={finalLinks}
-    />
-  );
+  const { links, userLinks } = useAppNavigation();
+  return <AppBarComponent userLinks={userLinks} links={links} />;
 };
 
-const AppFooter: React.FC<{ sx?: SxProps<Theme> }> = ({ sx }) => {
+const AppFooter: React.FC = () => {
   const { colors, borders } = useTheme().tokens;
   return (
     <Box
@@ -179,7 +70,6 @@ const AppFooter: React.FC<{ sx?: SxProps<Theme> }> = ({ sx }) => {
           letterSpacing: "0.04em",
           color: colors.textMuted,
         },
-        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
       ]}
     >
       Powered by{" "}
@@ -202,6 +92,9 @@ const AppFooter: React.FC<{ sx?: SxProps<Theme> }> = ({ sx }) => {
     </Box>
   );
 };
+
+const ShellFrame: React.FC<{ enabled: boolean; children: React.ReactNode }> = ({ enabled, children }) =>
+  enabled ? <MobileShell>{children}</MobileShell> : <>{children}</>;
 
 const AppContent: React.FC = () => {
   const { currentUser, userPermissions } = useAuthContext();
@@ -250,13 +143,16 @@ const AppContent: React.FC = () => {
   // Hide AppBar if on any of the hideAppBarRoutes, or if on a not found route
   // (path fuera de las rutas conocidas y de las de error).
   const isHideAppBar = isAuthPage;
+  // Teléfonos y tablets: interfaz tipo app (barras superior e inferior nativas).
+  const isMobileShell = useMobileShell() && !isHideAppBar;
 
   const safeUserPermissions = userPermissions || [];
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100dvh", overflow: "hidden" }}>
-      {!isHideAppBar && <AppBarWrapper />}
+      {!isHideAppBar && !isMobileShell && <AppBarWrapper />}
       {currentUser && <ReminderAnnouncer />}
+      <ShellFrame enabled={isMobileShell}>
       <Container
         maxWidth={false}
         disableGutters
@@ -264,7 +160,7 @@ const AppContent: React.FC = () => {
         sx={{
           paddingLeft: 0,
           paddingRight: 0,
-          paddingBottom: 0,
+          paddingBottom: isMobileShell ? TAB_BAR_TOTAL_HEIGHT : 0,
           overflow: "hidden",
           backgroundColor: isAuthPage ? "transparent" : theme.palette.background.default,
           display: "flex",
@@ -402,12 +298,11 @@ const AppContent: React.FC = () => {
           </Routes>
           </Suspense>
           </ErrorBoundary>
-          {/* Phones/tablets: at the end of the content instead of eating viewport height */}
-          {!isHideAppBar && <AppFooter sx={{ display: { xs: "block", md: "none" } }} />}
         </Box>
-        {/* Desktop: pinned under the scroll area */}
-        {!isHideAppBar && <AppFooter sx={{ display: { xs: "none", md: "block" } }} />}
+        {/* Escritorio: fijo bajo el área con scroll (en móvil vive en "Más") */}
+        {!isHideAppBar && !isMobileShell && <AppFooter />}
       </Container>
+      </ShellFrame>
     </Box>
   );
 };

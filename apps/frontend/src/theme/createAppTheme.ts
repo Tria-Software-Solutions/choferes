@@ -1,4 +1,5 @@
 import { createTheme } from "@mui/material/styles";
+import { keyframes } from "@mui/system";
 import {
   helperTextStyles,
   inputAdornmentStyles,
@@ -20,6 +21,15 @@ declare module "@mui/material/styles" {
 }
 
 export const FONT_FAMILY = "'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+// Teléfonos y tablets (< md = 960px): interfaz tipo app. Estas reglas viven aquí
+// para que TODAS las pantallas las hereden sin tocar cada una.
+const MOBILE = "@media (max-width:959.95px)";
+const SAFE_BOTTOM = "env(safe-area-inset-bottom, 0px)";
+const sheetUp = keyframes`
+  from { transform: translateY(32px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+`;
 
 /** Radii of the design system (px). */
 export const RADIUS = {
@@ -45,12 +55,41 @@ export const createAppTheme = (tokens: ThemeTokens) => {
   const { colors: c, field, shadows: shadow, borders: b } = tokens;
   const isDark = tokens.mode === "dark";
 
+  // Papel de menús, selectores y popovers en móvil: hoja inferior. Lleva
+  // !important porque Popover posiciona su papel con estilos en línea.
+  const bottomSheetPaper = {
+      position: "fixed !important",
+      top: "auto !important",
+      left: "0 !important",
+      right: "0 !important",
+      bottom: "0 !important",
+      width: "100% !important",
+      minWidth: "100% !important",
+      maxWidth: "100% !important",
+      maxHeight: "65dvh !important",
+      opacity: "1 !important",
+      transform: "none !important",
+      borderRadius: "20px 20px 0 0",
+      borderBottom: "none",
+      paddingBottom: SAFE_BOTTOM,
+      animation: `${sheetUp} 0.28s cubic-bezier(0.2, 0.8, 0.2, 1)`,
+      "&::before": {
+        content: '""',
+        display: "block",
+        width: 36,
+        height: 5,
+        borderRadius: 3,
+        margin: "8px auto 4px",
+        backgroundColor: c.borderStrong,
+      },
+  };
+
   return createTheme({
     tokens,
     breakpoints: {
       values: {
         xs: 0,
-        sm: 435,
+        sm: 600,
         md: 960,
         lg: 1280,
         xl: 3500,
@@ -224,6 +263,7 @@ export const createAppTheme = (tokens: ThemeTokens) => {
             letterSpacing: "-0.005em",
             padding: "0 14px",
             minHeight: 38,
+            [MOBILE]: { minHeight: 44, borderRadius: RADIUS.lg },
             gap: 2,
             transition:
               "background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease",
@@ -280,6 +320,7 @@ export const createAppTheme = (tokens: ThemeTokens) => {
             color: c.iconColor,
             borderRadius: RADIUS.sm,
             padding: 7,
+            [MOBILE]: { minWidth: 40, minHeight: 40 },
             transition: "background-color 0.15s ease, color 0.15s ease",
             "&:hover": { backgroundColor: c.hover, color: c.text },
             "&:focus-visible": { outline: b.focus, outlineOffset: 1 },
@@ -347,6 +388,7 @@ export const createAppTheme = (tokens: ThemeTokens) => {
             ...inputRootStyles(field),
             ...inputAdornmentStyles(field),
             ...inputControlStyles(field),
+            [MOBILE]: { "&:not(.MuiInputBase-multiline)": { minHeight: 48 } },
           },
         },
       },
@@ -661,6 +703,10 @@ export const createAppTheme = (tokens: ThemeTokens) => {
       MuiTabs: {
         styleOverrides: {
           root: { minHeight: 44 },
+          // Pestañas con deslizamiento horizontal (sin barra) en vez de cortarse.
+          scroller: {
+            [MOBILE]: { overflowX: "auto !important", scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } },
+          },
           indicator: { height: 2, borderRadius: 2, backgroundColor: c.text },
         },
       },
@@ -689,8 +735,12 @@ export const createAppTheme = (tokens: ThemeTokens) => {
             boxShadow: shadow.menu,
             borderRadius: 12,
             minWidth: 180,
+            // Móvil: los menús y selectores salen como hoja inferior (action
+            // sheet) en vez de un globo flotante, con !important porque
+            // Popover posiciona su papel con estilos en línea.
+            [MOBILE]: bottomSheetPaper,
           },
-          list: { padding: 4 },
+          list: { padding: 4, [MOBILE]: { padding: "4px 8px 8px" } },
         },
       },
       MuiMenuItem: {
@@ -699,6 +749,7 @@ export const createAppTheme = (tokens: ThemeTokens) => {
             borderRadius: RADIUS.sm,
             minHeight: 36,
             fontSize: "0.875rem",
+            [MOBILE]: { minHeight: 48, fontSize: "1rem" },
             gap: 10,
             color: c.text,
             "&:hover": { backgroundColor: c.hover },
@@ -718,6 +769,7 @@ export const createAppTheme = (tokens: ThemeTokens) => {
             border: b.dialog,
             boxShadow: shadow.menu,
             backgroundColor: c.menuSurface,
+            [MOBILE]: bottomSheetPaper,
           },
         },
       },
@@ -755,7 +807,29 @@ export const createAppTheme = (tokens: ThemeTokens) => {
       // ── Dialogs ───────────────────────────────────────────────────────────
       MuiDialog: {
         styleOverrides: {
+          // En móvil los diálogos suben desde abajo como una hoja (bottom sheet).
+          container: { [MOBILE]: { alignItems: "flex-end" } },
           paper: {
+            [MOBILE]: {
+              margin: 0,
+              width: "100%",
+              maxWidth: "100% !important",
+              maxHeight: "92dvh",
+              borderRadius: "20px 20px 0 0",
+              borderBottom: "none",
+              paddingBottom: SAFE_BOTTOM,
+              animation: `${sheetUp} 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)`,
+              "&::before": {
+                content: '""',
+                display: "block",
+                flexShrink: 0,
+                width: 36,
+                height: 5,
+                borderRadius: 3,
+                margin: "8px auto 0",
+                backgroundColor: c.borderStrong,
+              },
+            },
             borderRadius: RADIUS.xl,
             border: b.dialog,
             boxShadow: `0 24px 64px -12px ${shadow.dialog}, 0 4px 12px ${shadow.dialogSoft}`,
@@ -787,6 +861,7 @@ export const createAppTheme = (tokens: ThemeTokens) => {
         styleOverrides: {
           root: {
             padding: "14px 24px",
+            [MOBILE]: { padding: "12px 16px" },
             backgroundColor: c.surfaceSunken,
             borderTop: b.hairline,
             gap: 8,

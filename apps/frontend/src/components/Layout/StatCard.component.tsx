@@ -133,7 +133,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           {hint}
         </Typography>
       )}
-      {footer && <Box sx={{ mt: 0.5 }}>{footer}</Box>}
+      {footer && <Box sx={{ mt: 0.5, display: { xs: "none", md: "block" } }}>{footer}</Box>}
     </Box>
   );
 };
@@ -154,10 +154,19 @@ export const StatGrid: React.FC<StatGridProps> = ({ children, columns, sx }) => 
         {
           display: "grid",
           gridTemplateColumns: {
-            xs: "repeat(2, minmax(0, 1fr))",
-            sm: `repeat(${Math.min(count, 3)}, minmax(0, 1fr))`,
+            xs: "none",
             md: `repeat(${count}, minmax(0, 1fr))`,
           },
+          // Teléfonos y tablets: tarjetas en una tira horizontal (como los widgets
+          // de iOS) para que la lista de debajo quede a la vista.
+          gridAutoFlow: { xs: "column", md: "row" },
+          gridAutoColumns: { xs: "minmax(152px, 44%)", sm: "minmax(180px, 30%)", md: "auto" },
+          overflowX: { xs: "auto", md: "visible" },
+          scrollSnapType: { xs: "x proximity", md: "none" },
+          scrollPaddingInline: 16,
+          "& > *": { scrollSnapAlign: "start" },
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
           gap: { xs: 1, sm: 1.25 },
         },
         ...(Array.isArray(sx) ? sx : sx ? [sx] : []),

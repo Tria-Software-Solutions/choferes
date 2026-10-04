@@ -8,7 +8,6 @@ import {
   CircularProgress,
   IconButton,
   Paper,
-  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -17,6 +16,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import ResponsiveTable from "../../../components/Table/ResponsiveTable/ResponsiveTable.component";
 import { IconAlertTriangle, IconCheck, IconClock, IconId, IconInbox, IconPencil, IconPlus, IconTrash, IconX } from "@tabler/icons-react";
 import { Employee } from "../../../models/Employee";
 import { EmployeeLicense } from "../../../models/EmployeeLicense";
@@ -352,7 +352,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
           </Box>
         ) : (
           <TableContainer sx={tableContainerStyles(theme)}>
-            <Table size="small" stickyHeader>
+            <ResponsiveTable size="small" stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell sx={tableHeaderCellStyles}>Tipo</TableCell>
@@ -459,7 +459,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
                   );
                 })}
               </TableBody>
-            </Table>
+            </ResponsiveTable>
           </TableContainer>
         )}
       </Paper>

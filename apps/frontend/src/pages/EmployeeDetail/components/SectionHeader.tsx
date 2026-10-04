@@ -42,7 +42,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
         {/* Title and description share a column so a wrapped description
             stays aligned with the title; its 240px basis makes the actions
             wrap below on narrow cards instead of squeezing the text. */}
-        <Box sx={{ minWidth: 0, flex: "1 1 240px" }}>
+        <Box sx={{ minWidth: 0, flex: { xs: "1 1 0", md: "1 1 240px" } }}>
           <Typography variant="h6" sx={sectionTitleStyles}>
             {title}
           </Typography>
@@ -53,7 +53,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           )}
         </Box>
         {actions && (
-          <Box sx={{ ml: "auto", display: "flex", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
+          <Box sx={{ ml: "auto", display: "flex", alignItems: "center", flexWrap: { xs: "nowrap", md: "wrap" }, gap: 2 }}>
             {actions}
           </Box>
         )}

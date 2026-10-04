@@ -17,6 +17,8 @@ import {
   removeEmployeeAvatar,
 } from '../../../store/slices/employeeSlice';
 import SearchBarComponent from '../../../components/SearchBar/SearchBar.component';
+import EmployeeMobileList from './EmployeeMobileList';
+import { useMobileShell } from '../../../hooks/useMobileShell';
 import StickyDataGridComponent from '../../../components/Table/StickyDataGrid/StickyDataGrid.component';
 import { GridColDef } from '@mui/x-data-grid';
 import { formatTenure } from '../../../utils/tenure';
@@ -198,6 +200,7 @@ const EmployeesPage: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobileShell = useMobileShell();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -1075,6 +1078,12 @@ const EmployeesPage: React.FC = () => {
         <PageBody>
           {isLoadingEmployees && filteredEmployees.length === 0 ? (
             <LoadingState label="Cargando empleados…" />
+          ) : filteredEmployees.length > 0 && isMobileShell ? (
+            <EmployeeMobileList
+              employees={filteredEmployees}
+              getMissingFields={getMissingProfileFields}
+              onOpen={(employee) => navigate(`${ROUTES.EMPLOYEES}/${employee.id}`)}
+            />
           ) : filteredEmployees.length > 0 ? (
             <StickyDataGridComponent<Employee>
               rows={filteredEmployees}

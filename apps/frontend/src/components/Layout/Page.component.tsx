@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import { useMobileShell } from "../../hooks/useMobileShell";
 
 // Standard page scaffolding shared by every screen of the app:
 //
@@ -26,16 +27,19 @@ interface PageContainerProps {
   sx?: SxProps<Theme>;
 }
 
-export const PageContainer: React.FC<PageContainerProps> = ({ children, fill = true, sx }) => (
+export const PageContainer: React.FC<PageContainerProps> = ({ children, fill = true, sx }) => {
+  const isMobileShell = useMobileShell();
+  return (
   <Box
     component="main"
     sx={mergeSx(
       {
         display: "flex",
         flexDirection: "column",
-        gap: { xs: 1.5, md: 2 },
-        px: { xs: 1, sm: 1.5, md: 2 },
-        py: { xs: 1, sm: 1.5, md: 2 },
+        // Móvil: las superficies llegan de borde a borde, como en una app.
+        gap: isMobileShell ? 1 : { xs: 1.5, md: 2 },
+        px: isMobileShell ? 0 : { xs: 1, sm: 1.5, md: 2 },
+        py: isMobileShell ? 0 : { xs: 1, sm: 1.5, md: 2 },
         width: "100%",
         maxWidth: 1920,
         mx: "auto",
@@ -47,7 +51,8 @@ export const PageContainer: React.FC<PageContainerProps> = ({ children, fill = t
   >
     {children}
   </Box>
-);
+  );
+};
 
 interface PageCardProps {
   children: React.ReactNode;
@@ -60,6 +65,7 @@ interface PageCardProps {
 export const PageCard: React.FC<PageCardProps> = ({ children, grow = true, sx }) => {
   const theme = useTheme();
   const { borders, shadows } = theme.tokens;
+  const isMobileShell = useMobileShell();
   return (
     <Paper
       elevation={0}
@@ -69,9 +75,9 @@ export const PageCard: React.FC<PageCardProps> = ({ children, grow = true, sx })
           flexDirection: "column",
           minHeight: 0,
           overflow: "hidden",
-          borderRadius: "14px",
-          border: borders.paper,
-          boxShadow: `0 1px 2px ${shadows.card}`,
+          borderRadius: isMobileShell ? 0 : "14px",
+          border: isMobileShell ? "none" : borders.paper,
+          boxShadow: isMobileShell ? "none" : `0 1px 2px ${shadows.card}`,
           ...(grow && { flex: { md: 1 } }),
         },
         sx,
@@ -112,6 +118,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { colors, borders } = theme.tokens;
   const hasToolbar = Boolean(toolbar || toolbarEnd);
+  // En el shell móvil la barra superior ya muestra el título de la pantalla.
+  const isMobileShell = useMobileShell();
+  const showTitle = !isMobileShell;
+  if (isMobileShell && !subtitle && !actions && !hasToolbar) return null;
 
   return (
     <Box
@@ -128,7 +138,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       )}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
-        {icon && (
+        {icon && showTitle && (
           <Box
             aria-hidden
             sx={{
@@ -147,7 +157,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           </Box>
         )}
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography
+          {showTitle && <Typography
             component="h1"
             sx={{
               fontWeight: 700,
@@ -161,12 +171,12 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             }}
           >
             {isSmallScreen && mobileTitle ? mobileTitle : title}
-          </Typography>
+          </Typography>}
           {subtitle && (
             <Typography
               component="div"
               sx={{
-                mt: 0.25,
+                mt: showTitle ? 0.25 : 0,
                 fontSize: "0.8125rem",
                 fontWeight: 500,
                 lineHeight: 1.4,

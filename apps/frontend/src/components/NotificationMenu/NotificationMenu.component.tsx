@@ -220,8 +220,8 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
       PaperProps={{
         elevation: 0,
         sx: {
-          width: 392,
-          maxHeight: 580,
+          width: 'min(392px, calc(100vw - 16px))',
+          maxHeight: 'min(580px, calc(100dvh - 96px))',
           mt: 0.5,
           backgroundColor: theme.tokens.colors.menuSurface,
           border: theme.tokens.borders.paper,
