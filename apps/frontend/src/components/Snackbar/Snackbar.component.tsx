@@ -109,6 +109,8 @@ export const AppNotificationProvider: React.FC<{
         onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         TransitionComponent={SlideTransition}
+        // En móvil el aviso queda sobre la barra de pestañas, no detrás de ella.
+        sx={{ [theme.breakpoints.down('md')]: { bottom: 'calc(56px + env(safe-area-inset-bottom, 0px) + 12px)', left: 12, right: 12 } }}
       >
         <Alert
           onClose={closeable ? handleClose : undefined}

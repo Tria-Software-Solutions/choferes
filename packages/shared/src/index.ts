@@ -144,3 +144,11 @@ export {
   toVacationDateOnly,
 } from "./types/VacationAccrual";
 export type { VacationAccrualDetail } from "./types/VacationAccrual";
+
+// Navegación móvil (barra de pestañas + "Más")
+export {
+  MOBILE_MAX_TABS,
+  splitMobileTabs,
+  getParentRoute,
+} from "./constants/mobileNavigation";
+export type { MobileTabSplit } from "./constants/mobileNavigation";

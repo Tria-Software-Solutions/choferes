@@ -7,7 +7,6 @@ import {
   CircularProgress,
   IconButton,
   Paper,
-  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -16,6 +15,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import ResponsiveTable from "../../../components/Table/ResponsiveTable/ResponsiveTable.component";
 import { IconBan, IconCalendarWeek, IconCheck, IconInbox, IconListCheck, IconPencil, IconPlus, IconRefresh, IconTrash } from "@tabler/icons-react";
 import { Employee } from "../../../models/Employee";
 import { Vacation, VacationStatus } from "../../../models/Vacation";
@@ -336,7 +336,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
           </Box>
         ) : (
           <TableContainer sx={tableContainerStyles(theme)}>
-            <Table size="small" stickyHeader>
+            <ResponsiveTable size="small" stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell sx={tableHeaderCellStyles}>Periodo</TableCell>
@@ -449,7 +449,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
                   );
                 })}
               </TableBody>
-            </Table>
+            </ResponsiveTable>
           </TableContainer>
         )}
       </Paper>

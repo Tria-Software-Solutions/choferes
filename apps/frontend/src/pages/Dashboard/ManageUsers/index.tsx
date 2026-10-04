@@ -877,8 +877,12 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                             <Typography variant="body2" sx={{ fontWeight: 700, fontSize: "0.72rem", color: "primary.main", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", mt: 0.15 }}>
                               {user.roleName || "Sin rol"}
                             </Typography>
+                            {/* Teléfono: el correo va bajo el rol para dejar ancho al nombre. */}
+                            <Typography variant="caption" sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.7rem", color: "text.secondary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {user.email}
+                            </Typography>
                           </Box>
-                          <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary", flexShrink: 0, maxWidth: { xs: 120, sm: 200 }, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <Typography variant="caption" sx={{ display: { xs: "none", sm: "block" }, fontSize: "0.7rem", color: "text.secondary", flexShrink: 0, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {user.email}
                           </Typography>
                           <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
