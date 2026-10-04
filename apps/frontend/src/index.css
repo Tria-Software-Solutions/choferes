@@ -140,3 +140,21 @@ html, body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
+
+/* ── Interfaz tipo app (teléfonos y tablets, < 960px) ─────────────────────── */
+@media (max-width: 959.95px) {
+  html, body {
+    /* Sin "rebote" que arrastre toda la página ni resaltado gris al tocar. */
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* iOS hace zoom al enfocar un campo con menos de 16px: se evita. */
+  input, select, textarea,
+  .MuiInputBase-input,
+  .MuiSelect-select {
+    font-size: 16px !important;
+  }
+
+}

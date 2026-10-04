@@ -41,6 +41,7 @@ import {
   renderStatusButton,
 } from "./helpers";
 import { useExpandedRows } from "../../../hooks/useExpandedRows";
+import { useMobileShell } from "../../../hooks/useMobileShell";
 
 /** EditableTable - Componente genérico y configurable para mostrar y editar datos tabulares.
  * Usa TanStack Table v8 para sorting y pagination (headless) y MUI para el render,
@@ -210,6 +211,7 @@ const EditableTableComponent = <T extends object>({
   const { roles } = useSelector((state: RootState) => state.roles);
   const { permissions } = useSelector((state: RootState) => state.permissions);
   const { expandedRows, expandRow, collapseRow } = useExpandedRows();
+  const isMobileShell = useMobileShell();
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -374,6 +376,114 @@ const EditableTableComponent = <T extends object>({
   const firstColumns = useMemo(() => visibleColumns.slice(0, 2), [visibleColumns]);
   const remainingColumns = useMemo(() => visibleColumns.slice(2), [visibleColumns]);
 
+
+  // Teléfonos y tablets: cada fila es una tarjeta (título, estado, datos y
+  // acciones) en lugar de una tabla con scroll horizontal.
+  const [titleColumn, ...detailColumns] = visibleColumns;
+  const showActions = !noActions && (hasEditPermissions || hasDeletePermissions);
+  const renderMobileCards = () => (
+    <Box role="list">
+      {tableRows.map((tableRow) => {
+        const row = tableRow.original;
+        const rowId = getRowId(row);
+        const isEditing = editRowId === rowId;
+        const rowKey = `${rowId}-${(row as T & { isActive?: boolean }).isActive}`;
+        const renderCell = (column: keyof T) => (
+          <DataCell
+            column={String(column)}
+            value={row[column]}
+            row={row as Record<string, unknown>}
+            isEditing={isEditing}
+            editValue={(editFields[String(column)] || "").toString()}
+            editFields={editFields}
+            setEditField={setEditField}
+            validateField={validateField}
+            columnConfig={columnConfig}
+            theme={theme}
+            expanded={!!expandedRows[rowId]}
+            onToggleExpand={createToggleExpand(rowId)}
+            renderColumnValue={renderColumnValue}
+          />
+        );
+        return (
+          <Box
+            role="listitem"
+            key={rowKey}
+            sx={{
+              px: 2,
+              py: 1.5,
+              backgroundColor: isEditing ? theme.tokens.colors.accentSoft : theme.tokens.colors.surface,
+              borderBottom: theme.tokens.borders.hairline,
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+              <Box
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  fontSize: "0.9375rem",
+                  "& .MuiTypography-root, & span": { fontWeight: 700, color: theme.tokens.colors.text },
+                }}
+              >
+                {titleColumn && renderCell(titleColumn)}
+              </Box>
+              {showStatusColumn &&
+                renderStatusButton({
+                  row,
+                  isUser: "username" in row,
+                  isCurrentUser: rowId === currentUser?.id,
+                  hasDeletePermissions,
+                  handleOpenStatusDialog,
+                })}
+              {showActions && (
+                <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+                  {renderActionButtons({
+                  row,
+                  editRowId,
+                  getRowId,
+                  currentUser: currentUser || undefined,
+                  hasEditPermissions,
+                  hasDeletePermissions: hasDeletePermissions && (canDeleteRow?.(row) ?? true),
+                  isExpanded: isExpanded || false,
+                  onOpenPasswordModal,
+                  handleEditClick,
+                  handleSaveClick,
+                  handleCancelClick,
+                  handleOpenDeleteDialog,
+                  isSaveDisabled: isSaveDisabled || false,
+                  isSmallScreen,
+                  theme,
+                })}
+                </Box>
+              )}
+            </Box>
+            {detailColumns.length > 0 && (
+              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", columnGap: 2, rowGap: 1.25, mt: 1.25 }}>
+                {detailColumns.map((column) => (
+                  <Box key={String(column)} sx={{ minWidth: 0, overflow: "hidden" }}>
+                    <Typography
+                      sx={{
+                        fontSize: "0.6875rem",
+                        fontWeight: 600,
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                        color: theme.tokens.colors.textMuted,
+                        mb: 0.25,
+                      }}
+                    >
+                      {translateColumnHeaderToSpanish(String(column))}
+                    </Typography>
+                    <Box sx={{ fontSize: "0.875rem", fontWeight: 500, minWidth: 0 }}>{renderCell(column)}</Box>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+
   return (
     <Paper
       elevation={0}
@@ -428,6 +538,7 @@ const EditableTableComponent = <T extends object>({
           borderRadius: 0,
         }}
       >
+        {isMobileShell ? renderMobileCards() : (
         <Table
           stickyHeader
           aria-label="sticky table"
@@ -591,6 +702,7 @@ const EditableTableComponent = <T extends object>({
             })}
           </TableBody>
         </Table>
+        )}
       </TableContainer>
       {showPagination && (
       <TablePagination
