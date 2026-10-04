@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   AppBar,
   Toolbar,
@@ -15,14 +15,12 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
-import { IconBell, IconChevronDown, IconMenu2 } from "@tabler/icons-react";
-import MobileMenuDrawer from "../MobileMenu/MobileMenu.component";
+import { IconBell, IconChevronDown } from "@tabler/icons-react";
 import NotificationMenu from "../NotificationMenu/NotificationMenu.component";
 import TopNav from "./TopNav.component";
 import { useNotificationNavigation } from "../../hooks/useNotificationNavigation";
-import { useMenuPreferences } from "../../hooks/useMenuPreferences";
+import { useVisibleNavLinks } from "../../hooks/useVisibleNavLinks";
 import { useAuthContext } from "../../context/AuthContext";
-import * as UserService from "../../services/userService";
 import UserAvatar from "../UserAvatar/UserAvatar.component";
 import { APPBAR_MENU, ROUTES } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
@@ -39,7 +37,6 @@ interface Link {
 
 interface AppBarComponentProps {
   icon?: React.ReactNode;
-  title: string;
   userLinks?: Link[];
   links: Link[];
 }
@@ -78,56 +75,28 @@ const Brand: React.FC<{ onClick: () => void }> = ({ onClick }) => {
 
 // AppBarComponent renders the main application bar: brand, primary navigation,
 // theme toggle, notifications and the user menu (drawer navigation on mobile).
-const AppBarComponent: React.FC<AppBarComponentProps> = ({ title, userLinks = [], links }) => {
+const AppBarComponent: React.FC<AppBarComponentProps> = ({ userLinks = [], links }) => {
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
   const openNotificationTarget = useNotificationNavigation();
   const location = useLocation();
   const theme = useTheme();
   const { colors, borders } = theme.tokens;
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isCompactNav = useMediaQuery(theme.breakpoints.down("lg"));
   const { unreadCount } = useNotificationMenu();
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const [notificationsAnchor, setNotificationsAnchor] = useState<null | HTMLElement>(null);
 
   // Visible/ordered sections come from the user's menu preferences
   // (Configuración → Accesos rápidos) and are synced to their settings.
-  const linkKeys = useMemo(() => links.map((l) => l.label), [links]);
-  const { preferences, itemOrder, isMenuVisible } = useMenuPreferences(linkKeys);
-
-  const dockSyncRef = useRef<ReturnType<typeof setTimeout>>();
-  useEffect(() => {
-    if (!currentUser?.id) return undefined;
-    clearTimeout(dockSyncRef.current);
-    dockSyncRef.current = setTimeout(() => {
-      UserService.updateUserSettings(currentUser.id, {
-        dock: { preferences, order: itemOrder },
-      }).catch(() => {});
-    }, 500);
-    return () => clearTimeout(dockSyncRef.current);
-  }, [preferences, itemOrder, currentUser?.id]);
-
-  const visibleLinks = useMemo(() => {
-    const ordered = [...links].sort(
-      (a, b) => itemOrder.indexOf(a.label) - itemOrder.indexOf(b.label),
-    );
-    return ordered.filter((link) => isMenuVisible(link.label));
-  }, [links, itemOrder, isMenuVisible]);
+  const visibleLinks = useVisibleNavLinks(links);
 
   // Settings lives in the user menu on desktop; the bar only lists sections.
   const navLinks = useMemo(
     () => visibleLinks.filter((link) => link.label !== APPBAR_MENU.PROFILE),
     [visibleLinks],
   );
-
-  // Mobile drawer: dedupe user links against nav links by label.
-  const mobileUserLinks = useMemo(() => {
-    const linkLabels = new Set(visibleLinks.map((link) => link.label));
-    return userLinks.filter((link) => !linkLabels.has(link.label));
-  }, [visibleLinks, userLinks]);
 
   const hasNotificationsAccess = () => {
     return !!currentUser;
@@ -145,17 +114,13 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({ title, userLinks = []
       >
         <Brand onClick={() => navigate(ROUTES.LOGIN)} />
 
-        {!isMobile && (
-          <>
-            <Divider orientation="vertical" flexItem sx={{ my: 1.75, borderColor: colors.border }} />
-            <TopNav
-              links={navLinks}
-              pathname={location.pathname}
-              onNavigate={navigate}
-              compact={isCompactNav && navLinks.length > 4}
-            />
-          </>
-        )}
+        <Divider orientation="vertical" flexItem sx={{ my: 1.75, borderColor: colors.border }} />
+        <TopNav
+          links={navLinks}
+          pathname={location.pathname}
+          onNavigate={navigate}
+          compact={isCompactNav && navLinks.length > 4}
+        />
 
         <Box sx={{ flex: 1 }} />
 
@@ -185,8 +150,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({ title, userLinks = []
               </Tooltip>
             )}
 
-            {!isMobile && (
-              <ButtonBase
+            <ButtonBase
                 onClick={(event) => setUserMenuAnchor(event.currentTarget)}
                 aria-label={APPBAR_MENU.USER_MENU}
                 aria-haspopup="menu"
@@ -207,7 +171,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({ title, userLinks = []
                 }}
               >
                 <UserAvatar user={currentUser} size={30} />
-                <Box sx={{ display: { md: "none", lg: "block" }, textAlign: "left", maxWidth: 160 }}>
+                <Box sx={{ display: { xs: "none", lg: "block" }, textAlign: "left", maxWidth: 160 }}>
                   <Typography
                     sx={{
                       fontSize: "0.8125rem",
@@ -223,23 +187,6 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({ title, userLinks = []
                 </Box>
                 <IconChevronDown size={16} color={colors.textMuted} />
               </ButtonBase>
-            )}
-
-            {isMobile && (
-              <>
-                <IconButton onClick={() => setMobileMenuOpen(true)} aria-label="Abrir menú de navegación">
-                  <IconMenu2 size={20} stroke={1.75} />
-                </IconButton>
-                <MobileMenuDrawer
-                  open={mobileMenuOpen}
-                  onClose={() => setMobileMenuOpen(false)}
-                  title={title}
-                  navLinks={visibleLinks}
-                  userLinks={mobileUserLinks}
-                  currentUser={currentUser}
-                />
-              </>
-            )}
           </Box>
         )}
 

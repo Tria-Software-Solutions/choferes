@@ -7,7 +7,6 @@ import {
   CircularProgress,
   IconButton,
   Paper,
-  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -16,6 +15,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import ResponsiveTable from "../../../components/Table/ResponsiveTable/ResponsiveTable.component";
 import { IconFileText, IconInbox, IconPaperclip, IconPencil, IconPlus, IconShieldExclamation, IconTrash } from "@tabler/icons-react";
 import { Employee } from "../../../models/Employee";
 import {
@@ -190,7 +190,7 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
           </Box>
         ) : (
           <TableContainer sx={tableContainerStyles(theme)}>
-            <Table size="small" stickyHeader>
+            <ResponsiveTable size="small" stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell sx={tableHeaderCellStyles}>Fecha</TableCell>
@@ -314,7 +314,7 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
                   );
                 })}
               </TableBody>
-            </Table>
+            </ResponsiveTable>
           </TableContainer>
         )}
       </Paper>

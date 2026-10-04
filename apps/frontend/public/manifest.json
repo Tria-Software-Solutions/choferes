@@ -1,8 +1,9 @@
 {
-  "short_name": "React App",
-  "name": "Choferes",
+  "short_name": "Choferes",
+  "name": "Choferes de Alquiler",
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "orientation": "any"
 }

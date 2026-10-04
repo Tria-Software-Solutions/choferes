@@ -334,7 +334,7 @@ const HelpCenterTab: React.FC = () => {
       </Box>
 
       {/* Content — changes with the selected topic */}
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", pr: 0.5 }} key={activeTopic}>
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: { xs: "visible", md: "auto" }, pr: { md: 0.5 } }} key={activeTopic}>
         {activeTopic === "guide" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
             {visibleGuideSteps.length === 0 && (

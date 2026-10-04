@@ -4,7 +4,6 @@ import {
   Chip,
   IconButton,
   Paper,
-  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -13,6 +12,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import ResponsiveTable from "../../../components/Table/ResponsiveTable/ResponsiveTable.component";
 import {
   IconFileText,
   IconInbox,
@@ -98,7 +98,7 @@ export const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ overview }) =>
           </Box>
         ) : (
           <TableContainer sx={tableContainerStyles(theme)}>
-            <Table size="small" stickyHeader>
+            <ResponsiveTable size="small" stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell sx={tableHeaderCellStyles(theme)}>Fecha</TableCell>
@@ -177,7 +177,7 @@ export const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ overview }) =>
                   );
                 })}
               </TableBody>
-            </Table>
+            </ResponsiveTable>
           </TableContainer>
         )}
       </Paper>

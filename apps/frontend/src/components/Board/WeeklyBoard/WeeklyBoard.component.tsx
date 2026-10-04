@@ -67,6 +67,7 @@ import { getScheduleHours } from '../../../utils/schedule';
 import { getScheduleCellData, isToday } from '../../Table/SelectorTable/helpers/scheduleCell';
 import SegmentedToggle from '../../SegmentedToggle/SegmentedToggle.component';
 import QuickAssignPopover from './QuickAssignPopover.component';
+import { useMobileShell } from '../../../hooks/useMobileShell';
 import {
   calculateHoursForPeriod,
 } from '../../Table/SelectorTable/helpers/hoursCalculation';
@@ -1359,6 +1360,7 @@ function SwimlaneRow({
                   : undefined
               }
             >
+              {currentWeek.length > 1 && (
               <Box
                 sx={{
                   px: { xs: 0.75, sm: 1.25 },
@@ -1392,6 +1394,7 @@ function SwimlaneRow({
                   {formatHeaderDate(date)}
                 </Typography>
               </Box>
+              )}
               {isDayAvailable ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                   {assignedEmployees.map((emp) => {
@@ -2287,6 +2290,19 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
 
   const currentWeek = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
 
+  // Teléfonos: el tablero muestra un día a la vez (selector de días arriba) en
+  // lugar de siete columnas con scroll horizontal.
+  const isMobileShell = useMobileShell();
+  const [mobileDayIdx, setMobileDayIdx] = useState<number | null>(null);
+  const activeDayIdx = Math.min(
+    mobileDayIdx ?? Math.max(0, currentWeek.findIndex((d) => isToday(d.isoDate))),
+    currentWeek.length - 1,
+  );
+  const visibleWeek = useMemo(
+    () => (isMobileShell ? [currentWeek[activeDayIdx]] : currentWeek),
+    [isMobileShell, currentWeek, activeDayIdx],
+  );
+
   // All day columns (and swimlane day cells) share the same width: measured
   // from the widest card content so they are always equal without clipping names.
   const { containerRef: columnsContainerRef, columnWidth } = useUniformColumnWidth('[data-card]', [
@@ -2727,6 +2743,65 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
   // en la barra de filtros de la página: así el board usa todo su alto.
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {isMobileShell && (
+        <Box
+          role="tablist"
+          aria-label="Día de la semana"
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            px: 1,
+            py: 1,
+            flexShrink: 0,
+            borderBottom: theme.tokens.borders.hairline,
+          }}
+        >
+          {currentWeek.map(({ day, isoDate }, index) => {
+            const selected = index === activeDayIdx;
+            const today = isToday(isoDate);
+            return (
+              <Box
+                key={day}
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setMobileDayIdx(index)}
+                sx={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  py: 0.5,
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                <Typography sx={{ fontSize: '0.6875rem', fontWeight: 600, color: theme.tokens.colors.textMuted }}>
+                  {translateDayToAbrevSpanish(day as EnglishDayOfWeek)}
+                </Typography>
+                <Box
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    display: 'grid',
+                    placeItems: 'center',
+                    borderRadius: '50%',
+                    fontWeight: selected || today ? 700 : 500,
+                    fontSize: '0.9375rem',
+                    color: selected ? theme.tokens.colors.onAccent : today ? theme.tokens.colors.accent : theme.tokens.colors.text,
+                    backgroundColor: selected ? theme.tokens.colors.accent : 'transparent',
+                    border: today && !selected ? `1.5px solid ${theme.tokens.colors.accent}` : '1.5px solid transparent',
+                  }}
+                >
+                  {new Date(isoDate).getDate()}
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
+      )}
+
       {/* ─── Board ─── */}
       {/* Two panels with independent scroll: the board (day columns / swimlanes)
           scrolls on its own, and the employees panel (totals) on its own.
@@ -2747,7 +2822,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
           {/* ── Board panel (own scroll) ── */}
           <Box
             sx={{
-              flex: 1,
+              flex: isMobileShell ? '0 0 auto' : 1,
               minWidth: 0,
               minHeight: 0,
               overflow: 'auto',
@@ -2763,9 +2838,9 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
             {viewMode === 'employee' ? (
               <Box
                 ref={columnsContainerRef}
-                sx={{ display: 'flex', gap: { xs: 0.6, sm: 1 }, minHeight: '100%' }}
+                sx={{ display: 'flex', gap: { xs: 0.6, sm: 1 }, minHeight: isMobileShell ? 0 : '100%' }}
               >
-                {currentWeek.map(({ day, date, isoDate }) => {
+                {visibleWeek.map(({ day, date, isoDate }) => {
                   const todayDate = isToday(isoDate);
                   const isWeekend = day === 'saturday' || day === 'sunday';
                   const dayEmployees: DayColumnProps['employees'] = [];
@@ -2821,7 +2896,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                */
               <Box
                 ref={columnsContainerRef}
-                sx={{ display: 'flex', gap: { xs: 0.6, sm: 1 }, minHeight: '100%' }}
+                sx={{ display: 'flex', gap: { xs: 0.6, sm: 1 }, minHeight: isMobileShell ? 0 : '100%' }}
               >
                 <Box
                   sx={{
@@ -2834,9 +2909,9 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                     // shrink below the rows' intrinsic minimum so the day cells stay
                     // usable and each row frame always wraps its content — same
                     // adaptive behavior as the individual calendar view.
-                    width: { xs: 'max-content', sm: 'auto' },
-                    flex: { xs: '0 0 auto', sm: 1 },
-                    minWidth: { xs: 'auto', sm: 'min-content' },
+                    width: isMobileShell ? '100%' : { xs: 'max-content', sm: 'auto' },
+                    flex: isMobileShell ? 1 : { xs: '0 0 auto', sm: 1 },
+                    minWidth: isMobileShell ? 0 : { xs: 'auto', sm: 'min-content' },
                   }}
                 >
                   {schedules.map((schedule) => {
@@ -2847,7 +2922,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                         key={schedule.id}
                         schedule={schedule}
                         scheduleColor={scheduleColor}
-                        currentWeek={currentWeek}
+                        currentWeek={visibleWeek}
                         filteredEmployees={filteredEmployees}
                         getDaySchedule={getDaySchedule}
                         selectedEmployeeIds={selectedEmployeeIds}

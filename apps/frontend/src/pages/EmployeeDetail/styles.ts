@@ -15,6 +15,7 @@ export const detailHeaderStyles = (theme: Theme): SxProps<Theme> => ({
   pt: { xs: 2, sm: 2.5 },
   pb: 0,
   flexShrink: 0,
+  position: "relative",
   backgroundColor: theme.palette.background.paper,
   borderBottom: `1px solid ${hairline(theme)}`,
 });
@@ -153,7 +154,7 @@ export const sectionHeaderStyles: SxProps<Theme> = {
 export const sectionHeaderRowStyles: SxProps<Theme> = {
   display: "flex",
   alignItems: "flex-start",
-  flexWrap: "wrap",
+  flexWrap: { xs: "nowrap", md: "wrap" },
   gap: 1.5,
   mb: { xs: 1.5, md: 2 },
 };
@@ -218,7 +219,7 @@ export const emptyStateBoxStyles = (theme: Theme): SxProps<Theme> => ({
 export const tableContainerStyles = (theme: Theme): SxProps<Theme> => ({
   flex: { md: 1 },
   minHeight: { md: 0 },
-  maxHeight: { xs: 340, sm: 440 },
+  maxHeight: { xs: "none", md: 440 },
   overflow: "auto",
   borderRadius: "10px",
   border: theme.tokens.borders.paper,
