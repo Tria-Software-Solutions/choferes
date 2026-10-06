@@ -7,6 +7,7 @@ import {
   DEFAULT_NATIONALITY,
   MAX_PLATES_PER_EMPLOYEE,
   NationalIdType,
+  computeAccruedVacationDays,
   getEmployeePositions,
   getEmployeePositionsLabel,
   isNationalIdType,
@@ -311,9 +312,26 @@ const sanitizeControlledValues = (
   return sanitized;
 };
 
+// Saldo inicial de vacaciones: lo que reconoce la ley (art. 153) por la
+// antigüedad desde la fecha de ingreso, en días enteros.
+//
+// El saldo se guarda en días completos (`employees.vacationDays` es INTEGER) y
+// no se captura a mano en el alta: es un dato derivado de la ley. Si el cliente
+// manda un valor explícito se respeta (por ejemplo, una carga histórica por
+// API); sin fecha de ingreso no hay antigüedad que calcular y el saldo queda
+// sin asignar, igual que en el backfill `backfill-employee-vacation-days`.
+const initialVacationDays = (data: Record<string, unknown>): number | undefined => {
+  if (data.vacationDays !== undefined && data.vacationDays !== null) return undefined;
+  const start = data.contractStartDate;
+  if (typeof start !== "string" || !start) return undefined;
+  return Math.round(computeAccruedVacationDays(start).accruedDays);
+};
+
 // Creates a new employee and reloads the instance
 export const createEmployee = async (data: Record<string, unknown>) => {
   const clean = sanitizeControlledValues(pickEditableFields(data));
+  const vacationDays = initialVacationDays(clean);
+  if (vacationDays !== undefined) clean.vacationDays = vacationDays;
   const newEmployee = await Employee.create(clean as any);
   await newEmployee.reload();
   await notifyManagementRoles({
