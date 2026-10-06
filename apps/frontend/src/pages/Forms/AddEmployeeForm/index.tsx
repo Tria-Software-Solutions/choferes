@@ -9,7 +9,6 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  IconBeach,
   IconCash,
   IconMail,
   IconRotate,
@@ -29,7 +28,6 @@ import { maskPhone, digitsOnly } from "../../../utils/mask";
 import {
   DEFAULT_NATIONALITY,
   EMPLOYEE_GENDERS,
-  computeAccruedVacationDays,
   normalizeNationalId,
 } from "@choferes/shared";
 import type { EmployeeGender, NationalIdType } from "@choferes/shared";
@@ -56,17 +54,6 @@ import {
 // si el puesto o el contrato pagan más.
 const DEFAULT_HOURLY_RATE = "1690.46";
 
-/**
- * Saldo de vacaciones que otorga la ley (art. 153: 2 semanas remuneradas por
- * cada 50 semanas trabajadas) al día de hoy, para la fecha de ingreso indicada.
- * En un empleado nuevo casi siempre da 0 días.
- */
-const accruedVacationDays = (contractStartDate: string): number =>
-  computeAccruedVacationDays(contractStartDate).accruedDays;
-
-/** El saldo se muestra sin ceros de relleno: 5, no 5.00. */
-const formatVacationDays = (days: number): string => String(days);
-
 interface AddEmployeeFormData {
   firstName: string;
   lastName: string;
@@ -79,7 +66,6 @@ interface AddEmployeeFormData {
   gender: string;
   contractStartDate: string;
   hourlyRate: string;
-  vacationDays: string;
 }
 
 interface AddEmployeeFormProps {
@@ -100,7 +86,6 @@ interface AddEmployeeFormProps {
     gender?: EmployeeGender | null;
     contractStartDate?: string | null;
     hourlyRate?: number | null;
-    vacationDays?: number | null;
   }) => void;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -108,9 +93,10 @@ interface AddEmployeeFormProps {
 
 // Formulario de alta de empleado. Los campos van agrupados por secciones (como
 // la ficha del empleado) para que un formulario largo se lea de arriba abajo:
-// identificación, contacto, puesto y contrato/pago. Los vehículos se dan de
-// alta después en la ficha; el saldo de vacaciones se propone con la regla de
-// la ley (art. 153) y queda editable.
+// identificación, contacto, puesto y contrato/pago. Los vehículos y el saldo de
+// vacaciones se dan de alta después en la ficha: el saldo lo calcula el backend
+// con la regla de la ley (art. 153) a partir de la fecha de ingreso, no se
+// captura a mano aquí.
 const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   onSubmit,
   onCancel,
@@ -139,7 +125,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     gender: "",
     contractStartDate: todayStr,
     hourlyRate: DEFAULT_HOURLY_RATE,
-    vacationDays: formatVacationDays(accruedVacationDays(todayStr)),
   });
 
   const [formData, setFormData] = useState<AddEmployeeFormData>(emptyFormData);
@@ -153,9 +138,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   });
   const [birthDate, setBirthDate] = useState("");
   const [address, setAddress] = useState("");
-  // El saldo se propone calculado, pero en cuanto se toca a mano deja de
-  // recalcularse: manda lo que escribió la persona.
-  const [vacationDaysEdited, setVacationDaysEdited] = useState(false);
   const [errors, setErrors] = useState<Record<keyof AddEmployeeFormData, string>>({
     firstName: "",
     lastName: "",
@@ -168,7 +150,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     gender: "",
     contractStartDate: "",
     hourlyRate: "",
-    vacationDays: "",
   });
 
   // Validación de campos del formulario
@@ -233,13 +214,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       return "";
     }
 
-    if (name === "vacationDays") {
-      if (!value.trim()) return "";
-      const num = Number(value);
-      if (!Number.isFinite(num) || num < 0) return "Debe ser un número ≥ 0";
-      return "";
-    }
-
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
 
     if (!value.trim()) {
@@ -263,14 +237,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
 
   // Handles field changes and validation
   const handleFieldChange = (field: keyof AddEmployeeFormData, value: string) => {
-    setFormData((prev) => {
-      const next = { ...prev, [field]: value };
-      // El saldo sigue a la fecha de ingreso mientras nadie lo haya tocado a mano.
-      if (field === "contractStartDate" && !vacationDaysEdited) {
-        next.vacationDays = formatVacationDays(accruedVacationDays(value));
-      }
-      return next;
-    });
+    setFormData((prev) => ({ ...prev, [field]: value }));
     const error = validateField(field, value);
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
@@ -290,8 +257,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       errors.primaryPhone === "" &&
       errors.secondaryPhone === "" &&
       errors.contractStartDate === "" &&
-      errors.hourlyRate === "" &&
-      errors.vacationDays === ""
+      errors.hourlyRate === ""
     );
   };
 
@@ -320,12 +286,8 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
           formData.hourlyRate.trim() === ""
             ? null
             : Number(formData.hourlyRate),
-        // El campo viene con el saldo que otorga la ley (art. 153) por la
-        // fecha de ingreso, y sigue siendo editable por si hay un ajuste.
-        vacationDays:
-          formData.vacationDays.trim() === ""
-            ? null
-            : Number(formData.vacationDays),
+        // El saldo de vacaciones no viaja en el alta: lo calcula el backend con
+        // la antigüedad (art. 153) y se ajusta después desde la ficha.
       });
     }
   };
@@ -337,7 +299,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     setBirthDate("");
     setAddress("");
     setFormData(emptyFormData());
-    setVacationDaysEdited(false);
     setErrors({
       firstName: "",
       lastName: "",
@@ -350,7 +311,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       gender: "",
       contractStartDate: "",
       hourlyRate: "",
-      vacationDays: "",
     });
   };
 
@@ -577,29 +537,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             error={errors.hourlyRate !== ""}
             helperText={errors.hourlyRate}
             icon={<IconCash style={iconStyle} />}
-            sx={formControl(theme)}
-            type="number"
-            inputProps={{ step: "0.01", min: 0 }}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextfieldComponent
-            placeholder="Ej: 5"
-            label="Saldo de vacaciones (días)"
-            variant="outlined"
-            fullWidth
-            value={formData.vacationDays}
-            onChange={(e) => {
-              setVacationDaysEdited(true);
-              handleFieldChange("vacationDays", e.target.value);
-            }}
-            error={errors.vacationDays !== ""}
-            helperText={
-              errors.vacationDays ||
-              "Calculado por antigüedad (art. 153). Podés ajustarlo."
-            }
-            icon={<IconBeach style={iconStyle} />}
             sx={formControl(theme)}
             type="number"
             inputProps={{ step: "0.01", min: 0 }}

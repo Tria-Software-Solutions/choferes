@@ -17,6 +17,8 @@ import {
 } from "@mui/material";
 import { IconArrowLeft, IconBeach, IconBriefcase, IconCalendarMonth, IconCalendarX, IconId, IconMail, IconReceipt, IconShieldExclamation, IconUser, IconWallet } from "@tabler/icons-react";
 import { Employee } from "../../models/Employee";
+import { VacationAccrual } from "../../models/VacationAccrual";
+import { displayedVacationDays } from "./vacationBalance";
 import { getEmployeePositionsLabel } from "@choferes/shared";
 import * as EmployeeService from "../../services/employeeService";
 import { useAuthContext } from "../../context/AuthContext";
@@ -106,6 +108,10 @@ const EmployeeDetailPage: React.FC = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openTerminationDialog, setOpenTerminationDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  // Acumulado legal del empleado, para no mostrar "sin saldo" en el encabezado
+  // cuando el saldo guardado todavía no se asignó (la pestaña de Vacaciones ya
+  // lo calcula; aquí se usa solo de respaldo).
+  const [vacationAccrual, setVacationAccrual] = useState<VacationAccrual | null>(null);
 
   const canDelete = userPermissions.includes(PERMISSION_CODES.EDIT_EMPLOYEES);
   const canViewPayments = userPermissions.includes(PERMISSION_CODES.VIEW_PAYMENTS);
@@ -140,6 +146,27 @@ const EmployeeDetailPage: React.FC = () => {
   useEffect(() => {
     loadEmployee();
   }, [loadEmployee]);
+
+  // El encabezado puede mostrar el saldo guardado o, si aún no se asignó, el
+  // acumulado que reconoce la ley. Se relee al cambiar el saldo o la fecha de
+  // ingreso (por ejemplo, al sincronizar desde la pestaña de Vacaciones).
+  useEffect(() => {
+    if (Number.isNaN(employeeId) || !canViewVacations || !employee) {
+      setVacationAccrual(null);
+      return undefined;
+    }
+    let cancelled = false;
+    EmployeeService.getVacationAccrual(employeeId)
+      .then((accrual) => {
+        if (!cancelled) setVacationAccrual(accrual);
+      })
+      .catch(() => {
+        if (!cancelled) setVacationAccrual(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [employeeId, canViewVacations, employee]);
 
   const handleEmployeeUpdated = useCallback((updated: Employee) => {
     setEmployee(updated);
@@ -275,6 +302,14 @@ const EmployeeDetailPage: React.FC = () => {
   </Box>
   );
 
+  // Saldo guardado si existe; si no, el acumulado legal; si la fecha de ingreso
+  // aún no está registrada, ahí sí no hay nada que mostrar.
+  const vacationBalanceDays = displayedVacationDays(employee.vacationDays, vacationAccrual);
+  const vacationBalanceText =
+    vacationBalanceDays != null
+      ? `${vacationBalanceDays} días disponibles`
+      : "Sin saldo de vacaciones";
+
   const headerChips: HeaderChip[] = [
     ...(canSeePayroll
       ? [{
@@ -285,7 +320,7 @@ const EmployeeDetailPage: React.FC = () => {
     ...(canSeeVacationBalance
       ? [{
           icon: <IconBeach size={14} stroke={1.75} />,
-          label: employee.vacationDays != null ? `${employee.vacationDays} días disponibles` : "Sin saldo de vacaciones",
+          label: vacationBalanceText,
         }]
       : []),
   ];
@@ -383,9 +418,7 @@ const EmployeeDetailPage: React.FC = () => {
                 {canSeeVacationBalance && (
                   <Box component="span" sx={metaChipStyles(theme)}>
                     <IconBeach size={13} stroke={1.75} style={{ opacity: 0.7 }} />
-                    {employee.vacationDays != null
-                      ? `${employee.vacationDays} días disponibles`
-                      : "Sin saldo de vacaciones"}
+                    {vacationBalanceText}
                   </Box>
                 )}
                 {employeePosition && (

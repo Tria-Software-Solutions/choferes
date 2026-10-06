@@ -408,6 +408,51 @@ describe("employeeService", () => {
       ).rejects.toMatchObject({ statusCode: 400 });
       expect(mockCreate).not.toHaveBeenCalled();
     });
+
+    it("asigna el saldo de vacaciones que reconoce la ley según la fecha de ingreso", async () => {
+      mockCreate.mockResolvedValue({ id: 9, reload: jest.fn() });
+      // 349 días antes de hoy: con ambos extremos incluidos son 350 días, un
+      // ciclo completo (50 semanas) = 10 días hábiles (art. 153).
+      const start = new Date();
+      start.setDate(start.getDate() - 349);
+      const month = String(start.getMonth() + 1).padStart(2, "0");
+      const day = String(start.getDate()).padStart(2, "0");
+      const contractStartDate = `${start.getFullYear()}-${month}-${day}`;
+
+      await employeeService.createEmployee({
+        firstName: "Ana",
+        positions: ["chofer"],
+        contractStartDate,
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ vacationDays: 10 }),
+      );
+    });
+
+    it("no asigna saldo de vacaciones si no hay fecha de ingreso", async () => {
+      mockCreate.mockResolvedValue({ id: 9, reload: jest.fn() });
+
+      await employeeService.createEmployee({ firstName: "Ana", positions: ["chofer"] });
+
+      const created = mockCreate.mock.calls[0][0] as Record<string, unknown>;
+      expect(created.vacationDays).toBeUndefined();
+    });
+
+    it("respeta un saldo de vacaciones explícito (carga histórica)", async () => {
+      mockCreate.mockResolvedValue({ id: 9, reload: jest.fn() });
+
+      await employeeService.createEmployee({
+        firstName: "Ana",
+        positions: ["chofer"],
+        contractStartDate: "2024-01-01",
+        vacationDays: 7,
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ vacationDays: 7 }),
+      );
+    });
   });
 
   describe("updateEmployee", () => {
