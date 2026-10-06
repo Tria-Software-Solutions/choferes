@@ -1,7 +1,16 @@
 import { translateColumnHeaderToSpanish, translateDayOptionsToSpanish } from "./string";
 import { formatDateWithDay, parseIsoDateWithoutTimeZone } from "./dates";
 import { parseSvgPath, PdfIcon, PdfPathLeg } from "./pdfIcons";
-import logoAsset from "../assets/images/logo.png";
+import {
+  BRAND_INK,
+  BRAND_MUTED,
+  drawBrandFooter,
+  drawBrandHeader,
+  brandHeaderSizes,
+  drawCompactBrandHeader,
+  loadBrandAssets,
+} from "./pdfBranding";
+import { COMPANY, COMPANY_FOOTER_TEXT } from "./boletaFormat";
 import { Employee } from '../models/Employee';
 import { HoursWorked } from '../models/HoursWorked';
 import { WeeklySummary } from '../models/WeeklySummary';
@@ -16,26 +25,6 @@ let excelJsModule: ExcelJSModule | null = null;
 let jsPDF: JSPDFType["default"] | null = null;
 
 type PDFDocumentInstance = InstanceType<JSPDFType["default"]>;
-
-// Cached base64 data URL of the app logo so jsPDF can draw it synchronously.
-let logoDataUrlCache: string | null = null;
-
-export async function loadLogoDataUrl(): Promise<string | null> {
-  if (logoDataUrlCache) return logoDataUrlCache;
-  try {
-    const response = await fetch(logoAsset);
-    const blob = await response.blob();
-    logoDataUrlCache = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    logoDataUrlCache = null;
-  }
-  return logoDataUrlCache;
-}
 
 async function loadExcelJS(): Promise<ExcelJSModule> {
   if (!excelJsModule) {
@@ -209,40 +198,122 @@ export async function exportTable({
     const workbook = new ExcelJS.Workbook();
     workbook.creator = "Choferes";
     workbook.created = new Date();
+    const cleanTitle = (title ?? deriveTitleFromFileName(fileName)).slice(0, 60);
+    const colCount = exportHeaders.length;
+    const banner =
+      groupedHeaders && groupedHeaders.length > 1
+        ? (groupedHeaders[0].find((c) => String(c).trim() !== "") ?? "")
+        : "";
+
+    // Layout: 1 brand header (shield + motto) · 2 title · 3 subtitle · [banner] · column headers.
+    const BRAND_ROW = 1;
+    const TITLE_ROW = 2;
+    const SUBTITLE_ROW = 3;
+    const bannerRow = banner ? 4 : 0;
+    const headerRowIndex = banner ? 5 : 4;
     const sheet = workbook.addWorksheet("Datos", {
-      views: [{ state: "frozen", ySplit: (groupedHeaders && groupedHeaders.length > 1 ? 3 : 2) }],
+      views: [{ state: "frozen", ySplit: headerRowIndex }],
+      pageSetup: { paperSize: 9, orientation: colCount > 6 ? "landscape" : "portrait", fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+      headerFooter: {
+        oddFooter: `&L&8${COMPANY.legalName}&C&8${COMPANY.website}&R&8Página &P de &N`,
+      },
     });
 
-    // ── Title bar (merged, black band like the PDF hero) ──
-    const cleanTitle = (title ?? deriveTitleFromFileName(fileName)).slice(0, 60);
-    sheet.mergeCells(1, 1, 1, exportHeaders.length);
-    const titleCell = sheet.getCell(1, 1);
-    titleCell.value = cleanTitle;
-    titleCell.font = { bold: true, size: 14, color: { argb: "FFFFFFFF" } };
-    titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF111111" } };
-    titleCell.alignment = { vertical: "middle" };
-    sheet.getRow(1).height = 26;
+    // ── Column widths (content-aware, capped) — computed first: the logos are positioned from them ──
+    const colWidths = exportHeaders.map((header) => {
+      const maxLen = Math.max(
+        String(header).length,
+        ...strictRows.map((row) => {
+          const v = row[header];
+          return v === null || v === undefined ? 0 : String(v).length;
+        }),
+      );
+      return Math.min(Math.max(maxLen + 3, 10), 48);
+    });
+    colWidths.forEach((width, i) => {
+      sheet.getColumn(i + 1).width = width;
+    });
+    const colPx = colWidths.map((w) => Math.round(w * 7 + 5));
+    const totalPx = colPx.reduce((sum, px) => sum + px, 0);
 
-    let rowCursor = 2;
+    // Native anchor (column + EMU offset) for an x position in pixels from the left edge.
+    // ExcelJS' fractional columns are relative to a different width, so offsets are given in EMU.
+    const EMU_PER_PX = 9525;
+    const anchorAtPx = (px: number, rowOffsetPx = 0) => {
+      let acc = 0;
+      let col = colPx.length - 1;
+      let offset = 0;
+      for (let i = 0; i < colPx.length; i += 1) {
+        if (px < acc + colPx[i]) {
+          col = i;
+          offset = px - acc;
+          break;
+        }
+        acc += colPx[i];
+      }
+      return {
+        nativeCol: col,
+        nativeColOff: Math.round(offset * EMU_PER_PX),
+        nativeRow: 0,
+        nativeRowOff: Math.round(rowOffsetPx * EMU_PER_PX),
+      } as unknown as { col: number; row: number };
+    };
+
+    // ── Brand header: shield (left) + "Su auto… nuestro chofer." (right) over a thick rule ──
+    const assets = await loadBrandAssets();
+    const brandRowHeightPt = 62;
+    const brandRowPx = Math.round(brandRowHeightPt * (96 / 72));
+    sheet.getRow(BRAND_ROW).height = brandRowHeightPt;
+    for (let c = 1; c <= colCount; c += 1) {
+      sheet.getCell(BRAND_ROW, c).border = { bottom: { style: "thick", color: { argb: "FF000000" } } };
+    }
+    const sizes = brandHeaderSizes(brandRowPx - 8);
+    const pad = 6;
+    if (assets.shield) {
+      const id = workbook.addImage({ base64: assets.shield, extension: "png" });
+      sheet.addImage(id, {
+        tl: anchorAtPx(pad, 4),
+        ext: { width: sizes.shield.w, height: sizes.shield.h },
+      });
+    }
+    if (assets.brand) {
+      const id = workbook.addImage({ base64: assets.brand, extension: "png" });
+      sheet.addImage(id, {
+        tl: anchorAtPx(Math.max(totalPx - sizes.brand.w - pad, pad), 4 + sizes.shield.h - sizes.brand.h),
+        ext: { width: sizes.brand.w, height: sizes.brand.h },
+      });
+    }
+
+    // ── Title + subtitle (plain, under the brand rule) ──
+    sheet.mergeCells(TITLE_ROW, 1, TITLE_ROW, colCount);
+    const titleCell = sheet.getCell(TITLE_ROW, 1);
+    titleCell.value = cleanTitle;
+    titleCell.font = { bold: true, size: 15, color: { argb: "FF242424" } };
+    titleCell.alignment = { vertical: "bottom", horizontal: "left", indent: 0 };
+    sheet.getRow(TITLE_ROW).height = 30;
+
+    sheet.mergeCells(SUBTITLE_ROW, 1, SUBTITLE_ROW, colCount);
+    const subtitleCell = sheet.getCell(SUBTITLE_ROW, 1);
+    subtitleCell.value = [subtitle, `Generado el ${formatDateSpanish(new Date())}`]
+      .filter(Boolean)
+      .join("  ·  ");
+    subtitleCell.font = { size: 9.5, color: { argb: "FF6B7280" } };
+    subtitleCell.alignment = { vertical: "middle", horizontal: "left" };
+    sheet.getRow(SUBTITLE_ROW).height = 18;
 
     // ── Optional grouped header (merged, e.g. "Agosto 2026") ──
-    if (groupedHeaders && groupedHeaders.length > 1) {
-      const banner =
-        groupedHeaders[0].find((c) => String(c).trim() !== "") ?? "";
-      if (banner) {
-        sheet.mergeCells(2, 1, 2, exportHeaders.length);
-        const bannerCell = sheet.getCell(2, 1);
-        bannerCell.value = String(banner);
-        bannerCell.font = { bold: true, size: 10.5, color: { argb: "FFFFFFFF" } };
-        bannerCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1A1A1A" } };
-        bannerCell.alignment = { vertical: "middle", horizontal: "center" };
-        sheet.getRow(2).height = 20;
-        rowCursor = 3;
-      }
+    if (bannerRow) {
+      sheet.mergeCells(bannerRow, 1, bannerRow, colCount);
+      const bannerCell = sheet.getCell(bannerRow, 1);
+      bannerCell.value = String(banner);
+      bannerCell.font = { bold: true, size: 10.5, color: { argb: "FFFFFFFF" } };
+      bannerCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1A1A1A" } };
+      bannerCell.alignment = { vertical: "middle", horizontal: "center" };
+      sheet.getRow(bannerRow).height = 20;
     }
 
     // ── Column headers (black, bold, white text) ──
-    const headerRow = sheet.getRow(rowCursor);
+    const headerRow = sheet.getRow(headerRowIndex);
     exportHeaders.forEach((header, colIndex) => {
       const cell = headerRow.getCell(colIndex + 1);
       cell.value = String(header).toUpperCase();
@@ -260,7 +331,7 @@ export async function exportTable({
 
     // ── Data rows (zebra + borders) ──
     strictRows.forEach((row, rowIndex) => {
-      const excelRow = sheet.getRow(rowCursor + 1 + rowIndex);
+      const excelRow = sheet.getRow(headerRowIndex + 1 + rowIndex);
       const zebra = rowIndex % 2 === 1;
       exportHeaders.forEach((key, colIndex) => {
         const cell = excelRow.getCell(colIndex + 1);
@@ -290,19 +361,20 @@ export async function exportTable({
       excelRow.height = 18;
     });
 
-    // ── Column widths (content-aware, capped) ──
-    exportHeaders.forEach((header, colIndex) => {
-      const maxLen = Math.max(
-        String(header).length,
-        ...strictRows.map((row) => {
-          const v = row[header];
-          return v === null || v === undefined
-            ? 0
-            : String(v).length;
-        })
-      );
-      sheet.getColumn(colIndex + 1).width = Math.min(Math.max(maxLen + 3, 10), 48);
-    });
+    // ── Footer: legal line + website link (same as the pay slip) ──
+    const footerRow = headerRowIndex + strictRows.length + 3;
+    sheet.mergeCells(footerRow, 1, footerRow, colCount);
+    const legalCell = sheet.getCell(footerRow, 1);
+    legalCell.value = COMPANY_FOOTER_TEXT;
+    legalCell.font = { size: 8.5, color: { argb: "FF242424" } };
+    legalCell.alignment = { vertical: "middle", horizontal: "center" };
+    legalCell.border = { top: { style: "thin", color: { argb: "FFD1D5DB" } } };
+    sheet.getRow(footerRow).height = 20;
+    sheet.mergeCells(footerRow + 1, 1, footerRow + 1, colCount);
+    const linkCell = sheet.getCell(footerRow + 1, 1);
+    linkCell.value = { text: COMPANY.website, hyperlink: COMPANY.websiteUrl };
+    linkCell.font = { size: 8.5, underline: true, color: { argb: "FF1F497D" } };
+    linkCell.alignment = { vertical: "middle", horizontal: "center" };
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
@@ -567,77 +639,57 @@ async function exportToModernPdf({
   const cleanTitle = (title ?? deriveTitleFromFileName(fileName)).slice(0, 60);
   const generatedLabel = formatDateSpanish(new Date());
 
-  // ── Hero header band ───────────────────────────────────────────────
-  const bandY = 10;
-  const bandH = 34;
-  doc.setFillColor(10, 10, 10);
-  doc.roundedRect(marginX, bandY, pageWidth - marginX * 2, bandH, 5, 5, "F");
+  // ── Brand header (same as the pay slip): shield + "Su auto… nuestro chofer." ──
+  const assets = await loadBrandAssets();
+  const headerTop = 10;
+  const headerHeight = 19;
+  const ruleY = drawBrandHeader(doc, assets, {
+    left: marginX,
+    right: pageWidth - marginX,
+    top: headerTop,
+    height: headerHeight,
+  });
 
-  // Brand logo on a white rounded chip (dark icon needs contrast on the
-  // black band). Falls back to the "CHOFERES" overline if the image fails.
-  const logoDataUrl = await loadLogoDataUrl();
-  let textX = marginX + 7;
-  let titleY = bandY + 16.5;
-  let subtitleY = bandY + 23.5;
-  if (logoDataUrl) {
-    const chipSize = 24;
-    const chipX = marginX + 6;
-    const chipY = bandY + (bandH - chipSize) / 2;
-    doc.setFillColor(255, 255, 255);
-    doc.roundedRect(chipX, chipY, chipSize, chipSize, 6, 6, "F");
-    doc.addImage(logoDataUrl, "PNG", chipX + 2, chipY + 2, chipSize - 4, chipSize - 4);
-    textX = marginX + 36;
-    titleY = bandY + 17;
-    subtitleY = bandY + 24;
-  } else {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.setTextColor(156, 163, 175);
-    doc.text("CHOFERES", textX, bandY + 8);
-  }
-
-  // Title (truncated to fit the band, keeping clear of the right-side meta)
-  const contentMaxWidth = logoDataUrl ? 90 : 110;
+  // Title block under the rule; generated date + record count on the right.
+  const rightEdge = pageWidth - marginX;
+  const titleY = ruleY + 10;
+  const metaWidth = 52;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(17);
-  doc.setTextColor(255, 255, 255);
-  const titleLines = doc.splitTextToSize(cleanTitle, contentMaxWidth);
-  doc.text(String(titleLines[0] ?? cleanTitle), textX, titleY);
+  doc.setFontSize(16);
+  doc.setTextColor(...BRAND_INK);
+  const titleLines = doc.splitTextToSize(cleanTitle, pageWidth - marginX * 2 - metaWidth);
+  doc.text(String(titleLines[0] ?? cleanTitle), marginX, titleY);
 
   // Subtitle (each "·"-separated segment is shortened, e.g. "Semana 32 · Agosto 2026")
   if (subtitle) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
-    doc.setTextColor(203, 213, 225);
+    doc.setTextColor(...BRAND_MUTED);
     const shortenedSubtitle = subtitle
       .split("·")
       .map((segment) => shortenPdfCell(segment))
       .join(" · ");
-    const subLines = doc.splitTextToSize(shortenedSubtitle, contentMaxWidth);
-    doc.text(String(subLines[0] ?? ""), textX, subtitleY);
+    const subLines = doc.splitTextToSize(shortenedSubtitle, pageWidth - marginX * 2 - metaWidth);
+    doc.text(String(subLines[0] ?? ""), marginX, titleY + 6);
   }
 
-  // Generated date (right side)
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
-  doc.setTextColor(148, 163, 184);
-  doc.text(
-    `Generado el ${generatedLabel}`,
-    pageWidth - marginX - 7,
-    bandY + 8,
-    { align: "right" }
-  );
+  doc.setTextColor(...BRAND_MUTED);
+  doc.text(`Generado el ${generatedLabel}`, rightEdge, titleY - 4, { align: "right" });
 
-  // Records count chip (right side, below generated date)
+  // Records count chip (outlined pill, right side)
   const recordText = `${rows.length} ${rows.length === 1 ? "registro" : "registros"}`;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
-  const chipW = doc.getTextWidth(recordText) + 9;
-  const chipX = pageWidth - marginX - 7 - chipW;
-  doc.setFillColor(26, 26, 26);
-  doc.roundedRect(chipX, bandY + 12, chipW, 7.5, 3.75, 3.75, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.text(recordText, chipX + 4.5, bandY + 17);
+  doc.setFontSize(8);
+  const chipW = doc.getTextWidth(recordText) + 8;
+  doc.setDrawColor(209, 213, 219);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(rightEdge - chipW, titleY, chipW, 6.5, 3.25, 3.25, "S");
+  doc.setTextColor(...BRAND_INK);
+  doc.text(recordText, rightEdge - chipW / 2, titleY + 4.4, { align: "center" });
+
+  const tableStartY = titleY + (subtitle ? 13 : 9);
 
   // ── Table data ─────────────────────────────────────────────────────
   // Cells are shortened first so every value fits on a single line (no wraps).
@@ -692,8 +744,19 @@ async function exportToModernPdf({
   const autoTableResult = doc.autoTable({
     head,
     body: tableBody,
-    startY: bandY + bandH + 8,
-    margin: { top: 20, left: marginX, right: marginX, bottom: 18 },
+    startY: tableStartY,
+    margin: { top: 26, left: marginX, right: marginX, bottom: 24 },
+    // Pages after the first get a compact brand header instead of nothing.
+    didDrawPage: (hookData: { pageNumber: number }) => {
+      if (hookData.pageNumber > 1) {
+        drawCompactBrandHeader(
+          doc,
+          assets,
+          { left: marginX, right: pageWidth - marginX, top: 9, height: 11 },
+          cleanTitle,
+        );
+      }
+    },
     styles: {
       font: "helvetica",
       fontSize: 7.8,
@@ -774,9 +837,9 @@ async function exportToModernPdf({
     // Ensure the whole legend fits on the page; add a new page if needed.
     const legendHeight = 14 + legend.length * 7.5;
     let legendY = tableBottom + 12;
-    if (legendY + legendHeight > pageHeight - 20) {
+    if (legendY + legendHeight > pageHeight - 28) {
       doc.addPage();
-      legendY = 24;
+      legendY = 32;
     }
     doc.setPage(doc.getNumberOfPages());
     doc.setDrawColor(10, 10, 10);
@@ -805,24 +868,19 @@ async function exportToModernPdf({
     });
   }
 
-  // ── Footer with page numbers on every page ─────────────────────────
+  // ── Footer on every page: legal line with the website link + page number ──
   const totalPages = doc.getNumberOfPages();
   for (let page = 1; page <= totalPages; page += 1) {
     doc.setPage(page);
-    const footerY = pageHeight - 8;
+    const footerY = pageHeight - 11;
     doc.setDrawColor(228, 228, 231);
     doc.setLineWidth(0.3);
     doc.line(marginX, footerY - 5, pageWidth - marginX, footerY - 5);
+    drawBrandFooter(doc, { y: footerY, fontSize: 7, color: BRAND_MUTED });
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
-    doc.setTextColor(148, 163, 184);
-    doc.text(`Choferes · ${cleanTitle}`, marginX, footerY);
-    doc.text(
-      `Página ${page} de ${totalPages}`,
-      pageWidth - marginX,
-      footerY,
-      { align: "right" }
-    );
+    doc.setTextColor(...BRAND_MUTED);
+    doc.text(`Página ${page} de ${totalPages}`, pageWidth / 2, footerY + 4.2, { align: "center" });
   }
 
   doc.save(`${fileName}.pdf`);
