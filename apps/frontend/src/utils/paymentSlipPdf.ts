@@ -5,15 +5,8 @@
 // and attached to the email, so what the user checks is what is sent.
 import { Payment, PAYMENT_CONCEPTS } from "../models/Payment";
 import { loadJSPDF } from "./export";
-import shieldLogo from "../assets/images/boleta/logo-escudo.png";
-import brandLogo from "../assets/images/boleta/logo-su-auto.png";
-import {
-  COMPANY,
-  COMPANY_FOOTER_TEXT,
-  formatBoletaPeriod,
-  formatColones,
-  getPeriodEndISO,
-} from "./boletaFormat";
+import { formatBoletaPeriod, formatColones, getPeriodEndISO } from "./boletaFormat";
+import { BRAND_INK, drawBrandFooter, drawBrandHeader, loadBrandAssets } from "./pdfBranding";
 
 const CURRENCY_LABELS: Record<string, string> = {
   CRC: "₡",
@@ -63,31 +56,10 @@ export const getPaymentFileName = (payment: Payment): string => {
   return `comprobante-de-pago-${period}-${name}.pdf`;
 };
 
-const imageCache = new Map<string, string | null>();
-
-const loadImageDataUrl = async (src: string): Promise<string | null> => {
-  if (imageCache.has(src)) return imageCache.get(src) ?? null;
-  try {
-    const blob = await (await fetch(src)).blob();
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(blob);
-    });
-    imageCache.set(src, dataUrl);
-    return dataUrl;
-  } catch {
-    imageCache.set(src, null);
-    return null;
-  }
-};
-
 // Word template geometry (points): letter page, 1701 twips side margins.
 const PAGE = { marginX: 85, headerTop: 35 };
-const INK: [number, number, number] = [36, 36, 36]; // #242424
+const INK = BRAND_INK;
 const GRID: [number, number, number] = [191, 191, 191]; // #BFBFBF
-const LINK: [number, number, number] = [31, 73, 125]; // #1F497D
 
 export const boletaRows = (payment: Payment): Array<{ label: string; value: string }> => {
   const employeeName = payment.employee
@@ -116,35 +88,17 @@ export async function buildPaymentSlipPdf(payment: Payment) {
   const right = pageWidth - PAGE.marginX;
 
   // ── Header: shield (left) and "Su auto… nuestro chofer." (right) ──────────
-  const [shield, brand] = await Promise.all([
-    loadImageDataUrl(shieldLogo),
-    loadImageDataUrl(brandLogo),
-  ]);
+  const assets = await loadBrandAssets();
   const headerLeft = left - 9; // paragraph indent of the template header
   const headerRight = right + 38;
-  const shieldSize = { w: 100, h: 106 };
-  const brandSize = { w: 86, h: 62 };
-  const headerBottom = PAGE.headerTop + shieldSize.h;
-  try {
-    if (shield) {
-      doc.addImage(shield, "PNG", headerLeft, PAGE.headerTop, shieldSize.w, shieldSize.h);
-    }
-    if (brand) {
-      doc.addImage(
-        brand,
-        "PNG",
-        headerRight - brandSize.w,
-        headerBottom - brandSize.h,
-        brandSize.w,
-        brandSize.h,
-      );
-    }
-  } catch {
-    // Unreadable logo — keep the document without it.
-  }
-  doc.setDrawColor(0, 0, 0);
-  doc.setLineWidth(2.25);
-  doc.line(headerLeft, headerBottom + 6, headerRight, headerBottom + 6);
+  const shieldHeight = 106;
+  const headerBottom = PAGE.headerTop + shieldHeight;
+  drawBrandHeader(doc, assets, {
+    left: headerLeft,
+    right: headerRight,
+    top: PAGE.headerTop,
+    height: shieldHeight,
+  });
 
   // ── Title and period ──────────────────────────────────────────────────────
   doc.setTextColor(...INK);
@@ -187,21 +141,8 @@ export async function buildPaymentSlipPdf(payment: Payment) {
 
   // ── Footer: legal line with the website link ──────────────────────────────
   const footerY = pageHeight - 40;
+  drawBrandFooter(doc, { y: footerY, fontSize: 8 });
   doc.setFontSize(8);
-  const text = `${COMPANY_FOOTER_TEXT} /`;
-  // getTextWidth ignores trailing spaces: add the separating space by hand.
-  const spaceWidth = (doc.getStringUnitWidth(" ") * doc.getFontSize()) / doc.internal.scaleFactor;
-  const textWidth = doc.getTextWidth(text) + spaceWidth;
-  const linkWidth = doc.getTextWidth(COMPANY.website);
-  const startX = (pageWidth - textWidth - linkWidth) / 2;
-  doc.setTextColor(...INK);
-  doc.text(text, startX, footerY);
-  doc.setTextColor(...LINK);
-  doc.textWithLink(COMPANY.website, startX + textWidth, footerY, { url: COMPANY.websiteUrl });
-  doc.setDrawColor(...LINK);
-  doc.setLineWidth(0.4);
-  doc.line(startX + textWidth, footerY + 1.2, startX + textWidth + linkWidth, footerY + 1.2);
-  doc.setTextColor(...INK);
   doc.text("c.archivo", left, footerY + 12);
 
   return doc;
