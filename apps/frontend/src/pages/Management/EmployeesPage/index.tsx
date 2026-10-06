@@ -301,7 +301,6 @@ const EmployeesPage: React.FC = () => {
     gender?: EmployeeGender | null;
     contractStartDate?: string | null;
     hourlyRate?: number | null;
-    vacationDays?: number | null;
   }) => {
     try {
       setIsSubmitting(true);

@@ -40,6 +40,7 @@ import {
 import VacationFormDialog from "./VacationFormDialog";
 import { getVacationAccrual } from "../../../services/employeeService";
 import { VacationAccrual } from "../../../models/VacationAccrual";
+import { displayedVacationDays } from "../vacationBalance";
 import { updateEmployee } from "../../../store/slices/employeeSlice";
 import { submitButton } from "../../Forms/sharedStyles";
 import SectionHeader from "./SectionHeader";
@@ -225,6 +226,10 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
     }
   };
 
+  // Saldo guardado si existe; si no, el acumulado legal, para no mostrar
+  // "sin asignar" cuando la ley ya reconoce días.
+  const balanceDays = displayedVacationDays(employee.vacationDays, accrual);
+
   return (
     <Box sx={cardStackStyles}>
       <Paper elevation={0} sx={sectionPaperStyles(theme)}>
@@ -295,7 +300,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
                 <IconCalendarWeek size={16} color={theme.palette.primary.main} />
                 Saldo:{" "}
                 <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>
-                  {employee.vacationDays != null ? `${employee.vacationDays} días` : "sin asignar"}
+                  {balanceDays != null ? `${balanceDays} días` : "sin asignar"}
                 </Box>
               </Typography>
               {canCreate && (
