@@ -99,8 +99,16 @@ export const deleteUserRole = async (id: number) => {
 };
 
 // Assigns a role to a user without duplicating the row (idempotent).
-export const assignRole = async (userId: number, roleId: number): Promise<UserRole> => {
-  const existing = await UserRole.findOne({ where: { userId, roleId } });
+export const assignRole = async (
+  userId: number,
+  roleId: number,
+  transaction?: unknown,
+): Promise<UserRole> => {
+  const existing = await UserRole.findOne(
+    transaction ? { where: { userId, roleId }, transaction } : { where: { userId, roleId } },
+  );
   if (existing) return existing;
-  return UserRole.create({ userId, roleId });
+  return transaction
+    ? UserRole.create({ userId, roleId }, { transaction })
+    : UserRole.create({ userId, roleId });
 };

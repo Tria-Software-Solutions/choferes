@@ -9,6 +9,7 @@ import LicenseRequest, {
   LicenseRequestAction,
   LicenseRequestStatus,
 } from "../models/LicenseRequest";
+import sequelize from "../config/database";
 import EmployeeLicense from "../models/EmployeeLicense";
 import Employee from "../models/Employee";
 import { ServiceError } from "../utils/errors";
@@ -185,18 +186,21 @@ export const listRequests = async (query: Record<string, string | undefined>) =>
 };
 
 /** Aplica la solicitud aprobada a la licencia real. */
-const applyRequest = async (request: LicenseRequest) => {
+const applyRequest = async (request: LicenseRequest, transaction?: unknown) => {
   const payload = (request.payload ?? {}) as LicenseRequestPayload;
 
   if (request.action === "create") {
-    await licenseService.createLicense({
-      employeeId: request.employeeId,
-      licenseType: String(payload.licenseType),
-      licenseNumber: payload.licenseNumber ?? null,
-      issuedAt: payload.issuedAt ?? null,
-      expiresAt: payload.expiresAt ?? null,
-      notes: payload.notes ?? null,
-    });
+    await licenseService.createLicense(
+      {
+        employeeId: request.employeeId,
+        licenseType: String(payload.licenseType),
+        licenseNumber: payload.licenseNumber ?? null,
+        issuedAt: payload.issuedAt ?? null,
+        expiresAt: payload.expiresAt ?? null,
+        notes: payload.notes ?? null,
+      },
+      { transaction },
+    );
     return;
   }
 
@@ -206,13 +210,13 @@ const applyRequest = async (request: LicenseRequest) => {
   }
 
   if (request.action === "update") {
-    const updated = await licenseService.updateLicense(licenseId, payload);
+    const updated = await licenseService.updateLicense(licenseId, payload, { transaction });
     if (!updated) throw new ServiceError(409, "La licencia de la solicitud ya no existe");
     return;
   }
 
   if (request.action === "delete") {
-    const deleted = await licenseService.deleteLicense(licenseId);
+    const deleted = await licenseService.deleteLicense(licenseId, { transaction });
     if (!deleted) throw new ServiceError(409, "La licencia de la solicitud ya no existe");
   }
 };
@@ -229,12 +233,20 @@ const findPending = async (id: number) => {
 /** Aprueba la solicitud y aplica el cambio sobre las licencias del empleado. */
 export const approveRequest = async (id: number, reviewerUserId: number) => {
   const request = await findPending(id);
-  await applyRequest(request);
 
-  await request.update({
-    status: "approved",
-    reviewedBy: reviewerUserId,
-    reviewedAt: new Date(),
+  // Applying the license change and closing the request must be atomic: on
+  // "create" a partial failure would leave a license with the request still
+  // pending, and a retry would insert the license twice.
+  await sequelize.transaction(async (transaction: unknown) => {
+    await applyRequest(request, transaction);
+    await request.update(
+      {
+        status: "approved",
+        reviewedBy: reviewerUserId,
+        reviewedAt: new Date(),
+      },
+      { transaction },
+    );
   });
 
   await notifyEmployeeUser(request.employeeId, {

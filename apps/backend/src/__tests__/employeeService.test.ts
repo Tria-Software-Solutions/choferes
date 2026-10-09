@@ -54,6 +54,12 @@ jest.mock("../services/accessGrantService", () => ({
   checkRoleGrant: jest.fn(),
 }));
 
+// Managed transaction: runs the callback with a fake transaction handle.
+jest.mock("../config/database", () => ({
+  __esModule: true,
+  default: { transaction: jest.fn((callback: (t: unknown) => unknown) => callback("tx")) },
+}));
+
 // Hashing is irrelevant here and real bcrypt would slow the suite down.
 jest.mock("bcrypt", () => ({
   hash: jest.fn().mockResolvedValue("hashed"),
@@ -963,7 +969,7 @@ describe("employeeService", () => {
 
       expect(result.created).toBe(true);
       expect(mockRoleFindAll).toHaveBeenCalledWith({ where: { name: ["Chofer"] } });
-      expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 42, roleId: 6 });
+      expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 42, roleId: 6 }, { transaction: "tx" });
     });
 
     it("da a la cuenta nueva el rol de su puesto (supervisor → Supervisor)", async () => {
@@ -979,7 +985,7 @@ describe("employeeService", () => {
 
       expect(mockRoleFindAll).toHaveBeenCalledWith({ where: { name: ["Supervisor"] } });
       expect(checkRoleGrant).toHaveBeenCalledWith(actor, 3);
-      expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 42, roleId: 3 });
+      expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 42, roleId: 3 }, { transaction: "tx" });
     });
 
     it("no crea la cuenta si quien la activa no puede otorgar el rol del puesto", async () => {

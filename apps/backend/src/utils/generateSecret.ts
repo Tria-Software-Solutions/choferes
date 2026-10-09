@@ -47,7 +47,9 @@ export const generateTokens = (
       },
       JWT_SECRET_KEY,
       {
-        expiresIn: "1h",
+        // Short-lived: the client keeps this token in JS memory (cross-site
+        // fallback), so a small TTL bounds the window of an XSS token theft.
+        expiresIn: "15m",
         algorithm: "HS256",
       },
     ),
@@ -67,7 +69,10 @@ export const generateTokens = (
     ),
   };
 
-  res.cookie("accessToken", tokens.accessToken, { ...AUTH_COOKIE_OPTIONS, maxAge: 3600 * 1000 });
+  res.cookie("accessToken", tokens.accessToken, {
+    ...AUTH_COOKIE_OPTIONS,
+    maxAge: 15 * 60 * 1000,
+  });
 
   res.cookie("refreshToken", tokens.refreshToken, {
     ...AUTH_COOKIE_OPTIONS,

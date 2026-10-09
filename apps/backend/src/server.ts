@@ -121,7 +121,6 @@ app.use(
       "Origin",
       "x-no-cache",
     ],
-    exposedHeaders: ["x-access-token", "x-refresh-token"],
     maxAge: 86400,
   }),
 );
