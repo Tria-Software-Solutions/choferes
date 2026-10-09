@@ -27,6 +27,8 @@ jest.mock("../services/userRoleService", () => ({
   getUserRoles: jest.fn(),
   getUserRoleByUserId: jest.fn(),
   getUserRoleByRoleId: jest.fn(),
+  getUserRoleById: jest.fn(),
+  getRoleIdsByUserId: jest.fn(),
   createUserRole: jest.fn(),
   updateUserRole: jest.fn(),
   deleteUserRole: jest.fn(),
@@ -35,6 +37,7 @@ jest.mock("../services/userRoleService", () => ({
 // Grant rules have their own unit tests; here they're controlled per test.
 jest.mock("../services/accessGrantService", () => ({
   checkRoleAssignment: jest.fn(),
+  checkRoleRemoval: jest.fn(),
 }));
 
 // La regla "un supervisor conserva el rol Supervisor" se prueba en positionRoleService.test.ts.
@@ -64,7 +67,10 @@ const mockUserRole = {
 beforeEach(() => {
   jest.clearAllMocks();
   accessGrant.checkRoleAssignment.mockResolvedValue(null);
+  accessGrant.checkRoleRemoval.mockResolvedValue(null);
   positionRole.checkRolesFitEmployeePositions.mockResolvedValue(null);
+  service.getUserRoleById.mockResolvedValue(mockUserRole);
+  service.getRoleIdsByUserId.mockResolvedValue([1, 2]);
 });
 
 describe("GET /api/user-roles", () => {
@@ -247,13 +253,61 @@ describe("DELETE /api/user-roles/:id", () => {
     const res = await request(app).delete("/api/user-roles/1");
 
     expect(res.status).toBe(204);
+    expect(accessGrant.checkRoleRemoval).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 1 }),
+      mockUserRole.userId,
+      mockUserRole.roleId,
+    );
+    expect(service.deleteUserRole).toHaveBeenCalledWith(1);
   });
 
-  it("debería devolver 404 si no existe", async () => {
-    service.deleteUserRole.mockResolvedValue(0);
+  it("debería devolver 404 si la asignación no existe", async () => {
+    service.getUserRoleById.mockResolvedValue(null);
 
     const res = await request(app).delete("/api/user-roles/999");
 
     expect(res.status).toBe(404);
+    expect(service.deleteUserRole).not.toHaveBeenCalled();
+  });
+
+  it("rechaza quitarse los propios roles", async () => {
+    accessGrant.checkRoleRemoval.mockResolvedValue({
+      status: 403,
+      message: "No puedes quitarte tus propios roles",
+    });
+
+    const res = await request(app).delete("/api/user-roles/1");
+
+    expect(res.status).toBe(403);
+    expect(service.deleteUserRole).not.toHaveBeenCalled();
+  });
+
+  it("rechaza dejar una cuenta sin roles", async () => {
+    accessGrant.checkRoleRemoval.mockResolvedValue({
+      status: 409,
+      message: "Una cuenta debe conservar al menos un rol",
+    });
+
+    const res = await request(app).delete("/api/user-roles/1");
+
+    expect(res.status).toBe(409);
+    expect(service.deleteUserRole).not.toHaveBeenCalled();
+  });
+
+  it("valida que un supervisor conserve el rol Supervisor antes de borrar", async () => {
+    service.getRoleIdsByUserId.mockResolvedValue([1]);
+    positionRole.checkRolesFitEmployeePositions.mockResolvedValue({
+      status: 409,
+      message: 'debe tener el rol "Supervisor"',
+    });
+
+    const res = await request(app).delete("/api/user-roles/1");
+
+    expect(res.status).toBe(409);
+    expect(positionRole.checkRolesFitEmployeePositions).toHaveBeenCalledWith(
+      mockUserRole.userId,
+      [],
+    );
+    expect(service.deleteUserRole).not.toHaveBeenCalled();
   });
 });

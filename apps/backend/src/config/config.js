@@ -31,10 +31,25 @@ if (!db.host || !db.database) {
   );
 }
 
+// Managed providers (Render/Heroku/Neon) commonly present certificates that are
+// not anchored in the system trust store, so verification used to be disabled
+// outright. It can now be enabled without code changes:
+//   PGSSL_CA=<provider CA, PEM or base64>   → verify against that CA (strongest)
+//   PGSSL_REJECT_UNAUTHORIZED=true          → verify against the system store
+const caEnv = process.env.PGSSL_CA;
+let ca;
+if (caEnv && caEnv.includes("BEGIN CERTIFICATE")) {
+  ca = caEnv.replace(/\\n/g, "\n");
+} else if (caEnv) {
+  ca = Buffer.from(caEnv, "base64").toString("utf8");
+}
+
 const sslConfig = {
   ssl: {
     require: true,
-    rejectUnauthorized: false,
+    rejectUnauthorized:
+      caEnv !== undefined ? true : process.env.PGSSL_REJECT_UNAUTHORIZED === "true",
+    ...(ca ? { ca } : {}),
   },
 };
 
@@ -50,6 +65,14 @@ const makeDialectOptions = () => {
   // Explicitly disable SSL for local connections to avoid pg default behavior
   return { ssl: false };
 };
+
+if (useSSL && !ca && process.env.PGSSL_REJECT_UNAUTHORIZED !== "true") {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[db] TLS certificate verification is disabled (rejectUnauthorized=false). " +
+      "Set PGSSL_CA (provider CA) or PGSSL_REJECT_UNAUTHORIZED=true to enable it.",
+  );
+}
 
 const config = {
   development: {

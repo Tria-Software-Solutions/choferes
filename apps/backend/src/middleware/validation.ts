@@ -12,6 +12,7 @@ import {
   EMPLOYEE_TERMINATION_REASONS,
   usernameRegex,
 } from "@choferes/shared";
+import { isAllowedAttachmentDataUrl } from "../utils/dataUrl";
 
 /**
  * Middleware that checks express-validator result and returns 400 with errors if validation failed.
@@ -36,6 +37,17 @@ export const validate = (req: Request, res: Response, next: NextFunction) => {
 export const idParam = [
   param("id").isInt({ min: 1 }).withMessage("ID inválido: debe ser un número entero positivo"),
 ];
+
+// Contraseñas: mínimo 8 caracteres e incluir al menos una letra y un número.
+// Se usa en creación, cambio y contraseña temporal para una política uniforme.
+const passwordRule = (field: string, label: string) =>
+  body(field)
+    .notEmpty()
+    .withMessage(`${label} es requerida`)
+    .isLength({ min: 8 })
+    .withMessage(`${label} debe tener al menos 8 caracteres`)
+    .matches(/^(?=.*[A-Za-z])(?=.*\d).+$/)
+    .withMessage(`${label} debe incluir al menos una letra y un número`);
 
 // Teléfono CR opcional: solo dígitos, 8 de fijo o 9 con el 8 inicial de móvil.
 const phoneRule = (field: string) =>
@@ -407,11 +419,7 @@ export const userRules = [
     .withMessage("Email inválido")
     .isLength({ max: 255 })
     .withMessage("El email no puede exceder 255 caracteres"),
-  body("password")
-    .notEmpty()
-    .withMessage("La contraseña es requerida")
-    .isLength({ min: 6 })
-    .withMessage("La contraseña debe tener al menos 6 caracteres"),
+  passwordRule("password", "La contraseña"),
   // Rol(es) a asignar (obligatorio): toda cuenta debe tener al menos un rol.
   // `roleIds` (lista) es la forma nueva; `roleId` (uno) sigue aceptándose para
   // no romper a los clientes que solo mandan un rol.
@@ -471,11 +479,7 @@ export const userStatusUpdateRules = [
 
 export const userPasswordUpdateRules = [
   ...idParam,
-  body("password")
-    .notEmpty()
-    .withMessage("La contraseña es requerida")
-    .isLength({ min: 6 })
-    .withMessage("La contraseña debe tener al menos 6 caracteres"),
+  passwordRule("password", "La contraseña"),
   body("currentPassword")
     .optional()
     .isString()
@@ -484,11 +488,7 @@ export const userPasswordUpdateRules = [
 
 export const userTemporalPasswordUpdateRules = [
   ...idParam,
-  body("temporalPassword")
-    .notEmpty()
-    .withMessage("La contraseña temporal es requerida")
-    .isLength({ min: 6 })
-    .withMessage("La contraseña temporal debe tener al menos 6 caracteres"),
+  passwordRule("temporalPassword", "La contraseña temporal"),
 ];
 
 // ─── Roles ───────────────────────────────────────────────────────────────────
@@ -962,10 +962,11 @@ const attachmentRules = [
     .isString()
     .isLength({ max: 3000000 })
     .withMessage("Cada adjunto no puede exceder ~2MB")
-    // Must be an inline base64 file. Anything else (e.g. a `javascript:` URL)
-    // would run in the viewer's session when the attachment is opened.
-    .matches(/^data:[\w.+-]+\/[\w.+-]+;base64,[A-Za-z0-9+/=\s]*$/)
-    .withMessage("Cada adjunto debe ser un archivo codificado en base64"),
+    // Must be an inline base64 file whose MIME is on the allowlist. Anything
+    // else (e.g. a `javascript:` URL or `text/html`) would run in the viewer's
+    // session when the attachment is opened.
+    .custom((value: string) => isAllowedAttachmentDataUrl(value))
+    .withMessage("Cada adjunto debe ser un archivo permitido codificado en base64"),
 ];
 
 export const disciplinaryRules = [

@@ -11,6 +11,7 @@ import Document from "../models/Document";
 import DocumentFolder from "../models/DocumentFolder";
 import Employee from "../models/Employee";
 import { ServiceError } from "../utils/errors";
+import { parseDataUrl, isAllowedAttachmentDataUrl } from "../utils/dataUrl";
 
 /** Tamaño máximo del archivo original (6 MB). El data URL base64 crece ~37%,
  * así que se mantiene por debajo del límite de 10 MB del body parser. */
@@ -18,8 +19,6 @@ export const MAX_DOCUMENT_BYTES = 6 * 1024 * 1024;
 
 /** Profundidad máxima del árbol de carpetas (carpeta raíz incluida). */
 const MAX_FOLDER_DEPTH = 6;
-
-const DATA_URL_PATTERN = /^data:[\w.+-]+\/[\w.+-]+;base64,/;
 
 interface PlainRow {
   get: (options: { plain: true }) => Record<string, unknown>;
@@ -171,8 +170,9 @@ export const createDocument = async (input: CreateDocumentInput) => {
   if (name.length > 200) throw new ServiceError(400, "El nombre del archivo es demasiado largo");
 
   const data = typeof input.data === "string" ? input.data : "";
-  if (!DATA_URL_PATTERN.test(data)) {
-    throw new ServiceError(400, "El archivo debe venir como data URL base64");
+  const parsed = parseDataUrl(data);
+  if (!parsed || !isAllowedAttachmentDataUrl(data)) {
+    throw new ServiceError(400, "El archivo debe ser un tipo permitido en data URL base64");
   }
   // El data URL crece ~37% respecto al binario; se compara contra el mismo tope.
   if (data.length > MAX_DOCUMENT_BYTES * 1.4) {
@@ -185,14 +185,13 @@ export const createDocument = async (input: CreateDocumentInput) => {
   const folder = await findFolderOrFail(input.folderId);
   if (folder) assertSameOwner(folder, owner);
 
-  const mimeFromData = data.slice(5, data.indexOf(";base64"));
   const size = Number(input.size);
 
   const document = await Document.create({
     folderId: folder ? folder.id : null,
     ownerEmployeeId: owner,
     name,
-    mimeType: (input.mimeType ?? mimeFromData) || null,
+    mimeType: (input.mimeType ?? parsed.mime) || null,
     size: Number.isFinite(size) && size >= 0 ? Math.round(size) : 0,
     data,
     uploadedBy: input.userId ?? null,

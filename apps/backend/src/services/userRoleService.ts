@@ -14,6 +14,15 @@ export const resolveRoleById = async (roleId: number): Promise<Role> => {
 // Get all user-role assignments
 export const getUserRoles = async () => UserRole.findAll();
 
+// Get a single user-role assignment by its own id
+export const getUserRoleById = (id: number) => UserRole.findByPk(id);
+
+// Role ids currently assigned to a user
+export const getRoleIdsByUserId = async (userId: number): Promise<number[]> => {
+  const rows = await UserRole.findAll({ where: { userId }, attributes: ["roleId"] });
+  return rows.map((row) => row.roleId);
+};
+
 // Get a user-role assignment by user ID
 export const getUserRoleByUserId = async (userId: number) =>
   UserRole.findOne({

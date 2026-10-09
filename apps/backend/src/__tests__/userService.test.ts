@@ -93,7 +93,7 @@ describe("authenticateUser", () => {
 
     expect(User.findOne).toHaveBeenCalledTimes(1);
     expect(bcrypt.compare).toHaveBeenCalledWith("password123", mockUser.password);
-    expect(generateTokens).toHaveBeenCalledWith("1", mockResponse);
+    expect(generateTokens).toHaveBeenCalledWith("1", mockResponse, 0);
     expect(result.accessToken).toBe("token123");
     expect(result.refreshToken).toBe("refresh123");
   });
@@ -332,7 +332,7 @@ describe("createUser", () => {
 
     const result = await userService.createUser(newData as any);
 
-    expect(bcrypt.hash).toHaveBeenCalledWith("plain_password", 10);
+    expect(bcrypt.hash).toHaveBeenCalledWith("plain_password", 12);
     const createArgs = (User.create as jest.Mock).mock.calls[0][0];
     expect(createArgs).toMatchObject({
       firstName: "Nuevo",
@@ -511,12 +511,15 @@ describe("updateUserPassword", () => {
 
     const result = await userService.updateUserPassword(1, "new_password");
 
-    expect(bcrypt.hash).toHaveBeenCalledWith("new_password", 10);
-    // Changing the password revokes any pending temporary password.
+    expect(bcrypt.hash).toHaveBeenCalledWith("new_password", 12);
+    // Changing the password revokes any pending temporary password and bumps
+    // tokenVersion so previously issued JWTs stop working.
     expect(User.update).toHaveBeenCalledWith(
-      { password: "new_hashed", temporalPassword: null },
+      expect.objectContaining({ password: "new_hashed", temporalPassword: null }),
       { where: { id: 1 } },
     );
+    const [[updateArgs]] = (User.update as jest.Mock).mock.calls;
+    expect(updateArgs.tokenVersion).toBeDefined();
     expect(result).toBeDefined();
   });
 });
@@ -529,7 +532,7 @@ describe("updateUserTemporalPassword", () => {
 
     const result = await userService.updateUserTemporalPassword(1, "temp_password");
 
-    expect(bcrypt.hash).toHaveBeenCalledWith("temp_password", 10);
+    expect(bcrypt.hash).toHaveBeenCalledWith("temp_password", 12);
     expect(User.update).toHaveBeenCalledWith(
       { temporalPassword: "temp_hashed" },
       { where: { id: 1 } },
