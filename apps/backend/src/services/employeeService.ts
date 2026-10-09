@@ -607,8 +607,8 @@ export const linkEmployeeToUser = async (employeeId: number, actor?: Authenticat
   // La contraseña principal se inicializa con otro valor aleatorio que nadie
   // conoce: el acceso inicial es solo con la temporal y se revoca al cambiarla.
   const tempPassword = generateTempPassword();
-  const hashedTemporal = await bcrypt.hash(tempPassword, 10);
-  const hashedPassword = await bcrypt.hash(generateTempPassword(), 10);
+  const hashedTemporal = await bcrypt.hash(tempPassword, 12);
+  const hashedPassword = await bcrypt.hash(generateTempPassword(), 12);
 
   const user = await User.create({
     firstName: employee.firstName,

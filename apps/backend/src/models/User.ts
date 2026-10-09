@@ -33,6 +33,9 @@ export class User extends Model {
   /** Soft-delete timestamp. NULL = active account; set = account deleted. */
   public deletedAt?: Date | null;
 
+  /** Bumped to revoke all previously issued JWTs (e.g. on password change). */
+  public tokenVersion!: number;
+
   public static associations: {
     roles: Association<User, Role>; // Association with roles
     employee: Association<User, Employee>;
@@ -98,6 +101,11 @@ User.init(
     deletedAt: {
       type: DataTypes.DATE,
       allowNull: true,
+    },
+    tokenVersion: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
   },
   {

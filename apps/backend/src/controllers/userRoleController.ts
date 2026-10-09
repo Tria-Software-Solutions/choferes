@@ -115,12 +115,34 @@ export const updateUserRole = async (req: Request, res: Response) => {
 // Delete a user-role assignment by ID
 export const deleteUserRole = async (req: Request, res: Response) => {
   try {
+    const actor = (req as AuthenticatedRequest).user;
     const id = parseInt(req.params.id, 10);
-    const deleted = await userRoleService.deleteUserRole(id);
-    if (deleted) {
-      return res.status(204).end();
+    if (!actor) return res.status(401).json({ message: "Unauthorized" });
+
+    const assignment = await userRoleService.getUserRoleById(id);
+    if (!assignment) return res.status(404).json({ message: "UserRole not found" });
+
+    const denial = await accessGrantService.checkRoleRemoval(
+      actor,
+      assignment.userId,
+      assignment.roleId,
+    );
+    if (denial) return res.status(denial.status).json({ message: denial.message });
+
+    // Removing this role must not leave a supervisor without the Supervisor role.
+    const remaining = (await userRoleService.getRoleIdsByUserId(assignment.userId)).filter(
+      (roleId) => roleId !== assignment.roleId,
+    );
+    const positionDenial = await positionRoleService.checkRolesFitEmployeePositions(
+      assignment.userId,
+      remaining,
+    );
+    if (positionDenial) {
+      return res.status(positionDenial.status).json({ message: positionDenial.message });
     }
-    return res.status(404).json({ message: "UserRole not found" });
+
+    await userRoleService.deleteUserRole(id);
+    return res.status(204).end();
   } catch (error) {
     return sendServerError(res, "Error deleting UserRole", error);
   }

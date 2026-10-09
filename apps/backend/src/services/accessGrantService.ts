@@ -102,3 +102,25 @@ export const checkPermissionGrant = async (
   }
   return null;
 };
+
+// Returns why `actor` may not remove `roleId` from `targetUserId`, or null when
+// allowed. Prevents two foot-guns: stripping your own roles (self-lockout) and
+// leaving an account with zero roles (it would lose all access).
+export const checkRoleRemoval = async (
+  actor: AuthenticatedUser,
+  targetUserId: number,
+  roleId: number,
+): Promise<GrantDenial | null> => {
+  if (targetUserId === actor.id) {
+    return { status: 403, message: "No puedes quitarte tus propios roles" };
+  }
+
+  const remaining = await UserRole.findAll({
+    where: { userId: targetUserId, roleId: { $ne: roleId } },
+    attributes: ["roleId"],
+  });
+  if (remaining.length === 0) {
+    return { status: 409, message: "Una cuenta debe conservar al menos un rol" };
+  }
+  return null;
+};

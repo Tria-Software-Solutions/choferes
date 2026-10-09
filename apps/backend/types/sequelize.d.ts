@@ -75,6 +75,9 @@ declare module "sequelize" {
 
     static Model: typeof Model;
     static DataTypes: typeof DataTypes;
+    static literal(value: string): any;
+    static fn(...args: any[]): any;
+    static col(name: string): any;
 
     define(modelName: string, attributes: any, options?: any): typeof Model;
     model(modelName: string): typeof Model;

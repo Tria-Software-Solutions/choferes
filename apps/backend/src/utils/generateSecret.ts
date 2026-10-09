@@ -25,12 +25,15 @@ const AUTH_COOKIE_OPTIONS = {
   path: "/",
 };
 
-// Generate access and refresh JWT tokens and set them as cookies in the response
-export const generateTokens = (userId: string, res: Response) => {
+// Generate access and refresh JWT tokens and set them as cookies in the response.
+// `tokenVersion` is embedded so a password change (which bumps the column) can
+// invalidate every previously issued token for that user.
+export const generateTokens = (userId: string, res: Response, tokenVersion = 0) => {
   const tokens = {
     accessToken: jwt.sign(
       {
         userId,
+        ver: tokenVersion,
         iat: Math.floor(Date.now() / 1000),
         type: "access",
       },
@@ -43,6 +46,7 @@ export const generateTokens = (userId: string, res: Response) => {
     refreshToken: jwt.sign(
       {
         userId,
+        ver: tokenVersion,
         iat: Math.floor(Date.now() / 1000),
         type: "refresh",
       },

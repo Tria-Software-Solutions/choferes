@@ -1,6 +1,7 @@
 // Service for business logic and database operations related to users and authentication
 import bcrypt from "bcrypt";
 import { Response } from "express";
+import Sequelize from "sequelize";
 // Note: Sequelize v3 uses string operators ($or). Using inline types instead.
 import { User } from "../models/User";
 import { Role } from "../models/Role";
@@ -32,6 +33,10 @@ const EDITABLE_FIELDS = ["firstName", "lastName", "username", "email", "avatar"]
 // Fields accepted when creating a new user. isActive is intentionally not
 // here (defaults to true) so anonymous registration can't self-activate.
 const CREATABLE_FIELDS = ["firstName", "lastName", "username", "email", "password"];
+
+// bcrypt cost factor. 12 (~250ms/hash on modern hardware) raises the cost of
+// offline cracking well above the previous default of 10.
+export const BCRYPT_ROUNDS = 12;
 
 const ROLES_INCLUDE = [
   {
@@ -141,7 +146,11 @@ export const authenticateUser = async (identifier: string, password: string, res
       throw new Error(AUTH_ERRORS.INACTIVE);
     }
 
-    const { accessToken, refreshToken } = generateTokens(user.id.toString(), res);
+    const { accessToken, refreshToken } = generateTokens(
+      user.id.toString(),
+      res,
+      user.tokenVersion ?? 0,
+    );
 
     // Never return the model instance — password/temporalPassword hashes must
     // not leave the service boundary.
@@ -255,7 +264,7 @@ const resolveRolesToGrant = async (data: Record<string, any>): Promise<Role[]> =
 // true for every client of the API.
 export const createUser = async (data: Record<string, any>) => {
   const clean = pickFields(data, CREATABLE_FIELDS);
-  const hashedPassword = await bcrypt.hash(clean.password, 10);
+  const hashedPassword = await bcrypt.hash(clean.password, BCRYPT_ROUNDS);
 
   const roles = await resolveRolesToGrant(data);
 
@@ -332,10 +341,18 @@ export const updateUserStatus = async (id: number, status: boolean) => {
 
 // Updates the password of a user (hashes new password). Any pending temporary
 // password is revoked: it is a one-off recovery credential, not a second
-// permanent password.
+// permanent password. tokenVersion is bumped so tokens issued before the change
+// stop working (session revocation on password reset).
 export const updateUserPassword = async (id: number, password: string) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
-  await User.update({ password: hashedPassword, temporalPassword: null }, { where: { id } });
+  const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
+  await User.update(
+    {
+      password: hashedPassword,
+      temporalPassword: null,
+      tokenVersion: Sequelize.literal('"tokenVersion" + 1'),
+    },
+    { where: { id } },
+  );
   await createNotification(id, {
     source: `password-changed:${id}:${Date.now()}`,
     title: "Contraseña actualizada",
@@ -354,7 +371,7 @@ export const updateUserPassword = async (id: number, password: string) => {
 
 // Updates the temporary password of a user (hashes new password)
 export const updateUserTemporalPassword = async (id: number, temporalPassword: string) => {
-  const hashedTemporalPassword = await bcrypt.hash(temporalPassword, 10);
+  const hashedTemporalPassword = await bcrypt.hash(temporalPassword, BCRYPT_ROUNDS);
   await User.update({ temporalPassword: hashedTemporalPassword }, { where: { id } });
   await createNotification(id, {
     source: `temp-password-issued:${id}:${Date.now()}`,
