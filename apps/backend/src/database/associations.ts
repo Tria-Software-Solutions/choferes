@@ -8,6 +8,7 @@ import { ScheduleDay } from "../models/ScheduleDay";
 import { HoursWorked } from "../models/HoursWorked";
 import { UserRole } from "../models/UserRole";
 import { RolePermission } from "../models/RolePermission";
+import { AuthSession } from "../models/AuthSession";
 import { Notification } from "../models/Notification";
 import { Payment } from "../models/Payment";
 import { Vacation } from "../models/Vacation";
@@ -25,6 +26,16 @@ Notification.belongsTo(User, {
   onDelete: "CASCADE",
 });
 User.hasMany(Notification, {
+  foreignKey: "userId",
+  onDelete: "CASCADE",
+});
+
+// User <-> AuthSession (One-to-Many): refresh-token sessions
+AuthSession.belongsTo(User, {
+  foreignKey: "userId",
+  onDelete: "CASCADE",
+});
+User.hasMany(AuthSession, {
   foreignKey: "userId",
   onDelete: "CASCADE",
 });

@@ -4,6 +4,7 @@ import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
 import { UserRole } from "../models/UserRole";
 import { RolePermission } from "../models/RolePermission";
+import { AuthSession } from "../models/AuthSession";
 import { Employee } from "../models/Employee";
 import { Schedule } from "../models/Schedule";
 import { ScheduleDay } from "../models/ScheduleDay";
@@ -34,6 +35,7 @@ export {
   Permission,
   UserRole,
   RolePermission,
+  AuthSession,
   Employee,
   Schedule,
   ScheduleDay,

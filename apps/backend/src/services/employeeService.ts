@@ -22,6 +22,7 @@ import { Role } from "../models/Role";
 import { UserRole } from "../models/UserRole";
 import User from "../models/User";
 import { ServiceError } from "../utils/errors";
+import { localDateString } from "../utils/timezone";
 import type { AuthenticatedUser } from "../middleware/authorize";
 import { PERMISSION_CODES } from "../constants/permissions";
 import { checkRoleGrant } from "./accessGrantService";
@@ -744,7 +745,9 @@ export const getEmployeesWithRelations = async (includeHoursWorked = false) => {
 // Processes employees whose scheduledTerminationDate has arrived: sets them
 // as terminated and clears the scheduled fields. Called by the daily scheduler.
 export const processScheduledTerminations = async (): Promise<number> => {
-  const today = new Date().toISOString().slice(0, 10);
+  // Local calendar day in Costa Rica: the scheduler may run when UTC is already
+  // the next day, and an ISO slice would terminate employees one day early.
+  const today = localDateString();
   const due = await Employee.findAll({
     where: {
       scheduledTerminationDate: { $lte: today },
