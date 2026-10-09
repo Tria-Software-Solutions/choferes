@@ -126,6 +126,23 @@ app.use(
   }),
 );
 
+// CSRF defense in depth: CORS only protects the response, so a cross-site
+// simple form POST would still reach the handlers. Reject any state-changing
+// request that carries a browser Origin header outside the allowlist.
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+app.use((req, res, next) => {
+  if (SAFE_METHODS.has(req.method)) {
+    return next();
+  }
+  const { origin } = req.headers;
+  // No Origin header means a non-browser client (mobile app, Postman, server);
+  // those authenticate with cookies/headers and are not CSRF-able.
+  if (!origin || allowedOrigins.includes(origin)) {
+    return next();
+  }
+  return res.status(403).json({ message: "Origen no permitido" });
+});
+
 // Rate limiting to prevent abuse (production only)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -152,6 +169,9 @@ const authLimiter = rateLimit({
 // Only apply auth rate limiting in production
 if (process.env.NODE_ENV === "production") {
   app.use("/api/auth", authLimiter);
+  // The user login endpoint lives under /api/users, so it needs the strict
+  // limiter explicitly; otherwise it would only get the loose /api/ limiter.
+  app.use("/api/users/login", authLimiter);
 }
 
 app.use(cookieParser());

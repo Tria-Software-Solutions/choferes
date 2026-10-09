@@ -3,6 +3,7 @@ import multer, { FileFilterCallback } from "multer";
 import * as userService from "../services/userService";
 import * as employeeService from "../services/employeeService";
 import { sendServerError } from "../utils/errors";
+import { detectImageMime } from "../utils/dataUrl";
 
 // Avatars are stored directly in the database as base64 data URLs.
 // This avoids the ephemeral filesystem problem in production (Render free tier
@@ -38,10 +39,14 @@ export const uploadAvatar = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "No se proporcionó ninguna imagen" });
     }
 
-    // The mimetype is the real detected type (multer), so the data URL
-    // always declares the correct format — no more "corrupt" images caused
-    // by mismatched extensions.
-    const avatarDataUrl = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+    // Trust the file's magic bytes, not the client-declared mimetype, so a
+    // renamed file (or a spoofed Content-Type) can't smuggle a non-image type.
+    const detectedMime = detectImageMime(file.buffer);
+    if (!detectedMime) {
+      return res.status(400).json({ message: UPLOAD_TYPE_ERROR });
+    }
+
+    const avatarDataUrl = `data:${detectedMime};base64,${file.buffer.toString("base64")}`;
 
     await userService.updateUser(userId, { avatar: avatarDataUrl });
 
@@ -79,8 +84,14 @@ export const uploadEmployeeAvatar = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "No se proporcionó ninguna imagen" });
     }
 
-    // Same approach as user avatars: real mimetype (multer) → correct data URL.
-    const avatarDataUrl = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+    // Same as user avatars: the declared mimetype is ignored in favor of the
+    // binary signature actually present in the upload.
+    const detectedMime = detectImageMime(file.buffer);
+    if (!detectedMime) {
+      return res.status(400).json({ message: UPLOAD_TYPE_ERROR });
+    }
+
+    const avatarDataUrl = `data:${detectedMime};base64,${file.buffer.toString("base64")}`;
 
     const employee = await employeeService.updateEmployee(employeeId, {
       avatar: avatarDataUrl,

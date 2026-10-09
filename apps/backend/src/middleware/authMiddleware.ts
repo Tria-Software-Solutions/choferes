@@ -90,7 +90,7 @@ export const authenticateToken = async (
 
     const userId = parseInt(payload.userId, 10);
     const user = await User.findByPk(userId, {
-      attributes: ["id", "isActive"],
+      attributes: ["id", "isActive", "tokenVersion"],
       include: [
         {
           model: Role,
@@ -118,6 +118,16 @@ export const authenticateToken = async (
       return res.status(403).json({
         error: "Forbidden: Account disabled",
         code: "ACCOUNT_DISABLED",
+      });
+    }
+
+    // Session revocation: tokens issued before the last password change carry
+    // an older `ver`, so they are rejected here even though the signature is valid.
+    const tokenVersion = typeof payload.ver === "number" ? payload.ver : 0;
+    if (tokenVersion !== (user.tokenVersion ?? 0)) {
+      return res.status(401).json({
+        error: "Unauthorized: Session revoked",
+        code: "TOKEN_REVOKED",
       });
     }
 
@@ -189,7 +199,9 @@ export const authenticateRefreshToken = async (req: AuthenticatedRequest, res: R
       });
     }
 
-    const user = await User.findByPk(parseInt(userId, 10), { attributes: ["id", "isActive"] });
+    const user = await User.findByPk(parseInt(userId, 10), {
+      attributes: ["id", "isActive", "tokenVersion"],
+    });
     if (!user || !user.isActive) {
       clearAuthCookies(res);
       return res.status(401).json({
@@ -198,9 +210,21 @@ export const authenticateRefreshToken = async (req: AuthenticatedRequest, res: R
       });
     }
 
+    // A password change bumps tokenVersion; refuse to mint fresh tokens from a
+    // refresh token that predates it.
+    const tokenVersion = typeof payload.ver === "number" ? payload.ver : 0;
+    if (tokenVersion !== (user.tokenVersion ?? 0)) {
+      clearAuthCookies(res);
+      return res.status(401).json({
+        error: "Unauthorized: Session revoked",
+        code: "TOKEN_REVOKED",
+      });
+    }
+
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateTokens(
       userId,
       res,
+      user.tokenVersion ?? 0,
     );
 
     res.setHeader("x-access-token", newAccessToken);
