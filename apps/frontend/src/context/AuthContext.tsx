@@ -30,6 +30,17 @@ interface AuthContextType {
 // Use useAuthContext() to access the context in child components.
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// sessionStorage can hold stale/corrupt values (older schema, manual edits), so
+// parsing must never throw during render or the whole app fails to mount.
+const readSessionJson = <T,>(key: string, fallback: T): T => {
+  try {
+    const raw = sessionStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // State for access token, initialized from cookies or localStorage fallback
   const [accessToken, setAccessToken] = useState(() => {
@@ -43,14 +54,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // State for current user, initialized from sessionStorage
   const [currentUser, setCurrentUser] = useState(() => {
-    const storedUser = sessionStorage.getItem("currentUser");
-    return storedUser ? JSON.parse(storedUser) : null;
+    return readSessionJson<User | null>("currentUser", null);
   });
 
   // State for user permissions, initialized from sessionStorage
   const [userPermissions, setUserPermissions] = useState(() => {
-    const storedUserPermissions = sessionStorage.getItem("userPermissions");
-    return storedUserPermissions ? JSON.parse(storedUserPermissions) : [];
+    return readSessionJson<string[]>("userPermissions", []);
   });
 
   // State for the login timestamp, initialized from sessionStorage

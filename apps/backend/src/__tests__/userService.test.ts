@@ -15,6 +15,12 @@ jest.mock("../utils/generateSecret", () => ({
   generateTokens: jest.fn(),
 }));
 
+// Mock session tracking so tests never touch the auth_sessions table
+jest.mock("../services/sessionService", () => ({
+  createSession: jest.fn(),
+  revokeAllSessionsForUser: jest.fn(),
+}));
+
 // Mock models — User, Role, Permission are all named imports in userService
 jest.mock("../models/User", () => {
   const mockFunctions = {
@@ -52,6 +58,7 @@ import bcrypt from "bcrypt";
 import { Role } from "../models/Role";
 import { UserRole } from "../models/UserRole";
 import { generateTokens } from "../utils/generateSecret";
+import { createSession, revokeAllSessionsForUser } from "../services/sessionService";
 import * as userService from "../services/userService";
 
 const mockUser = {
@@ -78,6 +85,7 @@ const mockResponse = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  (createSession as jest.Mock).mockResolvedValue({ sid: "sid-1", jti: "jti-1" });
 });
 
 describe("authenticateUser", () => {
@@ -93,7 +101,10 @@ describe("authenticateUser", () => {
 
     expect(User.findOne).toHaveBeenCalledTimes(1);
     expect(bcrypt.compare).toHaveBeenCalledWith("password123", mockUser.password);
-    expect(generateTokens).toHaveBeenCalledWith("1", mockResponse, 0);
+    expect(generateTokens).toHaveBeenCalledWith("1", mockResponse, 0, {
+      sid: "sid-1",
+      jti: "jti-1",
+    });
     expect(result.accessToken).toBe("token123");
     expect(result.refreshToken).toBe("refresh123");
   });
@@ -500,6 +511,18 @@ describe("updateUserStatus", () => {
 
     expect(User.update).toHaveBeenCalledWith({ isActive: false }, { where: { id: 1 } });
     expect(result).toHaveProperty("isActive", false);
+  });
+
+  it("al reactivar limpia deletedAt para que la cuenta vuelva a aparecer", async () => {
+    (User.update as jest.Mock).mockResolvedValue([1]);
+    (User.findByPk as jest.Mock).mockResolvedValue({ ...mockUser, isActive: true });
+
+    await userService.updateUserStatus(1, true);
+
+    expect(User.update).toHaveBeenCalledWith(
+      { isActive: true, deletedAt: null },
+      { where: { id: 1 } },
+    );
   });
 });
 

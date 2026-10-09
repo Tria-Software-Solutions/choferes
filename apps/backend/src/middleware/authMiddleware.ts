@@ -3,6 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import { clearAuthCookies, generateTokens } from "../utils/generateSecret";
 import { runAsActor } from "../utils/actorContext";
+import { createSession, revokeSession, rotateSession } from "../services/sessionService";
 import { User } from "../models/User";
 import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
@@ -149,6 +150,27 @@ export const authenticateToken = async (
   }
 };
 
+// Rotates an existing refresh session, or creates a fresh one for a legacy
+// token issued before session tracking existed (so nobody is force-logged-out
+// on deploy). A replayed/unknown token resolves to "invalid".
+const resolveSession = async (
+  payload: JwtPayload,
+  userId: number,
+): Promise<{ status: "ok"; session: { sid: string; jti: string } } | { status: "invalid" }> => {
+  const sid = typeof payload.sid === "string" ? payload.sid : null;
+  const jti = typeof payload.jti === "string" ? payload.jti : null;
+
+  if (!sid || !jti) {
+    return { status: "ok", session: await createSession(userId) };
+  }
+
+  const result = await rotateSession(sid, jti);
+  if (result.status === "invalid" || result.userId !== userId) {
+    return { status: "invalid" };
+  }
+  return { status: "ok", session: { sid: result.sid, jti: result.jti } };
+};
+
 // Middleware to authenticate and refresh refresh tokens.
 // Reads the refresh token from the Authorization header first (the frontend
 // always sends it there), falling back to the httpOnly cookie. This makes the
@@ -221,10 +243,22 @@ export const authenticateRefreshToken = async (req: AuthenticatedRequest, res: R
       });
     }
 
+    // Rotate the session (or bootstrap one for a pre-session legacy token).
+    // A replay of an already-rotated token revokes the session here.
+    const rotated = await resolveSession(payload, user.id);
+    if (rotated.status === "invalid") {
+      clearAuthCookies(res);
+      return res.status(401).json({
+        error: "Unauthorized: Session revoked",
+        code: "SESSION_REVOKED",
+      });
+    }
+
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateTokens(
       userId,
       res,
       user.tokenVersion ?? 0,
+      rotated.session,
     );
 
     res.setHeader("x-access-token", newAccessToken);
@@ -243,10 +277,29 @@ export const authenticateRefreshToken = async (req: AuthenticatedRequest, res: R
   }
 };
 
-// Ends the session: expires the httpOnly auth cookies. Tokens held in memory
-// by the client are discarded client-side; this handler needs no valid token
-// so an already-expired session can still be closed cleanly.
-export const logout = (_req: Request, res: Response) => {
-  clearAuthCookies(res);
+// Ends the session: revokes the refresh session server-side (so the refresh
+// token can't be replayed) and expires the httpOnly auth cookies. Needs no
+// valid access token so an already-expired session can still be closed.
+export const logout = async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const refreshToken =
+      authHeader && authHeader.startsWith("Bearer ")
+        ? authHeader.substring(7)
+        : req.cookies?.refreshToken || null;
+
+    if (refreshToken) {
+      try {
+        const payload = jwt.verify(refreshToken, JWT_SECRET_KEY_REFRESH) as JwtPayload;
+        if (typeof payload.sid === "string") {
+          await revokeSession(payload.sid);
+        }
+      } catch {
+        // Invalid/expired refresh token: nothing to revoke.
+      }
+    }
+  } finally {
+    clearAuthCookies(res);
+  }
   return res.status(204).end();
 };
