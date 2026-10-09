@@ -30,9 +30,18 @@ const api = axios.create({
 });
 
 // Decode the JWT payload (unverified) to read the `exp` claim.
+// JWT uses base64url (no padding, `-`/`_` instead of `+`/`/`), which `atob`
+// rejects — so translate to base64 and pad first, then decode as UTF-8.
 const getTokenExpiry = (token: string): number | null => {
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    const base64Url = token.split(".")[1];
+    if (!base64Url) return null;
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+    const json = new TextDecoder().decode(
+      Uint8Array.from(atob(padded), (c) => c.charCodeAt(0)),
+    );
+    const payload = JSON.parse(json);
     return typeof payload?.exp === "number" ? payload.exp * 1000 : null;
   } catch {
     return null;

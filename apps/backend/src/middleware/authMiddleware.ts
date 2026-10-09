@@ -261,9 +261,10 @@ export const authenticateRefreshToken = async (req: AuthenticatedRequest, res: R
       rotated.session,
     );
 
-    res.setHeader("x-access-token", newAccessToken);
-    res.setHeader("x-refresh-token", newRefreshToken);
-
+    // The refresh token is also returned in the body (not only as httpOnly
+    // cookies) because the frontend is hosted on a different site than the API
+    // and some browsers block third-party cookies; the client then falls back
+    // to sending it in the Authorization header.
     return res.status(200).json({
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
