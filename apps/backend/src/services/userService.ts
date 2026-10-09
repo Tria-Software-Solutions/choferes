@@ -16,6 +16,7 @@ import {
 } from "../utils/pagination";
 import { assignRole, resolveRoleById } from "./userRoleService";
 import { createNotification, notifyManagementRoles } from "./notificationService";
+import { createSession, revokeAllSessionsForUser } from "./sessionService";
 import { ServiceError } from "../utils/errors";
 
 // Sensitive columns that must never be serialized to API consumers.
@@ -146,10 +147,13 @@ export const authenticateUser = async (identifier: string, password: string, res
       throw new Error(AUTH_ERRORS.INACTIVE);
     }
 
+    const session = await createSession(user.id);
+
     const { accessToken, refreshToken } = generateTokens(
       user.id.toString(),
       res,
       user.tokenVersion ?? 0,
+      session,
     );
 
     // Never return the model instance — password/temporalPassword hashes must
@@ -317,7 +321,13 @@ export const updateUser = async (id: number, data: Record<string, any>) => {
 
 // Updates the active status of a user
 export const updateUserStatus = async (id: number, status: boolean) => {
-  await User.update({ isActive: status }, { where: { id } });
+  const changes: Record<string, unknown> = { isActive: status };
+  if (status) {
+    // Reactivating a soft-deleted account must clear the soft-delete marker,
+    // otherwise every listing (which filters deletedAt: null) keeps hiding it.
+    changes.deletedAt = null;
+  }
+  await User.update(changes, { where: { id } });
   const user = await User.findByPk(id, {
     attributes: SAFE_ATTRS,
     include: ROLES_WITH_PERMISSIONS_INCLUDE,
@@ -353,6 +363,9 @@ export const updateUserPassword = async (id: number, password: string) => {
     },
     { where: { id } },
   );
+  // Bumping tokenVersion already invalidates access tokens; also revoke the
+  // refresh sessions so the old refresh tokens can't mint new access tokens.
+  await revokeAllSessionsForUser(id);
   await createNotification(id, {
     source: `password-changed:${id}:${Date.now()}`,
     title: "Contraseña actualizada",
