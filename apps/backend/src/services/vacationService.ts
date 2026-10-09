@@ -1,4 +1,5 @@
 // Service for vacation requests: CRUD plus approve/reject with balance handling.
+import sequelize from "../config/database";
 import Vacation from "../models/Vacation";
 import Employee from "../models/Employee";
 import User from "../models/User";
@@ -194,6 +195,10 @@ export const updateVacation = async (id: number, input: UpdateVacationInput) => 
 
   const previousStatus = vacation.status;
   const updates: Record<string, unknown> = {};
+  // Balance change is applied together with the status change, inside a single
+  // transaction, so an approval can never deduct days without recording the
+  // approval (or vice versa).
+  let balanceUpdate: number | undefined;
 
   // Field edits (dates/reason) only while pending.
   if (input.startDate !== undefined || input.endDate !== undefined) {
@@ -223,7 +228,7 @@ export const updateVacation = async (id: number, input: UpdateVacationInput) => 
         );
       }
       if (balance != null) {
-        await employee.update({ vacationDays: Number(balance) - vacation.daysRequested });
+        balanceUpdate = Number(balance) - vacation.daysRequested;
       }
       updates.status = "approved";
       updates.approvedBy = input.approvedBy ?? null;
@@ -233,7 +238,7 @@ export const updateVacation = async (id: number, input: UpdateVacationInput) => 
         // Restore the balance deducted on approval.
         const balance = employee.vacationDays;
         if (balance != null) {
-          await employee.update({ vacationDays: Number(balance) + vacation.daysRequested });
+          balanceUpdate = Number(balance) + vacation.daysRequested;
         }
       }
       updates.status = "rejected";
@@ -243,7 +248,7 @@ export const updateVacation = async (id: number, input: UpdateVacationInput) => 
       if (previousStatus === "approved") {
         const balance = employee.vacationDays;
         if (balance != null) {
-          await employee.update({ vacationDays: Number(balance) + vacation.daysRequested });
+          balanceUpdate = Number(balance) + vacation.daysRequested;
         }
       }
       updates.status = "pending";
@@ -252,8 +257,15 @@ export const updateVacation = async (id: number, input: UpdateVacationInput) => 
     }
   }
 
-  if (Object.keys(updates).length > 0) {
-    await vacation.update(updates);
+  if (balanceUpdate !== undefined || Object.keys(updates).length > 0) {
+    await sequelize.transaction(async (transaction: unknown) => {
+      if (balanceUpdate !== undefined) {
+        await employee.update({ vacationDays: balanceUpdate }, { transaction });
+      }
+      if (Object.keys(updates).length > 0) {
+        await vacation.update(updates, { transaction });
+      }
+    });
   }
 
   // Notify the employee once a request is approved or rejected so the flow is
@@ -310,14 +322,19 @@ export const deleteVacation = async (id: number) => {
   const vacation = await Vacation.findByPk(id);
   if (!vacation) return false;
 
-  if (vacation.status === "approved") {
-    const employee = await Employee.findByPk(vacation.employeeId);
+  const employee =
+    vacation.status === "approved" ? await Employee.findByPk(vacation.employeeId) : null;
+
+  // Restoring the balance and deleting the request must succeed or fail together.
+  await sequelize.transaction(async (transaction: unknown) => {
     if (employee && employee.vacationDays != null) {
-      await employee.update({
-        vacationDays: Number(employee.vacationDays) + vacation.daysRequested,
-      });
+      await employee.update(
+        { vacationDays: Number(employee.vacationDays) + vacation.daysRequested },
+        { transaction },
+      );
     }
-  }
+    await vacation.destroy({ transaction });
+  });
 
   await notifyEmployeeUser(vacation.employeeId, {
     source: `vacation-cancelled:${vacation.id}`,
@@ -330,6 +347,5 @@ export const deleteVacation = async (id: number) => {
     actionText: "Ver estado",
   });
 
-  await vacation.destroy();
   return true;
 };

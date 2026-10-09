@@ -30,6 +30,12 @@ jest.mock("../models/User", () => ({
   },
 }));
 
+// Managed transaction: runs the callback with a fake transaction handle.
+jest.mock("../config/database", () => ({
+  __esModule: true,
+  default: { transaction: jest.fn((callback: (t: unknown) => unknown) => callback("tx")) },
+}));
+
 import Vacation from "../models/Vacation";
 import Employee from "../models/Employee";
 import * as vacationService from "../services/vacationService";
@@ -187,6 +193,26 @@ describe("updateVacation — approve/reject", () => {
     expect(vacation.state.status).toBe("approved");
     expect(vacation.state.approvedBy).toBe(5);
     expect(vacation.state.approvedAt).not.toBeNull();
+  });
+
+  it("aplica saldo y estado dentro de la misma transacción", async () => {
+    const employee = makeEmployee(10);
+    const vacation = makeVacation();
+    mockVacationFindByPk
+      .mockResolvedValueOnce(vacation.instance)
+      .mockResolvedValueOnce(vacation.instance);
+    mockEmployeeFindByPk.mockResolvedValue(employee.instance);
+
+    await vacationService.updateVacation(1, { status: "approved", approvedBy: 5 });
+
+    expect(employee.instance.update).toHaveBeenCalledWith(
+      { vacationDays: 5 },
+      { transaction: "tx" },
+    );
+    expect(vacation.instance.update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "approved" }),
+      { transaction: "tx" },
+    );
   });
 
   it("falla con 400 si el saldo es insuficiente", async () => {
