@@ -21,6 +21,12 @@ jest.mock("../services/sessionService", () => ({
   revokeAllSessionsForUser: jest.fn(),
 }));
 
+// Managed transaction: runs the callback with a fake transaction handle.
+jest.mock("../config/database", () => ({
+  __esModule: true,
+  default: { transaction: jest.fn((callback: (t: unknown) => unknown) => callback("tx")) },
+}));
+
 // Mock models — User, Role, Permission are all named imports in userService
 jest.mock("../models/User", () => {
   const mockFunctions = {
@@ -395,7 +401,7 @@ describe("createUser", () => {
     } as any);
 
     expect(mockRoleFindByPk).toHaveBeenCalledWith(3);
-    expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 5, roleId: 3 });
+    expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 5, roleId: 3 }, { transaction: "tx" });
   });
 
   it("asigna todos los roles de roleIds (una cuenta puede tener varios)", async () => {
@@ -421,8 +427,8 @@ describe("createUser", () => {
       roleIds: [1, 2],
     } as any);
 
-    expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 7, roleId: 1 });
-    expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 7, roleId: 2 });
+    expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 7, roleId: 1 }, { transaction: "tx" });
+    expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 7, roleId: 2 }, { transaction: "tx" });
   });
 
   it("rechaza roleIds vacío (una cuenta nunca queda sin rol)", async () => {

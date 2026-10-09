@@ -108,7 +108,7 @@ describe("generateTokens", () => {
       1,
       expect.objectContaining({ userId: "user-123", type: "access" }),
       process.env.JWT_SECRET_KEY,
-      expect.objectContaining({ expiresIn: "1h", algorithm: "HS256" }),
+      expect.objectContaining({ expiresIn: "15m", algorithm: "HS256" }),
     );
     expect(require("jsonwebtoken").sign).toHaveBeenNthCalledWith(
       2,
@@ -123,7 +123,7 @@ describe("generateTokens", () => {
     expect(mockRes.cookie).toHaveBeenCalledTimes(2);
     expect(mockRes.cookie).toHaveBeenNthCalledWith(
       1, "accessToken", mockAccessToken,
-      expect.objectContaining({ httpOnly: true, secure: false, sameSite: "lax", maxAge: 3600 * 1000 }),
+      expect.objectContaining({ httpOnly: true, secure: false, sameSite: "lax", maxAge: 15 * 60 * 1000 }),
     );
     expect(mockRes.cookie).toHaveBeenNthCalledWith(
       2, "refreshToken", mockRefreshToken,

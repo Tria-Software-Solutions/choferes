@@ -76,8 +76,8 @@ export const getLicenses = async (query: QueryParams) => {
   return { ...result, data: result.data.map(normalize) };
 };
 
-export const getLicenseById = async (id: number) => {
-  const license = await EmployeeLicense.findByPk(id, { include: [employeeInclude] });
+export const getLicenseById = async (id: number, transaction?: unknown) => {
+  const license = await EmployeeLicense.findByPk(id, { include: [employeeInclude], transaction });
   return license ? normalize(license) : null;
 };
 
@@ -101,20 +101,26 @@ export interface CreateLicenseInput {
   notes?: string | null;
 }
 
-export const createLicense = async (input: CreateLicenseInput) => {
-  const employee = await Employee.findByPk(input.employeeId);
+export const createLicense = async (
+  input: CreateLicenseInput,
+  options: { transaction?: unknown } = {},
+) => {
+  const employee = await Employee.findByPk(input.employeeId, { transaction: options.transaction });
   if (!employee) {
     throw new ServiceError(404, "Empleado no encontrado");
   }
 
-  const created = await EmployeeLicense.create({
-    employeeId: input.employeeId,
-    licenseType: input.licenseType,
-    licenseNumber: input.licenseNumber || null,
-    issuedAt: input.issuedAt || null,
-    expiresAt: input.expiresAt || null,
-    notes: input.notes || null,
-  });
+  const created = await EmployeeLicense.create(
+    {
+      employeeId: input.employeeId,
+      licenseType: input.licenseType,
+      licenseNumber: input.licenseNumber || null,
+      issuedAt: input.issuedAt || null,
+      expiresAt: input.expiresAt || null,
+      notes: input.notes || null,
+    },
+    { transaction: options.transaction },
+  );
 
   await notifyEmployeeUser(input.employeeId, {
     source: `license-created:${created.id}`,
@@ -138,8 +144,12 @@ export interface UpdateLicenseInput {
   notes?: string | null;
 }
 
-export const updateLicense = async (id: number, input: UpdateLicenseInput) => {
-  const license = await EmployeeLicense.findByPk(id);
+export const updateLicense = async (
+  id: number,
+  input: UpdateLicenseInput,
+  options: { transaction?: unknown } = {},
+) => {
+  const license = await EmployeeLicense.findByPk(id, { transaction: options.transaction });
   if (!license) return null;
 
   const updates: Record<string, unknown> = {};
@@ -150,7 +160,7 @@ export const updateLicense = async (id: number, input: UpdateLicenseInput) => {
   if (input.notes !== undefined) updates.notes = input.notes || null;
 
   if (Object.keys(updates).length > 0) {
-    await license.update(updates);
+    await license.update(updates, { transaction: options.transaction });
   }
 
   if (Object.keys(updates).length > 0) {
@@ -169,13 +179,13 @@ export const updateLicense = async (id: number, input: UpdateLicenseInput) => {
     });
   }
 
-  return getLicenseById(id);
+  return getLicenseById(id, options.transaction);
 };
 
-export const deleteLicense = async (id: number) => {
-  const license = await EmployeeLicense.findByPk(id);
+export const deleteLicense = async (id: number, options: { transaction?: unknown } = {}) => {
+  const license = await EmployeeLicense.findByPk(id, { transaction: options.transaction });
   if (!license) return false;
-  await EmployeeLicense.destroy({ where: { id } });
+  await EmployeeLicense.destroy({ where: { id }, transaction: options.transaction });
   await notifyEmployeeUser(license.employeeId, {
     source: `license-deleted:${id}`,
     title: "Licencia eliminada",

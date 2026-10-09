@@ -25,6 +25,12 @@ jest.mock("../services/employeeLicenseService", () => ({
   deleteLicense: jest.fn(),
 }));
 
+// Managed transaction: runs the callback with a fake transaction handle.
+jest.mock("../config/database", () => ({
+  __esModule: true,
+  default: { transaction: jest.fn((callback: (t: unknown) => unknown) => callback("tx")) },
+}));
+
 import LicenseRequest from "../models/LicenseRequest";
 import EmployeeLicense from "../models/EmployeeLicense";
 import Employee from "../models/Employee";
@@ -150,11 +156,14 @@ describe("approveRequest", () => {
 
     await approveRequest(3, 1);
 
-    expect(licenseServiceMock.updateLicense).toHaveBeenCalledWith(12, {
-      expiresAt: "2030-01-01",
-    });
+    expect(licenseServiceMock.updateLicense).toHaveBeenCalledWith(
+      12,
+      { expiresAt: "2030-01-01" },
+      { transaction: "tx" },
+    );
     expect(request.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: "approved", reviewedBy: 1 }),
+      { transaction: "tx" },
     );
     expect(notifyEmployeeMock).toHaveBeenCalledTimes(1);
   });
@@ -169,6 +178,7 @@ describe("approveRequest", () => {
 
     expect(licenseServiceMock.createLicense).toHaveBeenCalledWith(
       expect.objectContaining({ employeeId: 7, licenseType: "B1" }),
+      { transaction: "tx" },
     );
   });
 

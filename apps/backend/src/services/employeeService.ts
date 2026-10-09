@@ -40,6 +40,7 @@ import {
   resolveRolesForPositions,
 } from "./positionRoleService";
 import { assignRole } from "./userRoleService";
+import sequelize from "../config/database";
 import {
   paginate,
   getPaginationParams,
@@ -611,19 +612,27 @@ export const linkEmployeeToUser = async (employeeId: number, actor?: Authenticat
   const hashedTemporal = await bcrypt.hash(tempPassword, 12);
   const hashedPassword = await bcrypt.hash(generateTempPassword(), 12);
 
-  const user = await User.create({
-    firstName: employee.firstName,
-    lastName: employee.lastName,
-    username,
-    email,
-    password: hashedPassword,
-    temporalPassword: hashedTemporal,
-    isActive: true,
-    employeeId: employee.id,
-  });
+  // La cuenta y sus roles se crean de forma atómica: un fallo a mitad dejaría
+  // un usuario sin permisos (o con solo algunos).
+  const user = await sequelize.transaction(async (transaction: unknown) => {
+    const created = await User.create(
+      {
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        username,
+        email,
+        password: hashedPassword,
+        temporalPassword: hashedTemporal,
+        isActive: true,
+        employeeId: employee.id,
+      },
+      { transaction },
+    );
 
-  // Sin esto la cuenta nacía sin permisos (no podía ver ni Tareas/Perfil).
-  await Promise.all(roles.map((role) => assignRole(user.id, role.id)));
+    // Sin esto la cuenta nacía sin permisos (no podía ver ni Tareas/Perfil).
+    await Promise.all(roles.map((role) => assignRole(created.id, role.id, transaction)));
+    return created;
+  });
 
   await createNotification(user.id, {
     source: `account-created:${user.id}`,

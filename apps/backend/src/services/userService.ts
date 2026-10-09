@@ -18,6 +18,7 @@ import { assignRole, resolveRoleById } from "./userRoleService";
 import { createNotification, notifyManagementRoles } from "./notificationService";
 import { createSession, revokeAllSessionsForUser } from "./sessionService";
 import { ServiceError } from "../utils/errors";
+import sequelize from "../config/database";
 
 // Sensitive columns that must never be serialized to API consumers.
 // Requests targeting these columns use their dedicated endpoints instead,
@@ -272,15 +273,19 @@ export const createUser = async (data: Record<string, any>) => {
 
   const roles = await resolveRolesToGrant(data);
 
-  const created = await User.create(
-    {
-      ...clean,
-      password: hashedPassword,
-    },
-    { returning: true },
-  );
-
-  await Promise.all(roles.map((role) => assignRole(created.id, role.id)));
+  const created = await sequelize.transaction(async (transaction: unknown) => {
+    const user = await User.create(
+      {
+        ...clean,
+        password: hashedPassword,
+      },
+      { returning: true, transaction },
+    );
+    // Creating the account and granting its roles must be atomic: otherwise a
+    // failure mid-way leaves a user without permissions (or with only some).
+    await Promise.all(roles.map((role) => assignRole(user.id, role.id, transaction)));
+    return user;
+  });
   const roleNames = roles.map((role) => role.name).join(", ");
 
   await createNotification(created.id, {
