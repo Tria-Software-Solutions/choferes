@@ -3,11 +3,26 @@ name: Keep Backend Alive
 on:
   schedule:
     - cron: '*/5 * * * *'  # Se ejecuta cada 5 minutos
+  workflow_dispatch:
+
+permissions: {}
 
 jobs:
   keep_alive:
     runs-on: ubuntu-latest
+    env:
+      # Render free duerme el servicio y los cron de GitHub se retrasan, así que
+      # el primer request puede tardar en despertarlo (>60s).
+      HEALTH_URL: https://choferes.onrender.com/health
     steps:
       - name: Ping Backend
-        # -f: fail on HTTP errors so a down backend marks the job as failed
-        run: curl -sf --retry 2 https://choferesdealquiler.onrender.com/health
+        # -f: falla en errores HTTP para que un backend caído marque el job como
+        #     fallido. --retry-all-errors también reintenta 502/503 de arranque
+        #     en frío, y --max-time amplio cubre el wake-up de Render.
+        run: |
+          curl -sf \
+            --max-time 90 \
+            --retry 5 \
+            --retry-delay 10 \
+            --retry-all-errors \
+            "$HEALTH_URL"
