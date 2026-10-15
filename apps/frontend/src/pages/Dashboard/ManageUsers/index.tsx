@@ -22,7 +22,6 @@ import {
   Box,
   Button,
   Checkbox,
-  CircularProgress,
   FormControl,
   IconButton,
   MenuItem,
@@ -34,6 +33,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
+import { DotsLoader } from "../../../components/Loader";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddUserForm from "../../Forms/AddUserForm";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
@@ -498,7 +498,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       ) : isLoadingUsers ? (
         <Box sx={loadingBoxStyles}>
           <Backdrop sx={backdropStyles(theme)} open={isLoadingUsers}>
-            <CircularProgress />
+            <DotsLoader size="lg" label="Cargando usuarios" />
           </Backdrop>
         </Box>
       ) : (

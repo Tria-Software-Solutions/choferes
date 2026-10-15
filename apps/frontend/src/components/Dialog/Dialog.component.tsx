@@ -9,10 +9,10 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
-  CircularProgress,
 } from "@mui/material";
 import { IconTrash, IconX } from "@tabler/icons-react";
 import DIALOG from "../../constants/dialog.constants";
+import { DotsLoader } from "../Loader";
 import {
   dialogPaperStyles,
   headerBoxStyles,
@@ -96,7 +96,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
   })();
 
   const confirmLabel = loading ? (
-    <CircularProgress size={16} color="inherit" />
+    <DotsLoader size="xs" color="currentColor" />
   ) : (
     confirmText || defaultConfirmText
   );

@@ -1,14 +1,14 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { ThemeProvider } from "@mui/material/styles";
 import { lightTheme } from "../../../theme";
 import { DocumentsTab } from "./DocumentsTab";
 
 const mockGetMyDocuments = jest.fn();
-const mockDownloadDocument = jest.fn();
+const mockDownloadMyDocument = jest.fn();
 jest.mock("../../../services/documentService", () => ({
   getMyDocuments: () => mockGetMyDocuments(),
-  downloadDocument: (id: number) => mockDownloadDocument(id),
+  downloadMyDocument: (id: number) => mockDownloadMyDocument(id),
 }));
 
 const mockUseAuthContext = jest.fn();
@@ -78,7 +78,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   mockGetMyDocuments.mockReset();
-  mockDownloadDocument.mockReset();
+  mockDownloadMyDocument.mockReset();
   mockGetMyDocuments.mockResolvedValue(myDocuments);
 });
 
@@ -115,6 +115,26 @@ describe("DocumentsTab — vista de empleado", () => {
 
     expect(screen.getByText("Contrato laboral.pdf")).toBeInTheDocument();
     expect(screen.queryByText("Reglamento interno.pdf")).not.toBeInTheDocument();
+  });
+
+  // El empleado no tiene `documents:view`: si descargara por el endpoint de
+  // administración obtendría 403, así que debe usar el de autoservicio.
+  it("descarga a través del endpoint de autoservicio", async () => {
+    asUser("Chofer");
+    mockDownloadMyDocument.mockResolvedValue({
+      ...myDocuments.shared.documents[0],
+      data: "data:application/pdf;base64,JVBERi0xLjQ=",
+    });
+    const click = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+
+    renderTab();
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Descargar Reglamento interno.pdf" }),
+    );
+
+    await waitFor(() => expect(mockDownloadMyDocument).toHaveBeenCalledWith(1));
+    await waitFor(() => expect(click).toHaveBeenCalled());
+    click.mockRestore();
   });
 
   it("vale también para Supervisor y Chofer Coordinador", async () => {

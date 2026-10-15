@@ -62,7 +62,7 @@ const ResponsiveTable: React.FC<TableProps> = ({ children, sx, ...props }) => {
           "& tbody": { display: "block" },
           "& tbody tr": {
             display: "block",
-            px: 2,
+            px: 0,
             py: 1.25,
             borderBottom: borders.hairline,
             "&:last-of-type": { borderBottom: "none" },

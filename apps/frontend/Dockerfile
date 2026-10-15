@@ -6,7 +6,7 @@ COPY apps/backend/package.json ./apps/backend/
 COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/shared/package.json ./packages/shared/
 # CRA inyecta REACT_APP_* en build-time (runtime nginx no las usa)
-ARG REACT_APP_API_URL=http://localhost:5001
+ARG REACT_APP_API_URL=http://localhost:5000
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 RUN npm ci --legacy-peer-deps
 COPY . ./

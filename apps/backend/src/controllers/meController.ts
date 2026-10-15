@@ -86,6 +86,20 @@ export const getMyDocuments = async (req: Request, res: Response) => {
   }
 };
 
+// GET /me/documents/:id — un archivo visible en el panel, con su binario.
+export const downloadMyDocument = async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized: authentication required" });
+    }
+    const document = await meService.getMyDocument(userId, parseInt(req.params.id, 10));
+    return res.status(200).json(document);
+  } catch (error) {
+    return handleError(res, error, "Error al descargar el archivo");
+  }
+};
+
 // POST /me/licenses/requests — el empleado pide crear o editar una licencia.
 // Queda pendiente hasta que Gerencia/Administrativo la revise.
 export const createMyLicenseRequest = async (req: Request, res: Response) => {

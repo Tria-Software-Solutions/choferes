@@ -127,6 +127,23 @@ describe("DocumentPreview", () => {
     expect(screen.getByRole("button", { name: /Descargar/ })).toBeEnabled();
   });
 
+  // Mi Panel pasa su propio descargador (autoservicio), porque el usuario no
+  // tiene `documents:view` y el endpoint por defecto le daría 403.
+  it("usa el descargador indicado en vez del de administración", async () => {
+    const fetchDocument = jest
+      .fn()
+      .mockResolvedValue(baseDoc({ data: "data:application/pdf;base64,JVBERi0xLjQ=" }));
+    render(
+      <ThemeProvider theme={lightTheme}>
+        <DocumentPreview open doc={baseDoc()} onClose={jest.fn()} fetchDocument={fetchDocument} />
+      </ThemeProvider>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "archivo.pdf" })).toBeInTheDocument();
+    expect(fetchDocument).toHaveBeenCalledWith(10);
+    expect(mockDownloadDocument).not.toHaveBeenCalled();
+  });
+
   it("muestra un estado de error si el archivo no se pudo cargar", async () => {
     mockDownloadDocument.mockRejectedValue(new Error("404"));
     renderPreview(baseDoc());

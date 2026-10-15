@@ -145,15 +145,29 @@ export const loginTextFieldStyles: SxProps<Theme> = {
       "&:focus-visible": { backgroundColor: "transparent" },
       "&.Mui-focusVisible": { backgroundColor: "transparent" },
     },
+    // Autofill del navegador (Chrome/password manager): sin esto pinta un
+    // recuadro oscuro opaco que solo cubre el <input> y "rompe" el campo
+    // translúcido. Con `background-clip: text` el fondo del autofill se recorta
+    // a las letras (ocultas por `text-fill-color`), y la transición larguísima
+    // evita que Chrome aplique su color de fondo: el campo conserva su aspecto.
+    // Además anulamos el box-shadow del estilo global de campos
+    // (`0 0 0 100px ${fill} inset`): en este login ese relleno se apilaría
+    // sobre el fondo del root y el campo autocompletado quedaría más claro
+    // que uno normal (tonos distintos entre usuario y contraseña).
     "& input:-webkit-autofill": {
-      WebkitBoxShadow: "0 0 0 100px rgba(28,28,40,0.9) inset",
+      WebkitBoxShadow: "none",
+      boxShadow: "none",
+      WebkitBackgroundClip: "text",
       WebkitTextFillColor: "#ffffff",
-      borderRadius: "10px",
+      caretColor: "#ffffff",
       transition: "background-color 5000s ease-in-out 0s",
     },
-    "& input:-webkit-autofill:focus": {
-      WebkitBoxShadow: "0 0 0 100px rgba(28,28,40,0.9) inset",
+    "& input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+      WebkitBoxShadow: "none",
+      boxShadow: "none",
+      WebkitBackgroundClip: "text",
       WebkitTextFillColor: "#ffffff",
+      caretColor: "#ffffff",
     },
   },
   "& .MuiFormHelperText-root, & .MuiFormHelperText-root.Mui-error": {
@@ -327,11 +341,6 @@ export const loginSubmitButtonStyles: SxProps<Theme> = {
     color: "rgba(255,255,255,0.55)",
     boxShadow: "none",
   },
-};
-
-export const submitProgressStyles: SxProps<Theme> = {
-  mr: 1,
-  color: "inherit",
 };
 
 export const loginPasswordIconButtonStyles: SxProps<Theme> = {

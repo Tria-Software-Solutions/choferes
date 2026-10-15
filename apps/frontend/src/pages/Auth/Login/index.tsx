@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import {
-  TextField, Button, Typography, Box, Alert, CircularProgress, IconButton,
+  TextField, Button, Typography, Box, Alert, IconButton,
   InputAdornment, Checkbox, FormControlLabel,
 } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material';
@@ -37,8 +37,8 @@ import {
   forgotSuccessStyles,
   loginSubmitButtonStyles,
   loginPasswordIconButtonStyles,
-  submitProgressStyles,
 } from './styles';
+import { DotsLoader } from '../../../components/Loader';
 
 const Login: React.FC = () => {
   const location = useLocation();
@@ -337,7 +337,7 @@ const Login: React.FC = () => {
                     >
                       {isSubmitting ? (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CircularProgress size={18} sx={submitProgressStyles} />
+                          <DotsLoader size="xs" color="currentColor" />
                           {LOGIN.LOADING}
                         </Box>
                       ) : (
@@ -448,7 +448,7 @@ const Login: React.FC = () => {
                     >
                       {forgotSubmitting ? (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CircularProgress size={18} sx={submitProgressStyles} />
+                          <DotsLoader size="xs" color="currentColor" />
                           {LOGIN.FORGOT_SENDING}
                         </Box>
                       ) : (

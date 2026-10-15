@@ -42,9 +42,7 @@ export const fetchEmployees = createAsyncThunk(
         return [];
       }
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch employees";
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch employees"));
     }
   },
 );
@@ -63,9 +61,7 @@ export const fetchAllEmployees = createAsyncThunk(
         return [];
       }
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch employees";
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch employees"));
     }
   },
 );
@@ -78,9 +74,7 @@ export const createEmployee = createAsyncThunk(
       const createdEmployee = await EmployeeService.createEmployee(newEmployee);
       return createdEmployee;
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to create employee";
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(getApiErrorMessage(error, "Failed to create employee"));
     }
   },
 );
@@ -112,9 +106,7 @@ export const deleteEmployee = createAsyncThunk(
       await EmployeeService.deleteEmployee(id);
       return id;
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete employee";
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(getApiErrorMessage(error, "Failed to delete employee"));
     }
   },
 );
@@ -130,9 +122,7 @@ export const updateEmployeeAvatar = createAsyncThunk(
       const result = await EmployeeService.uploadEmployeeAvatar(id, file);
       return { id, avatar: result.avatar };
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to update employee avatar";
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(getApiErrorMessage(error, "Failed to update employee avatar"));
     }
   },
 );
@@ -145,9 +135,7 @@ export const removeEmployeeAvatar = createAsyncThunk(
       await EmployeeService.deleteEmployeeAvatar(id);
       return { id, avatar: null };
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete employee avatar";
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(getApiErrorMessage(error, "Failed to delete employee avatar"));
     }
   },
 );

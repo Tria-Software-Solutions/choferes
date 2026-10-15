@@ -87,14 +87,16 @@ interface PersonalInfoTabProps {
 // "Editar" de su encabezado.
 type EditSection = "personal" | "identity" | "vehicles" | "contract" | "payment";
 
-// Celda de dato etiquetado para la vista de solo lectura.
+// Celda de dato etiquetado para la vista de solo lectura. El `span` solo
+// aplica desde sm: en teléfonos la grilla es de una columna, y un `span 2`
+// crearía una segunda columna implícita que aprieta el resto de los datos.
 const InfoCell: React.FC<{
   label: string;
   icon?: React.ReactNode;
   children: React.ReactNode;
   span?: number;
 }> = ({ label, icon, children, span }) => (
-  <Box sx={{ gridColumn: span ? `span ${span}` : undefined }}>
+  <Box sx={{ gridColumn: span && span > 1 ? { xs: "auto", sm: `span ${span}` } : undefined }}>
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
       {icon && (
         <Box sx={{ display: "flex", color: "text.disabled", lineHeight: 1 }}>{icon}</Box>

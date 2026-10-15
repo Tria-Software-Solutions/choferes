@@ -81,15 +81,25 @@ export const getLinkedEmployee = async (userId: number): Promise<Employee | null
 };
 
 /**
- * Documentos que ve el empleado en su panel: el ámbito compartido y el de su
- * propia ficha. La página administrativa no está disponible para él.
+ * Documentos que ve el usuario en su panel: el ámbito compartido y, dentro de
+ * "Tus documentos", los de su ficha (si tiene empleado) o su ámbito privado,
+ * más los archivos que le compartieron explícitamente. La página administrativa
+ * de Documentos no está disponible para él.
  */
 export const getMyDocuments = async (userId: number) => {
   const employee = await getLinkedEmployee(userId);
-  if (!employee) {
-    throw new ServiceError(404, "Tu cuenta no está vinculada a un empleado");
-  }
-  return documentService.listForEmployee(employee.id);
+  return documentService.listForUser(userId, employee ? employee.id : null);
+};
+
+/**
+ * Un archivo concreto visible en el panel, con su binario para descargar. Usa
+ * el mismo criterio de visibilidad que `getMyDocuments`, así que un empleado
+ * (sin `documents:view`) puede abrir lo que ve listado —incluido lo que le
+ * compartieron— sin acceso a la página administrativa de Documentos.
+ */
+export const getMyDocument = async (userId: number, documentId: number) => {
+  const employee = await getLinkedEmployee(userId);
+  return documentService.getVisibleDocument(userId, employee ? employee.id : null, documentId);
 };
 
 /** Un día de la semana con el Horario/Lugar que la persona tiene asignado. */

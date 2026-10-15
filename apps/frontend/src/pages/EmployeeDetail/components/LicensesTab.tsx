@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   IconButton,
   Paper,
   TableBody,
@@ -17,6 +16,7 @@ import {
   useTheme,
 } from "@mui/material";
 import ResponsiveTable from "../../../components/Table/ResponsiveTable/ResponsiveTable.component";
+import { DotsLoader } from "../../../components/Loader";
 import { IconAlertTriangle, IconCheck, IconClock, IconId, IconInbox, IconPencil, IconPlus, IconTrash, IconX } from "@tabler/icons-react";
 import { Employee } from "../../../models/Employee";
 import { EmployeeLicense } from "../../../models/EmployeeLicense";
@@ -237,7 +237,15 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
           title="Licencias de conducir"
           description="Licencias del empleado y su fecha de vencimiento."
           actions={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: { xs: 1, sm: 2 },
+                flexWrap: "wrap",
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
               <Typography
                 variant="body2"
                 sx={{ display: "flex", alignItems: "center", gap: 0.75, color: "text.secondary" }}
@@ -250,7 +258,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
                   variant="text"
                   startIcon={<IconPlus size={18} />}
                   onClick={() => handleOpenForm(null)}
-                  sx={submitButton}
+                  sx={[submitButton, { flex: { xs: "1 1 100%", sm: "none" } }]}
                 >
                   {isDirect ? "Nueva licencia" : "Solicitar licencia"}
                 </Button>
@@ -335,7 +343,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
 
         {(isLoading || !loaded) && licenses.length === 0 ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress size={26} />
+            <DotsLoader size="md" label="Cargando" />
           </Box>
         ) : loadError && licenses.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>
