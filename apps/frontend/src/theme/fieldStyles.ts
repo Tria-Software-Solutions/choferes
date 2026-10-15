@@ -155,6 +155,16 @@ export const inputControlStyles = (colors: FieldPalette) => ({
       color: colors.disabledText,
     },
   },
+  // Password fields: Urbanist draws the bullet glyph very small. A larger
+  // font-size makes the dots legible, while `height`/`line-height` stay pinned
+  // to the normal metrics (0.9375rem * 1.4375 = MUI's input height) so the field
+  // keeps exactly the same size as every other input.
+  "& input[type='password']": {
+    fontSize: "1.25rem",
+    height: "21.5625px",
+    lineHeight: "21.5625px",
+    letterSpacing: "0.08em",
+  },
   "& textarea": {
     color: colors.text,
     fontSize: FIELD_FONT_SIZE,

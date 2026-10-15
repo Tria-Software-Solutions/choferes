@@ -40,7 +40,6 @@ import {
   Typography,
   useTheme,
   useMediaQuery,
-  CircularProgress,
   Dialog,
   DialogContent,
   DialogActions,
@@ -48,6 +47,7 @@ import {
 import { createExportOptions, exportFileFormattedDate } from '../../../utils/export';
 import APPBAR_MENU from '../../../constants/appbar.constants';
 import NavIcon from '../../../components/NavIcon/NavIcon.component';
+import { DotsLoader } from '../../../components/Loader';
 import PAGE_TITLE from '../../../constants/pageTitle.constants';
 import { PERMISSION_CODES } from '../../../constants/permissions.constants';
 import NOTIFICATIONS from '../../../constants/notifications.constants';
@@ -474,10 +474,6 @@ const EmployeesPage: React.FC = () => {
   // la tabla; las alertas de licencias se calculan sobre la plantilla completa
   // para que no se escondan detrás de la búsqueda o el filtro de estado.
   const kpiStats = useMemo(() => {
-    const activeCount = filteredEmployees.filter(
-      (employee) => employee.isActive !== false,
-    ).length;
-
     // Tarifa promedio por hora: promedio simple sobre los empleados visibles que
     // ya tienen tarifa registrada. Quienes no la tienen no entran en la base,
     // para que el indicador no se vea inflado por ceros.
@@ -503,12 +499,21 @@ const EmployeesPage: React.FC = () => {
       licenses.filter((license) => rosterIds.has(license.employeeId)),
     );
 
+    // Datos extra para hints/footers de las otras 3 tarjetas
+    const minRate = rates.length > 0 ? Math.min(...rates) : null;
+    const maxRate = rates.length > 0 ? Math.max(...rates) : null;
+
+    const avgVacationDays =
+      filteredEmployees.length > 0 ? totalVacationDays / filteredEmployees.length : 0;
+
     return {
       total: filteredEmployees.length,
-      activeCount,
       averageRate,
       ratesCount: rates.length,
+      minRate,
+      maxRate,
       totalVacationDays,
+      avgVacationDays,
       licenses: licensesSummary,
     };
   }, [filteredEmployees, allEmployees, licenses]);
@@ -1041,7 +1046,14 @@ const EmployeesPage: React.FC = () => {
               icon={<IconUsers />}
               label="Empleados"
               value={kpiStats.total}
+              // Los inactivos son de la plantilla completa, no de las filas
+              // visibles: el filtro de estado (que por defecto es "Activos")
+              // los escondería y el contador daría 0.
+              hint={`${filterCounts.inactive} ${
+                filterCounts.inactive === 1 ? 'inactivo' : 'inactivos'
+              }`}
               tone="accent"
+              onClick={() => setSearch('')}
             />
             <StatCard
               icon={<IconCash />}
@@ -1051,11 +1063,15 @@ const EmployeesPage: React.FC = () => {
                   ? `${formatMoney(kpiStats.averageRate, 'CRC')}/h`
                   : '—'
               }
+              hint={kpiStats.ratesCount > 0 ? `Basada en ${kpiStats.ratesCount} empleado${kpiStats.ratesCount === 1 ? '' : 's'}` : 'Sin tarifas registradas'}
+              onClick={() => setSearch('')}
             />
             <StatCard
               icon={<IconCalendarWeek />}
               label="Vacaciones"
               value={`${kpiStats.totalVacationDays} días`}
+              hint={filteredEmployees.length > 0 ? `Promedio: ${kpiStats.avgVacationDays.toFixed(1)} días/empleado` : 'Sin empleados'}
+              onClick={() => setSearch('')}
             />
             <StatCard
               icon={<IconShieldExclamation />}
@@ -1070,6 +1086,7 @@ const EmployeesPage: React.FC = () => {
                     ? 'warning'
                     : 'success'
               }
+              onClick={() => setSearch('')}
             />
           </StatGrid>
         )}
@@ -1240,7 +1257,7 @@ const EmployeesPage: React.FC = () => {
                     backdropFilter: 'blur(2px)',
                   }}
                 >
-                  <CircularProgress size={44} sx={{ color: '#fff' }} />
+                  <DotsLoader size="lg" color="#ffffff" label="Subiendo imagen" />
                 </Box>
               )}
             </Box>

@@ -52,6 +52,16 @@ router.get(
   meController.getMyDocuments,
 );
 
+// Descarga de un archivo visible en el panel (compartido, propio o compartido
+// conmigo). El empleado no tiene `documents:view`, así que la página
+// administrativa no sirve: aquí el servicio autoriza por visibilidad.
+router.get(
+  "/documents/:id",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_MY_PANEL),
+  meController.downloadMyDocument,
+);
+
 // Cambios de licencia propuestos por el empleado: quedan pendientes de revisión
 // y no escriben la licencia real hasta que administración los aprueba.
 router.get(

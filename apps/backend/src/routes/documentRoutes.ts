@@ -46,4 +46,44 @@ router.delete(
   documentController.deleteDocument,
 );
 
+// Editor de oficina (ONLYOFFICE). El frontend pide la config firmada; el
+// document server descarga el archivo y devuelve el editado al callback. Esas
+// dos últimas rutas no llevan la sesión del usuario (el document server no la
+// tiene): se autorizan con el token firmado de la URL y con el JWT de ONLYOFFICE.
+router.get(
+  "/files/:id/office-config",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.MANAGE_DOCUMENTS),
+  documentController.getOfficeConfig,
+);
+router.get("/files/:id/content", documentController.getDocumentContent);
+router.post("/files/:id/callback", documentController.officeCallback);
+
+// Compartición explícita: compartir varios archivos con varios destinatarios,
+// listar sus destinatarios y quitarlos. Mover varios elementos a otra carpeta.
+router.post(
+  "/shares",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.MANAGE_DOCUMENTS),
+  documentController.shareDocuments,
+);
+router.get(
+  "/files/:id/shares",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_DOCUMENTS),
+  documentController.listShares,
+);
+router.delete(
+  "/shares/:id",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.MANAGE_DOCUMENTS),
+  documentController.removeShare,
+);
+router.post(
+  "/move",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.MANAGE_DOCUMENTS),
+  documentController.moveItems,
+);
+
 export default router;

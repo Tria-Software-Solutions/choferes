@@ -17,9 +17,10 @@ import { store, AppDispatch } from "./store/store";
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import { Container, useTheme, CircularProgress, Box } from "@mui/material";
+import { Container, useTheme, Box } from "@mui/material";
 import { PERMISSION_CODES, ROUTES } from "./constants/constants";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.component";
+import { DotsLoader } from "./components/Loader";
 import ReminderAnnouncer from "./components/ReminderAnnouncer/ReminderAnnouncer.component";
 import { normalizeThemeMode, useThemeMode } from "./context/ThemeContext";
 import { updateUserSettings } from "./store/slices/userSlice";
@@ -45,7 +46,7 @@ const SessionExpired = lazy(() => import("./pages/ErrorPages/SessionExpired"));
 
 const PageLoader = () => (
   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-    <CircularProgress />
+    <DotsLoader size="lg" label="Cargando" />
   </Box>
 );
 

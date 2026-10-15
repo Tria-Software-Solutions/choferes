@@ -89,7 +89,16 @@ export const TodayHero: React.FC<TodayHeroProps> = ({ overview, shift, now }) =>
         revealSx(0) as object,
       ]}
     >
-      <Box sx={{ ...cellSx, gridColumn: { xs: "1 / -1", md: "auto" }, flexDirection: "row", alignItems: "center", gap: 1.5 }}>
+      <Box
+        sx={{
+          ...cellSx,
+          gridColumn: { xs: "1 / -1", md: "auto" },
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          gap: 1.5,
+        }}
+      >
         <Box
           aria-hidden
           sx={{

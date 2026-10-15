@@ -9,17 +9,14 @@ import {
   IconButton,
   MenuItem,
   TextField,
-  Tooltip,
   Typography,
-  useTheme,
 } from "@mui/material";
 import {
-  IconChevronRight,
   IconDownload,
-  IconEye,
-  IconFile,
   IconFolder,
   IconFolderPlus,
+  IconFolderSymlink,
+  IconShare,
   IconTrash,
   IconUpload,
   IconX,
@@ -30,39 +27,47 @@ import APPBAR_MENU from "../../constants/appbar.constants";
 import NavIcon from "../../components/NavIcon/NavIcon.component";
 import EmployeeAvatar from "../../components/EmployeeAvatar/EmployeeAvatar.component";
 import PlaceholderSelect from "../../components/PlaceholderSelect/PlaceholderSelect.component";
+import DocumentExplorer from "../../components/DocumentExplorer/DocumentExplorer.component";
+import type { ExplorerSelection } from "../../components/DocumentExplorer/DocumentExplorer.component";
 import DocumentPreview, {
-  formatBytes,
+  triggerBlobDownload,
   triggerDownload,
 } from "../../components/DocumentPreview/DocumentPreview.component";
+import OfficeEditor from "../../components/OfficeEditor/OfficeEditor.component";
 import { EmptyState, PageBody, PageCard, PageContainer, PageHeader } from "../../components/Layout";
 import { useAppNotifications } from "../../components/Snackbar/Snackbar.component";
 import * as EmployeeService from "../../services/employeeService";
 import * as DocumentService from "../../services/documentService";
-import type { DocumentDTO, DocumentFolderDTO, DocumentScope } from "../../services/documentService";
+import type { DocumentDTO, DocumentScope } from "../../services/documentService";
 import type { Employee } from "../../models/Employee";
+import ShareDialog from "./components/ShareDialog.component";
+import MoveDialog from "./components/MoveDialog.component";
 
 const SHARED_SCOPE = "shared";
-type ScopeValue = typeof SHARED_SCOPE | number;
+const PERSONAL_SCOPE = "personal";
+type ScopeValue = typeof SHARED_SCOPE | typeof PERSONAL_SCOPE | number;
 
 const employeeLabel = (employee: Employee) =>
   `${employee.firstName} ${employee.lastName}`.trim();
 
 // Página de Documentos: administración crea carpetas y sube archivos en el
-// ámbito compartido o en el de un empleado. Los empleados ven esos documentos
-// desde su Mi Panel (pestaña Documentos), no desde aquí.
+// ámbito compartido, en el privado del propio usuario ("Solo para mí") o en el
+// de un empleado. Los empleados ven esos documentos desde su Mi Panel (pestaña
+// Documentos), no desde aquí.
 const DocumentsPage: React.FC = () => {
-  const theme = useTheme();
-  const { colors, borders } = theme.tokens;
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
 
   const canManage = userPermissions.includes(PERMISSION_CODES.MANAGE_DOCUMENTS);
 
   const [employees, setEmployees] = useState<Employee[]>([]);
-  // "shared" = ámbito global; un número = carpeta/archivos de ese empleado.
-  const [scopeId, setScopeId] = useState<number | "shared">("shared");
+  // "shared" = ámbito global; "personal" = mis documentos privados (ligados a mi
+  // usuario, no a una ficha de Planilla); un número = carpeta/archivos de ese
+  // empleado. Apertura por defecto en "Compartido (toda la empresa)".
+  const [scopeId, setScopeId] = useState<ScopeValue>(SHARED_SCOPE);
   const [scope, setScope] = useState<DocumentScope>({ folders: [], documents: [] });
-  const [currentFolderId, setCurrentFolderId] = useState<number | null>(null);
+  const [folderParentId, setFolderParentId] = useState<number | null>(null);
+  const [uploadFolderId, setUploadFolderId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,8 +83,29 @@ const DocumentsPage: React.FC = () => {
   >(null);
   const [deleting, setDeleting] = useState(false);
   const [previewTarget, setPreviewTarget] = useState<DocumentDTO | null>(null);
+  // Archivo abierto en el editor de oficina (Word/Excel/PowerPoint).
+  const [editTarget, setEditTarget] = useState<DocumentDTO | null>(null);
 
-  const ownerEmployeeId = scopeId === "shared" ? null : scopeId;
+  // Acciones masivas (selección múltiple). Se guarda también el "limpiar
+  // selección" del explorador para resetearlo tras completar la acción.
+  const [shareState, setShareState] = useState<{
+    documents: DocumentDTO[];
+    clear: () => void;
+  } | null>(null);
+  const [moveState, setMoveState] = useState<{
+    selection: ExplorerSelection;
+    clear: () => void;
+  } | null>(null);
+  const [bulkDeleteState, setBulkDeleteState] = useState<{
+    selection: ExplorerSelection;
+    clear: () => void;
+  } | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  const isPersonal = scopeId === PERSONAL_SCOPE;
+  // El ámbito personal se resuelve en el servidor a partir del usuario del token.
+  const ownerEmployeeId =
+    scopeId === SHARED_SCOPE || isPersonal ? null : scopeId;
 
   // Cada empleado se identifica con su foto/avatar, tanto en la lista de
   // opciones como en el valor seleccionado del campo.
@@ -94,15 +120,17 @@ const DocumentsPage: React.FC = () => {
 
   const scopeOptionLabel = (value: ScopeValue): React.ReactNode => {
     if (value === SHARED_SCOPE) return "Compartido (toda la empresa)";
+    if (value === PERSONAL_SCOPE) return "Solo para mí";
     const employee = employees.find((item) => item.id === value);
     return employee ? employeeOption(employee, 22) : "Empleado";
   };
 
   const scopeLabel = useMemo(() => {
+    if (scopeId === PERSONAL_SCOPE) return "Solo para mí";
     if (ownerEmployeeId == null) return "Compartido (toda la empresa)";
     const employee = employees.find((item) => item.id === ownerEmployeeId);
     return employee ? employeeLabel(employee) : "Empleado";
-  }, [ownerEmployeeId, employees]);
+  }, [scopeId, ownerEmployeeId, employees]);
 
   useEffect(() => {
     let cancelled = false;
@@ -118,39 +146,25 @@ const DocumentsPage: React.FC = () => {
     };
   }, []);
 
-  const load = useCallback(async (owner: number | null) => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      setScope(await DocumentService.getDocuments(owner));
+      setScope(
+        isPersonal
+          ? await DocumentService.getPersonalDocuments()
+          : await DocumentService.getDocuments(ownerEmployeeId),
+      );
     } catch {
       setError("No se pudieron cargar los documentos.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isPersonal, ownerEmployeeId]);
 
   useEffect(() => {
-    setCurrentFolderId(null);
-    void load(ownerEmployeeId);
-  }, [ownerEmployeeId, load]);
-
-  const childrenFolders = scope.folders.filter((folder) => (folder.parentId ?? null) === currentFolderId);
-  const currentDocuments = scope.documents.filter((doc) => (doc.folderId ?? null) === currentFolderId);
-
-  // Ruta desde la raíz hasta la carpeta actual (para la miga de pan).
-  const breadcrumb = useMemo(() => {
-    const byId = new Map(scope.folders.map((folder) => [folder.id, folder]));
-    const trail: DocumentFolderDTO[] = [];
-    let cursor = currentFolderId;
-    while (cursor != null) {
-      const folder = byId.get(cursor);
-      if (!folder) break;
-      trail.unshift(folder);
-      cursor = folder.parentId ?? null;
-    }
-    return trail;
-  }, [currentFolderId, scope.folders]);
+    void load();
+  }, [load]);
 
   const handleCreateFolder = async () => {
     if (!folderName.trim()) return;
@@ -158,12 +172,13 @@ const DocumentsPage: React.FC = () => {
     try {
       await DocumentService.createDocumentFolder({
         name: folderName.trim(),
-        parentId: currentFolderId,
-        ownerEmployeeId,
+        parentId: folderParentId,
+        personal: isPersonal,
+        ownerEmployeeId: isPersonal ? undefined : ownerEmployeeId,
       });
       setFolderName("");
       setFolderDialogOpen(false);
-      await load(ownerEmployeeId);
+      await load();
       showNotification("Carpeta creada", { severity: "success" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "No se pudo crear la carpeta";
@@ -187,13 +202,14 @@ const DocumentsPage: React.FC = () => {
       });
       await DocumentService.uploadDocument({
         name: file.name,
-        folderId: currentFolderId,
-        ownerEmployeeId,
+        folderId: uploadFolderId,
+        personal: isPersonal,
+        ownerEmployeeId: isPersonal ? undefined : ownerEmployeeId,
         mimeType: file.type || null,
         size: file.size,
         data,
       });
-      await load(ownerEmployeeId);
+      await load();
       showNotification("Archivo subido", { severity: "success" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "No se pudo subir el archivo";
@@ -222,7 +238,7 @@ const DocumentsPage: React.FC = () => {
         await DocumentService.deleteDocument(deleteTarget.id);
       }
       setDeleteTarget(null);
-      await load(ownerEmployeeId);
+      await load();
       showNotification("Elemento eliminado", { severity: "success" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "No se pudo eliminar";
@@ -232,15 +248,69 @@ const DocumentsPage: React.FC = () => {
     }
   };
 
-  const rowSx = {
-    display: "flex",
-    alignItems: "center",
-    gap: 1.5,
-    px: 2.5,
-    py: 1.25,
-    borderBottom: borders.hairline,
-    "&:last-of-type": { borderBottom: "none" },
-  } as const;
+  const handleBulkDownload = async (selection: ExplorerSelection) => {
+    const files = selection.documents;
+    if (files.length === 0) return;
+    setBulkBusy(true);
+    try {
+      if (files.length === 1) {
+        const full = await DocumentService.downloadDocument(files[0].id);
+        triggerDownload(full.data, full.name);
+      } else {
+        const blob = await DocumentService.buildDocumentsZip(files);
+        triggerBlobDownload(blob, `documentos-${files.length}.zip`);
+      }
+    } catch {
+      showNotification("No se pudieron descargar los archivos", { severity: "error" });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!bulkDeleteState) return;
+    setBulkBusy(true);
+    try {
+      const { selection, clear } = bulkDeleteState;
+      await Promise.all([
+        ...selection.documents.map((doc) => DocumentService.deleteDocument(doc.id)),
+        ...selection.folders.map((folder) => DocumentService.deleteDocumentFolder(folder.id)),
+      ]);
+      setBulkDeleteState(null);
+      clear();
+      await load();
+      showNotification("Elementos eliminados", { severity: "success" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "No se pudieron eliminar";
+      showNotification(message, { severity: "error" });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleMove = async (targetFolderId: number | null) => {
+    if (!moveState) return;
+    setBulkBusy(true);
+    try {
+      const { selection, clear } = moveState;
+      await DocumentService.moveDocumentItems({
+        documentIds: selection.documents.map((doc) => doc.id),
+        folderIds: selection.folders.map((folder) => folder.id),
+        targetFolderId,
+        personal: isPersonal,
+        ownerEmployeeId: isPersonal ? undefined : ownerEmployeeId,
+      });
+      setMoveState(null);
+      clear();
+      await load();
+      showNotification("Elementos movidos", { severity: "success" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "No se pudieron mover";
+      showNotification(message, { severity: "error" });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
 
   return (
     <PageContainer>
@@ -251,93 +321,31 @@ const DocumentsPage: React.FC = () => {
           mobileTitle="Documentos"
           subtitle="Carpetas y archivos de la empresa y de cada empleado."
           toolbar={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
-              <Box sx={{ width: { xs: "100%", sm: 260 }, flexShrink: 0 }}>
-                <PlaceholderSelect<ScopeValue>
-                  placeholder="Ámbito de documentos"
-                  icon={<IconFolder size={18} />}
-                  value={scopeId}
-                  onChange={(event) =>
-                    setScopeId(
-                      event.target.value === SHARED_SCOPE ? "shared" : Number(event.target.value),
-                    )
-                  }
-                  formatValue={scopeOptionLabel}
-                >
-                  <MenuItem value={SHARED_SCOPE}>Compartido (toda la empresa)</MenuItem>
-                  {employees.map((employee) => (
-                    <MenuItem key={employee.id} value={employee.id}>
-                      {employeeOption(employee, 26)}
-                    </MenuItem>
-                  ))}
-                </PlaceholderSelect>
-              </Box>
-
-              {/* Miga de pan del ámbito actual + carpeta abierta */}
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap" }}>
-                <Typography
-                  component="button"
-                  onClick={() => setCurrentFolderId(null)}
-                  sx={{
-                    border: "none",
-                    background: "none",
-                    cursor: "pointer",
-                    font: "inherit",
-                    fontSize: "0.8125rem",
-                    fontWeight: 600,
-                    color: currentFolderId == null ? colors.text : colors.accent,
-                  }}
-                >
-                  {scopeLabel}
-                </Typography>
-                {breadcrumb.map((folder) => (
-                  <React.Fragment key={folder.id}>
-                    <IconChevronRight size={14} color={colors.textMuted} />
-                    <Typography
-                      component="button"
-                      onClick={() => setCurrentFolderId(folder.id)}
-                      sx={{
-                        border: "none",
-                        background: "none",
-                        cursor: "pointer",
-                        font: "inherit",
-                        fontSize: "0.8125rem",
-                        fontWeight: 600,
-                        color: folder.id === currentFolderId ? colors.text : colors.accent,
-                      }}
-                    >
-                      {folder.name}
-                    </Typography>
-                  </React.Fragment>
+            <Box sx={{ width: { xs: "100%", sm: 260 }, flexShrink: 0 }}>
+              <PlaceholderSelect<ScopeValue>
+                placeholder="Ámbito de documentos"
+                value={scopeId}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (value === SHARED_SCOPE) setScopeId(SHARED_SCOPE);
+                  else if (value === PERSONAL_SCOPE) setScopeId(PERSONAL_SCOPE);
+                  else setScopeId(Number(value));
+                }}
+                formatValue={scopeOptionLabel}
+              >
+                <MenuItem value={PERSONAL_SCOPE}>Solo para mí</MenuItem>
+                <MenuItem value={SHARED_SCOPE}>Compartido (toda la empresa)</MenuItem>
+                {employees.map((employee) => (
+                  <MenuItem key={employee.id} value={employee.id}>
+                    {employeeOption(employee, 26)}
+                  </MenuItem>
                 ))}
-              </Box>
+              </PlaceholderSelect>
             </Box>
-          }
-          toolbarEnd={
-            canManage ? (
-              <>
-                <Button
-                  variant="outlined"
-                  startIcon={<IconFolderPlus size={16} />}
-                  onClick={() => setFolderDialogOpen(true)}
-                >
-                  Nueva carpeta
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<IconUpload size={16} />}
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingFile}
-                >
-                  {uploadingFile ? "Subiendo…" : "Subir archivo"}
-                </Button>
-                <input ref={fileInputRef} type="file" hidden onChange={handleFileChange} />
-              </>
-            ) : undefined
           }
         />
 
-        <PageBody scroll>
+        <PageBody>
           {loading ? (
             <Box sx={{ p: 3 }}>
               <Typography variant="body2" color="text.secondary">
@@ -350,89 +358,109 @@ const DocumentsPage: React.FC = () => {
               title="Algo salió mal"
               description={error}
               action={
-                <Button variant="outlined" onClick={() => void load(ownerEmployeeId)}>
+                <Button variant="outlined" onClick={() => void load()}>
                   Reintentar
                 </Button>
               }
             />
-          ) : childrenFolders.length === 0 && currentDocuments.length === 0 ? (
-            <EmptyState
-              icon={<IconFolder />}
-              title="Sin documentos"
-              description={
-                canManage
-                  ? "Crea una carpeta o sube un archivo para empezar."
-                  : "Todavía no hay documentos en este ámbito."
-              }
-            />
           ) : (
-            <Box>
-              {childrenFolders.map((folder) => (
-                <Box key={`folder-${folder.id}`} sx={rowSx}>
-                  <IconFolder size={20} color={colors.accent} />
-                  <Typography
-                    onClick={() => setCurrentFolderId(folder.id)}
-                    sx={{ flex: 1, minWidth: 0, fontWeight: 600, fontSize: "0.9rem", cursor: "pointer" }}
+            <DocumentExplorer
+              key={String(scopeId)}
+              folders={scope.folders}
+              documents={scope.documents}
+              rootLabel={scopeLabel}
+              onPreview={(doc) => setPreviewTarget(doc)}
+              onDownload={(doc) => void handleDownload(doc)}
+              // El editor de oficina solo está para los roles con `documents:manage`
+              // (Gerencia/Administrativo/SysAdmin).
+              onEdit={canManage ? (doc) => setEditTarget(doc) : undefined}
+              onDeleteFolder={
+                canManage
+                  ? (folder) => setDeleteTarget({ type: "folder", id: folder.id, name: folder.name })
+                  : undefined
+              }
+              onDeleteDocument={
+                canManage
+                  ? (doc) => setDeleteTarget({ type: "file", id: doc.id, name: doc.name })
+                  : undefined
+              }
+              folderActions={
+                canManage
+                  ? (folderId) => (
+                      <>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<IconFolderPlus size={16} />}
+                          onClick={() => {
+                            setFolderParentId(folderId);
+                            setFolderDialogOpen(true);
+                          }}
+                        >
+                          Nueva carpeta
+                        </Button>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          startIcon={<IconUpload size={16} />}
+                          onClick={() => {
+                            setUploadFolderId(folderId);
+                            fileInputRef.current?.click();
+                          }}
+                          disabled={uploadingFile}
+                        >
+                          {uploadingFile ? "Subiendo…" : "Subir archivo"}
+                        </Button>
+                        <input ref={fileInputRef} type="file" hidden onChange={handleFileChange} />
+                      </>
+                    )
+                  : undefined
+              }
+              selectable
+              renderSelectionActions={(selection, clearSelection) => (
+                <>
+                  <Button
+                    size="small"
+                    startIcon={<IconShare size={16} />}
+                    disabled={selection.documents.length === 0 || bulkBusy}
+                    onClick={() =>
+                      setShareState({ documents: selection.documents, clear: clearSelection })
+                    }
                   >
-                    {folder.name}
-                  </Typography>
+                    Compartir
+                  </Button>
+                  <Button
+                    size="small"
+                    startIcon={<IconDownload size={16} />}
+                    disabled={selection.documents.length === 0 || bulkBusy}
+                    onClick={() => void handleBulkDownload(selection)}
+                  >
+                    Descargar
+                  </Button>
                   {canManage && (
-                    <Tooltip title="Eliminar carpeta">
-                      <IconButton
+                    <>
+                      <Button
                         size="small"
-                        aria-label={`Eliminar carpeta ${folder.name}`}
-                        onClick={() => setDeleteTarget({ type: "folder", id: folder.id, name: folder.name })}
+                        startIcon={<IconFolderSymlink size={16} />}
+                        disabled={bulkBusy}
+                        onClick={() => setMoveState({ selection, clear: clearSelection })}
                       >
-                        <IconTrash size={16} />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </Box>
-              ))}
-
-              {currentDocuments.map((doc) => (
-                <Box key={`file-${doc.id}`} sx={rowSx}>
-                  <IconFile size={20} color={colors.textMuted} />
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ fontWeight: 600, fontSize: "0.9rem" }} noWrap>
-                      {doc.name}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: colors.textMuted }}>
-                      {formatBytes(doc.size)}
-                    </Typography>
-                  </Box>
-                  <Tooltip title="Vista previa">
-                    <IconButton
-                      size="small"
-                      aria-label={`Vista previa de ${doc.name}`}
-                      onClick={() => setPreviewTarget(doc)}
-                    >
-                      <IconEye size={16} />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Descargar">
-                    <IconButton
-                      size="small"
-                      aria-label={`Descargar ${doc.name}`}
-                      onClick={() => void handleDownload(doc)}
-                    >
-                      <IconDownload size={16} />
-                    </IconButton>
-                  </Tooltip>
-                  {canManage && (
-                    <Tooltip title="Eliminar archivo">
-                      <IconButton
+                        Mover
+                      </Button>
+                      <Button
                         size="small"
-                        aria-label={`Eliminar archivo ${doc.name}`}
-                        onClick={() => setDeleteTarget({ type: "file", id: doc.id, name: doc.name })}
+                        color="error"
+                        startIcon={<IconTrash size={16} />}
+                        disabled={bulkBusy}
+                        onClick={() => setBulkDeleteState({ selection, clear: clearSelection })}
                       >
-                        <IconTrash size={16} />
-                      </IconButton>
-                    </Tooltip>
+                        Eliminar
+                      </Button>
+                    </>
                   )}
-                </Box>
-              ))}
-            </Box>
+                </>
+              )}
+            />
           )}
         </PageBody>
       </PageCard>
@@ -475,6 +503,14 @@ const DocumentsPage: React.FC = () => {
         onClose={() => setPreviewTarget(null)}
       />
 
+      {/* Editor de oficina (Word/Excel/PowerPoint) */}
+      <OfficeEditor
+        open={editTarget != null}
+        doc={editTarget}
+        onClose={() => setEditTarget(null)}
+        onSaved={() => void load()}
+      />
+
       {/* Confirmación: eliminar carpeta/archivo */}
       <Dialog open={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)} fullWidth maxWidth="xs">
         <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -502,6 +538,60 @@ const DocumentsPage: React.FC = () => {
             sx={{ textTransform: "none" }}
           >
             {deleting ? "Eliminando…" : "Eliminar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Compartir selección múltiple */}
+      <ShareDialog
+        open={shareState != null}
+        documents={shareState?.documents ?? []}
+        employees={employees}
+        onClose={() => setShareState(null)}
+        onShared={() => {
+          shareState?.clear();
+          void load();
+        }}
+      />
+
+      {/* Mover selección múltiple */}
+      <MoveDialog
+        open={moveState != null}
+        folders={scope.folders}
+        selection={moveState?.selection ?? { documents: [], folders: [] }}
+        onClose={() => setMoveState(null)}
+        onMoved={(targetFolderId) => void handleMove(targetFolderId)}
+      />
+
+      {/* Confirmación: eliminar selección múltiple */}
+      <Dialog
+        open={bulkDeleteState != null}
+        onClose={() => setBulkDeleteState(null)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Eliminar</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            {bulkDeleteState
+              ? `¿Eliminar ${
+                  bulkDeleteState.selection.documents.length + bulkDeleteState.selection.folders.length
+                } elemento(s)? Las carpetas se eliminan con todo su contenido.`
+              : ""}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setBulkDeleteState(null)} sx={{ textTransform: "none" }}>
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => void handleBulkDelete()}
+            disabled={bulkBusy}
+            sx={{ textTransform: "none" }}
+          >
+            {bulkBusy ? "Eliminando…" : "Eliminar"}
           </Button>
         </DialogActions>
       </Dialog>

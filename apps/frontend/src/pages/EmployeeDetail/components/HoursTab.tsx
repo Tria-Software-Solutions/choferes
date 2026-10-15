@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   IconButton,
   MenuItem,
   Paper,
@@ -13,10 +12,10 @@ import {
   TableHead,
   TableRow,
   Typography,
-  useMediaQuery,
   useTheme,
 } from "@mui/material";
 import ResponsiveTable from "../../../components/Table/ResponsiveTable/ResponsiveTable.component";
+import { DotsLoader } from "../../../components/Loader";
 import { IconCalendarMonth, IconInbox, IconRefresh } from "@tabler/icons-react";
 import { BiweeklySummary } from "../../../models/BiweeklySummary";
 import { Employee } from "../../../models/Employee";
@@ -86,7 +85,6 @@ const biweekStartDate = (biweekNumber: number, year: number): string => {
 // or duplicated rows made the totals disagree with the hours board).
 const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
 
@@ -225,8 +223,16 @@ const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
           title="Horas por quincena"
           description="Resumen de horas laboradas por quincena, base del cálculo quincenal."
           actions={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <Box sx={{ minWidth: 120 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                flexWrap: "wrap",
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
+              <Box sx={{ minWidth: 120, flex: { xs: 1, sm: "none" } }}>
                 <PlaceholderSelect
                   placeholder="Año"
                   icon={<IconCalendarMonth size={20} color={theme.palette.text.secondary} />}
@@ -246,8 +252,7 @@ const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
                   startIcon={<IconRefresh size={18} />}
                   onClick={() => void handleRecalculate()}
                   disabled={isRecalculating}
-                  fullWidth={isSmallScreen}
-                  sx={submitButton}
+                  sx={[submitButton, { flex: { xs: 1, sm: "none" } }]}
                 >
                   {isRecalculating ? "Recalculando..." : "Recalcular"}
                 </Button>
@@ -266,7 +271,7 @@ const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
 
         {isLoading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress size={26} />
+            <DotsLoader size="md" label="Cargando" />
           </Box>
         ) : filtered.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>

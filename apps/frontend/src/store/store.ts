@@ -50,7 +50,6 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: false, // Disabled due to performance warning with large state/actions
       immutableCheck: {
-        // Ignore redux-persist entity paths for immutability
         ignoredPaths: [
           "hoursWorked.entities",
           "employees.entities",

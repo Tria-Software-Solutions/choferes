@@ -3,19 +3,12 @@ import { Box, ButtonBase, Typography, useTheme } from "@mui/material";
 import { IconCalendarX, IconMail, IconPhone } from "@tabler/icons-react";
 import EmployeeAvatar from "../../../components/EmployeeAvatar/EmployeeAvatar.component";
 import { pressable } from "../../../components/MobileShell/mobileShell.constants";
-import { maskPhone } from "../../../utils/mask";
 import type { Employee } from "../../../models/Employee";
-
-export interface HeaderChip {
-  icon: React.ReactNode;
-  label: string;
-}
 
 interface EmployeeMobileHeaderProps {
   employee: Employee;
   position?: string | null;
-  chips: HeaderChip[];
-  /** Muestra "Finalizó" entre las acciones rápidas. */
+  /** Muestra la acción de finalizar entre las acciones rápidas. */
   onTerminate?: () => void;
 }
 
@@ -50,9 +43,9 @@ const QuickAction: React.FC<QuickActionProps> = ({ icon, label, href, onClick, t
 };
 
 // Encabezado del expediente en teléfonos: tarjeta de contacto con avatar,
-// nombre, puesto, estado, acciones rápidas (llamar, correo) y métricas.
-const EmployeeMobileHeader: React.FC<EmployeeMobileHeaderProps> = ({ employee, position, chips, onTerminate }) => {
-  const { colors, borders } = useTheme().tokens;
+// nombre, puesto, estado y acciones rápidas (llamar, correo, finalizar).
+const EmployeeMobileHeader: React.FC<EmployeeMobileHeaderProps> = ({ employee, position, onTerminate }) => {
+  const { colors } = useTheme().tokens;
   const inactive = employee.isActive === false;
   const fullName = `${employee.firstName} ${employee.lastName}`.trim();
 
@@ -96,55 +89,9 @@ const EmployeeMobileHeader: React.FC<EmployeeMobileHeaderProps> = ({ employee, p
           <QuickAction icon={<IconMail size={22} stroke={1.75} />} label="Correo" href={`mailto:${employee.email}`} />
         )}
         {onTerminate && (
-          <QuickAction icon={<IconCalendarX size={22} stroke={1.75} />} label="Finalizó" onClick={onTerminate} tone="warning" />
+          <QuickAction icon={<IconCalendarX size={22} stroke={1.75} />} label="Finalizar" onClick={onTerminate} tone="warning" />
         )}
       </Box>
-
-      {employee.primaryPhone && (
-        <Typography sx={{ mt: 1, fontSize: "0.75rem", color: colors.textMuted }}>{maskPhone(employee.primaryPhone)}</Typography>
-      )}
-
-      {chips.length > 0 && (
-        <Box
-          sx={{
-            mt: 1.5,
-            mx: -2,
-            px: 2,
-            display: "flex",
-            gap: 0.75,
-            overflowX: "auto",
-            justifyContent: { xs: "flex-start", sm: "center" },
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
-          {chips.map((chip) => (
-            <Box
-              key={chip.label}
-              component="span"
-              sx={{
-                flexShrink: 0,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 0.6,
-                px: 1.25,
-                py: 0.6,
-                borderRadius: "999px",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                color: colors.textMuted,
-                backgroundColor: colors.hoverSoft,
-                border: borders.paper,
-                whiteSpace: "nowrap",
-                "& svg": { opacity: 0.7 },
-              }}
-            >
-              {chip.icon}
-              {chip.label}
-            </Box>
-          ))}
-        </Box>
-      )}
     </Box>
   );
 };

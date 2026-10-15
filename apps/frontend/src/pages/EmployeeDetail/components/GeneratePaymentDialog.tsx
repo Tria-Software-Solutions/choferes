@@ -3,7 +3,6 @@ import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   Grid,
   MenuItem,
   Typography,
@@ -12,6 +11,7 @@ import {
 } from "@mui/material";
 import { IconNotebook, IconReceipt } from "@tabler/icons-react";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
+import { DotsLoader } from "../../../components/Loader";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import PlaceholderSelect from "../../../components/PlaceholderSelect/PlaceholderSelect.component";
 import BoletaDocument from "../../../components/Boleta/BoletaDocument.component";
@@ -127,7 +127,7 @@ const GeneratePaymentDialog: React.FC<GeneratePaymentDialogProps> = ({
             variant="contained"
             onClick={() => void handleSubmit()}
             disabled={!breakdown || isLoadingBreakdown || isSubmitting}
-            startIcon={isSubmitting ? <CircularProgress size={14} color="inherit" /> : undefined}
+            startIcon={isSubmitting ? <DotsLoader size="xs" color="currentColor" /> : undefined}
             fullWidth={isSmallScreen}
           >
             Generar
@@ -170,7 +170,7 @@ const GeneratePaymentDialog: React.FC<GeneratePaymentDialogProps> = ({
 
         {isLoadingBreakdown && !breakdown ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}>
-            <CircularProgress size={26} />
+            <DotsLoader size="md" />
           </Box>
         ) : breakdown ? (
           <>

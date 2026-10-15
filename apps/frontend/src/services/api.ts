@@ -173,7 +173,7 @@ api.interceptors.response.use(
       // The backend responds with { error: "Unauthorized: Token expired", code: "TOKEN_EXPIRED" }.
       // Match the `code` (and the message as a fallback) so the refresh flow actually runs.
       const data = error.response.data as { code?: string; error?: string } | undefined;
-      // MISSING_TOKEN: after a reload the in-memory token is gone and the 1h
+      // MISSING_TOKEN: after a reload the in-memory token is gone and the 15m
       // access cookie may have expired while the 7-day refresh cookie is still
       // valid — try to refresh before ending the session.
       const isTokenExpired =

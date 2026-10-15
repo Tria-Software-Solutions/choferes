@@ -2,9 +2,10 @@ import React from "react";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
-import CircularProgress from "@mui/material/CircularProgress";
+import { useTheme } from "@mui/material";
 import { IconSearch, IconX } from "@tabler/icons-react";
 import { SEARCH_BAR } from "../../constants/constants";
+import { DotsLoader } from "../Loader";
 import {
   textFieldStyles,
   searchIconStyles,
@@ -47,6 +48,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
   onClick,
   isSearching = false,
 }) => {
+  const { colors } = useTheme().tokens;
   const handleClear = () => {
     // Clear the input by setting its value to an empty string
     onChange({ target: { value: "" } } as React.ChangeEvent<HTMLInputElement>);
@@ -66,7 +68,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
       InputProps={{
         startAdornment: isSearching ? (
           <InputAdornment position="start">
-            <CircularProgress size={18} thickness={4} sx={{ color: "text.secondary" }} />
+            <DotsLoader size="sm" color={colors.textMuted} label="Buscando" />
           </InputAdornment>
         ) : (
           <InputAdornment position="start">

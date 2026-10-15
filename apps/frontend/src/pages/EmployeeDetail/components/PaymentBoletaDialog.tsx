@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import {
   Box,
   Button,
-  CircularProgress,
   IconButton,
   TextField,
   Tooltip,
@@ -37,6 +36,7 @@ import { useAuthContext } from "../../../context/AuthContext";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
+import { DotsLoader } from "../../../components/Loader";
 import BoletaDocument from "../../../components/Boleta/BoletaDocument.component";
 import { StatusBadge } from "../../../components/Layout";
 import type { StatTone } from "../../../components/Layout/StatCard.component";
@@ -385,7 +385,7 @@ const PaymentBoletaDialog: React.FC<PaymentBoletaDialogProps> = ({ open, onClose
             variant="contained"
             onClick={() => void handleSave()}
             disabled={busy === "save" || Boolean(invalidField)}
-            startIcon={busy === "save" ? <CircularProgress size={14} color="inherit" /> : undefined}
+            startIcon={busy === "save" ? <DotsLoader size="xs" color="currentColor" /> : undefined}
           >
             Guardar cambios
           </Button>
@@ -398,7 +398,7 @@ const PaymentBoletaDialog: React.FC<PaymentBoletaDialogProps> = ({ open, onClose
                 <Button
                   variant="text"
                   startIcon={
-                    busy === "recalc" ? <CircularProgress size={14} color="inherit" /> : <IconRefresh size={16} />
+                    busy === "recalc" ? <DotsLoader size="xs" color="currentColor" /> : <IconRefresh size={16} />
                   }
                   onClick={() => void handleRecalculate()}
                   disabled={busy !== null}
@@ -413,7 +413,7 @@ const PaymentBoletaDialog: React.FC<PaymentBoletaDialogProps> = ({ open, onClose
           <Button
             variant="outlined"
             startIcon={
-              busy === "download" ? <CircularProgress size={14} color="inherit" /> : <IconDownload size={16} />
+              busy === "download" ? <DotsLoader size="xs" color="currentColor" /> : <IconDownload size={16} />
             }
             onClick={() => void handleDownload()}
             disabled={busy !== null}
@@ -433,7 +433,7 @@ const PaymentBoletaDialog: React.FC<PaymentBoletaDialogProps> = ({ open, onClose
           {canSend && current.status !== "cancelled" && (
             <Button
               variant="contained"
-              startIcon={busy === "send" ? <CircularProgress size={14} color="inherit" /> : <IconMail size={16} />}
+              startIcon={busy === "send" ? <DotsLoader size="xs" color="currentColor" /> : <IconMail size={16} />}
               onClick={() => void handleSend()}
               disabled={busy !== null || !employeeEmail}
             >
@@ -457,7 +457,7 @@ const PaymentBoletaDialog: React.FC<PaymentBoletaDialogProps> = ({ open, onClose
     >
       {!current || !previewAmounts ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress size={26} />
+          <DotsLoader size="md" />
         </Box>
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
