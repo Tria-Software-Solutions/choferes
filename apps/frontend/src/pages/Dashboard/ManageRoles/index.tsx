@@ -19,7 +19,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   IconButton,
   Paper,
   TextField,
@@ -28,6 +27,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
+import { DotsLoader } from "../../../components/Loader";
 import PermissionTogglePanel from "../../../components/PermissionTogglePanel/PermissionTogglePanel.component";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddRoleForm from "../../Forms/AddRoleForm";
@@ -464,7 +464,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
           {isLoadingRoles ? (
             <Box sx={loadingBoxStyles}>
               <Backdrop sx={backdropStyles(theme)} open={isLoadingRoles}>
-                <CircularProgress />
+                <DotsLoader size="lg" label="Cargando roles" />
               </Backdrop>
             </Box>
           ) : hideHeader ? (

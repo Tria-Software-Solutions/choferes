@@ -1,6 +1,7 @@
 import React from "react";
-import { Box, CircularProgress, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import { DotsLoader } from "../Loader";
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -67,7 +68,7 @@ interface LoadingStateProps {
   sx?: SxProps<Theme>;
 }
 
-// Centered spinner for page/section loading.
+// Centered loader for page/section loading.
 export const LoadingState: React.FC<LoadingStateProps> = ({ label, sx }) => {
   const { colors } = useTheme().tokens;
   return (
@@ -87,7 +88,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({ label, sx }) => {
         ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
       ]}
     >
-      <CircularProgress size={28} thickness={4} />
+      <DotsLoader size="md" />
       {label && <Typography sx={{ fontSize: "0.85rem", color: colors.textMuted }}>{label}</Typography>}
     </Box>
   );

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, CircularProgress, Typography, useTheme } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import { IconDownload, IconEye, IconFile, IconFileAlert } from "@tabler/icons-react";
 import DialogComponent from "../Dialog/Dialog.component";
+import { DotsLoader } from "../Loader";
 import { downloadDocument } from "../../services/documentService";
 import type { DocumentDTO } from "../../services/documentService";
 
@@ -29,6 +30,18 @@ export const triggerDownload = (url: string | undefined, name: string): void => 
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+/** Descarga un Blob (p. ej. el ZIP de una selección múltiple). */
+export const triggerBlobDownload = (blob: Blob, name: string): void => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 export type DocumentPreviewKind = "image" | "pdf" | "video" | "audio" | "text" | "unsupported";
@@ -77,12 +90,23 @@ interface DocumentPreviewProps {
   /** Documento a previsualizar (solo metadatos; el binario se trae al abrir). */
   doc: DocumentDTO | null;
   onClose: () => void;
+  /**
+   * Cómo traer el binario. Por defecto usa el endpoint de administración
+   * (`documents:view`); Mi Panel pasa el de autoservicio, porque el empleado no
+   * tiene ese permiso.
+   */
+  fetchDocument?: (id: number) => Promise<DocumentDTO>;
 }
 
 // Visor de un documento: trae el archivo completo y lo muestra según su tipo.
 // Si el navegador no puede renderizarlo (docx, xlsx…) se avisa y queda el botón
 // de descarga. Lo usan la página de Documentos y Mi Panel → Documentos.
-export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ open, doc, onClose }) => {
+export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
+  open,
+  doc,
+  onClose,
+  fetchDocument = downloadDocument,
+}) => {
   const theme = useTheme();
   const { colors, borders } = theme.tokens;
   // Se conserva el último documento no nulo para que el encabezado no quede
@@ -106,7 +130,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ open, doc, onC
     let cancelled = false;
     setLoading(true);
     setFailed(false);
-    downloadDocument(doc.id)
+    fetchDocument(doc.id)
       .then((data) => {
         if (!cancelled) setFull(data);
       })
@@ -119,7 +143,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ open, doc, onC
     return () => {
       cancelled = true;
     };
-  }, [open, doc]);
+  }, [open, doc, fetchDocument]);
 
   const kind = getPreviewKind(full?.mimeType ?? shown?.mimeType, full?.name ?? shown?.name);
   const dataUrl = full?.data;
@@ -128,7 +152,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ open, doc, onC
     if (loading) {
       return (
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1.5, py: 6 }}>
-          <CircularProgress size={30} />
+          <DotsLoader size="md" />
           <Typography variant="body2" sx={{ color: colors.textMuted }}>
             Cargando documento…
           </Typography>

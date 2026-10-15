@@ -151,12 +151,28 @@ export const sectionHeaderStyles: SxProps<Theme> = {
   flexShrink: 0,
 };
 
+// Fila del encabezado: ícono + título y, a la derecha, las acciones. En
+// teléfonos las acciones bajan a su propia línea (bajo el título) para que el
+// texto no quede apretado entre el título y los botones.
 export const sectionHeaderRowStyles: SxProps<Theme> = {
   display: "flex",
   alignItems: "flex-start",
-  flexWrap: { xs: "nowrap", md: "wrap" },
+  flexWrap: "wrap",
   gap: 1.5,
   mb: { xs: 1.5, md: 2 },
+};
+
+// Contenedor de las acciones del encabezado: alineado a la derecha en md+; en
+// teléfonos ocupa el ancho completo en una fila propia.
+export const sectionHeaderActionsStyles: SxProps<Theme> = {
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: { xs: 1.5, md: 2 },
+  ml: { xs: 0, md: "auto" },
+  mt: { xs: 1, md: 0 },
+  flexBasis: { xs: "100%", md: "auto" },
+  width: { xs: "100%", md: "auto" },
 };
 
 export const sectionHeaderIconStyles = (theme: Theme): SxProps<Theme> => ({
@@ -216,13 +232,15 @@ export const emptyStateBoxStyles = (theme: Theme): SxProps<Theme> => ({
 // Scrollbar is kept ultra subtle so the tables don't feel boxed in.
 // Table area of the filling cards: on md+ it takes the height left by the
 // section header and scrolls; on phones it keeps a fixed maximum height.
+// En teléfonos cada fila ya se apila como una lista dentro de la tarjeta, así
+// que el contenedor pierde el borde/radio para no encajonar otra caja.
 export const tableContainerStyles = (theme: Theme): SxProps<Theme> => ({
   flex: { md: 1 },
   minHeight: { md: 0 },
   maxHeight: { xs: "none", md: 440 },
   overflow: "auto",
-  borderRadius: "10px",
-  border: theme.tokens.borders.paper,
+  borderRadius: { xs: 0, md: "10px" },
+  border: { xs: "none", md: theme.tokens.borders.paper },
 });
 
 // Opaque background is required by MUI's stickyHeader so rows don't show

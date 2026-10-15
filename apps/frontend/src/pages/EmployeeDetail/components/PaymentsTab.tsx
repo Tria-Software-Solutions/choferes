@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   Box,
   Button,
-  CircularProgress,
   IconButton,
   Paper,
   TableBody,
@@ -16,6 +15,7 @@ import {
   useTheme,
 } from "@mui/material";
 import ResponsiveTable from "../../../components/Table/ResponsiveTable/ResponsiveTable.component";
+import { DotsLoader } from "../../../components/Loader";
 import { IconEye, IconInbox, IconPencil, IconPlus, IconReceipt, IconRefresh, IconTrash } from "@tabler/icons-react";
 import { Employee } from "../../../models/Employee";
 import { Payment } from "../../../models/Payment";
@@ -148,7 +148,15 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
           title="Pagos quincenales"
           description="Cada quincena se genera sola a partir de las horas registradas; puedes editar cualquier monto antes de enviarla."
           actions={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: { xs: 1, sm: 2 },
+                flexWrap: "wrap",
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 {payments.length} boleta{payments.length === 1 ? "" : "s"} ·{" "}
                 <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>
@@ -160,7 +168,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
                   variant="text"
                   startIcon={<IconPlus size={18} />}
                   onClick={() => setIsGenerateOpen(true)}
-                  sx={submitButton}
+                  sx={[submitButton, { flex: { xs: "1 1 100%", sm: "none" } }]}
                 >
                   Generar pago
                 </Button>
@@ -171,7 +179,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
 
         {(isLoading || !loaded) && payments.length === 0 ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress size={26} />
+            <DotsLoader size="md" label="Cargando" />
           </Box>
         ) : loadError && payments.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>

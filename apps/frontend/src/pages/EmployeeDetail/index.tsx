@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import EmployeeMobileHeader, { type HeaderChip } from "./components/EmployeeMobileHeader";
+import EmployeeMobileHeader from "./components/EmployeeMobileHeader";
 import { useMobileShell } from "../../hooks/useMobileShell";
 import { useMobileScreenTitle } from "../../components/MobileShell/MobileScreenTitle";
 import { useDispatch } from "react-redux";
@@ -310,21 +310,6 @@ const EmployeeDetailPage: React.FC = () => {
       ? `${vacationBalanceDays} días disponibles`
       : "Sin saldo de vacaciones";
 
-  const headerChips: HeaderChip[] = [
-    ...(canSeePayroll
-      ? [{
-          icon: <IconWallet size={14} stroke={1.75} />,
-          label: employee.hourlyRate != null ? `${formatMoney(Number(employee.hourlyRate), "CRC")}/h` : "Sin tarifa",
-        }]
-      : []),
-    ...(canSeeVacationBalance
-      ? [{
-          icon: <IconBeach size={14} stroke={1.75} />,
-          label: vacationBalanceText,
-        }]
-      : []),
-  ];
-
   return (
     <PageContainer>
       <PageCard sx={isMobileShell ? { overflow: "visible" } : undefined}>
@@ -333,7 +318,6 @@ const EmployeeDetailPage: React.FC = () => {
             <EmployeeMobileHeader
               employee={employee}
               position={employeePosition}
-              chips={headerChips}
               onTerminate={canDelete && !employee.terminationDate ? () => setOpenTerminationDialog(true) : undefined}
             />
             <Box
@@ -341,6 +325,7 @@ const EmployeeDetailPage: React.FC = () => {
                 position: "sticky",
                 top: 0,
                 zIndex: 5,
+                px: { xs: 2.5, sm: 3 },
                 backgroundColor: theme.palette.background.paper,
                 borderTop: theme.tokens.borders.hairline,
                 borderBottom: theme.tokens.borders.hairline,

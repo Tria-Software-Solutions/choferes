@@ -3,6 +3,7 @@ import { Box, Typography, useTheme } from "@mui/material";
 import {
   sectionDescStyles,
   sectionDividerStyles,
+  sectionHeaderActionsStyles,
   sectionHeaderIconStyles,
   sectionHeaderRowStyles,
   sectionHeaderStyles,
@@ -53,7 +54,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
           )}
         </Box>
         {actions && (
-          <Box sx={{ ml: "auto", display: "flex", alignItems: "center", flexWrap: { xs: "nowrap", md: "wrap" }, gap: 2 }}>
+          <Box sx={sectionHeaderActionsStyles}>
             {actions}
           </Box>
         )}

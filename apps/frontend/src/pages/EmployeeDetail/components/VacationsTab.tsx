@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   IconButton,
   Paper,
   TableBody,
@@ -16,6 +15,7 @@ import {
   useTheme,
 } from "@mui/material";
 import ResponsiveTable from "../../../components/Table/ResponsiveTable/ResponsiveTable.component";
+import { DotsLoader } from "../../../components/Loader";
 import { IconBan, IconCalendarWeek, IconCheck, IconInbox, IconListCheck, IconPencil, IconPlus, IconRefresh, IconTrash } from "@tabler/icons-react";
 import { Employee } from "../../../models/Employee";
 import { Vacation, VacationStatus } from "../../../models/Vacation";
@@ -292,7 +292,15 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
           title="Solicitudes"
           description="Solicitudes de vacaciones del empleado y su estado de aprobación."
           actions={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: { xs: 1, sm: 2 },
+                flexWrap: "wrap",
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
               <Typography
                 variant="body2"
                 sx={{ display: "flex", alignItems: "center", gap: 0.75, color: "text.secondary" }}
@@ -308,7 +316,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
                   variant="text"
                   startIcon={<IconPlus size={18} />}
                   onClick={() => handleOpenForm(null)}
-                  sx={submitButton}
+                  sx={[submitButton, { flex: { xs: "1 1 100%", sm: "none" } }]}
                 >
                   Nueva solicitud
                 </Button>
@@ -324,7 +332,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
 
         {(isLoading || !loaded) && vacations.length === 0 ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress size={26} />
+            <DotsLoader size="md" label="Cargando" />
           </Box>
         ) : loadError && vacations.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>

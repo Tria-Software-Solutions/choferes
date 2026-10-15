@@ -45,12 +45,12 @@ import { useTimeFormat } from "../../../hooks/useTimeFormat";
 import { useEmployeeNameFormatSetting, type EmployeeNameFormat } from "../../../context/NameFormatContext";
 import { getAvatarSrc, resizeAvatarFile } from "../../../utils/avatar";
 import UserAvatar from "../../../components/UserAvatar/UserAvatar.component";
+import { DotsLoader } from "../../../components/Loader";
 import { updateUserAvatar, removeUserAvatar } from "../../../store/slices/userSlice";
 import {
   Dialog,
   DialogContent,
   DialogActions,
-  CircularProgress,
 } from "@mui/material";
 import NotificationSettingsTab from "./NotificationSettingsTab";
 import SessionsTab from "./SessionsTab";
@@ -1463,7 +1463,7 @@ const Profile: React.FC = () => {
                     backdropFilter: "blur(2px)",
                   }}
                 >
-                  <CircularProgress size={44} sx={{ color: "#fff" }} />
+                  <DotsLoader size="lg" color="#ffffff" label="Subiendo imagen" />
                 </Box>
               )}
             </Box>

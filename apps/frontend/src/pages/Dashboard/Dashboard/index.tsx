@@ -3,7 +3,6 @@ import {
   Box,
   useTheme,
   useMediaQuery,
-  CircularProgress,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { getEmployees } from "../../../services/employeeService";
@@ -24,6 +23,7 @@ import {
   PageContainer,
   PageHeader,
 } from "../../../components/Layout";
+import { DotsLoader } from "../../../components/Loader";
 import { BentoGrid, BentoGridItem } from "../../../components/BentoGrid/BentoGrid.component";
 import {
   TopEmployeesChart,
@@ -356,7 +356,7 @@ const Dashboard = () => {
         <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
           {PAGE_TITLE.DASHBOARD}
           {refreshing && (
-            <CircularProgress size={14} thickness={5} aria-label="Actualizando datos" />
+            <DotsLoader size="xs" label="Actualizando datos" />
           )}
         </Box>
       }
